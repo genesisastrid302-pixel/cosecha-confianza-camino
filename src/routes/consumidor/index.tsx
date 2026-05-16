@@ -38,9 +38,9 @@ function ConsumidorHome() {
                     <img src={p.photo} alt={p.name} className="h-full w-full object-cover" />
                     {p.badge && (
                       <span className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] ${
-                        p.badge === "ultimos" ? "bg-terracota text-paper" : p.badge === "miel" ? "bg-miel text-ink" : "bg-primary text-primary-foreground"
+                        p.badge === "ultimos" ? "bg-terracota text-paper" : "bg-primary text-primary-foreground"
                       }`}>
-                        {p.badge === "ultimos" ? `Últimos ${p.unitsLeft}` : p.badge === "miel" ? "Miel" : p.harvestIn > 0 ? `${p.harvestIn}d` : "Hoy"}
+                        {p.badge === "ultimos" ? `Últimos ${p.unitsLeft}` : p.harvestIn > 0 ? `${p.harvestIn}d` : "Hoy"}
                       </span>
                     )}
                   </div>

@@ -24,7 +24,7 @@ export const Route = createFileRoute("/consumidor/perfil")({
         <div className="divide-y divide-border rounded-2xl border border-border bg-card">
           <Row l="Direcciones de entrega" d="2 guardadas" />
           <Row l="Método de pago" d="Tarjeta · CoDi" />
-          <Row l="Preferencias" d="Verduras y miel" />
+          <Row l="Preferencias" d="Verduras y cítricos" />
           <Row l="Mis suscripciones" d="Canasta de Santiago" />
         </div>
 

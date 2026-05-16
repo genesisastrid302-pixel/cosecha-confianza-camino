@@ -9,82 +9,38 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TrazabilidadRouteImport } from './routes/trazabilidad'
-import { Route as ConsumidorRouteImport } from './routes/consumidor'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ProductorSlugRouteImport } from './routes/productor.$slug'
 
-const TrazabilidadRoute = TrazabilidadRouteImport.update({
-  id: '/trazabilidad',
-  path: '/trazabilidad',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ConsumidorRoute = ConsumidorRouteImport.update({
-  id: '/consumidor',
-  path: '/consumidor',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProductorSlugRoute = ProductorSlugRouteImport.update({
-  id: '/productor/$slug',
-  path: '/productor/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/consumidor': typeof ConsumidorRoute
-  '/trazabilidad': typeof TrazabilidadRoute
-  '/productor/$slug': typeof ProductorSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/consumidor': typeof ConsumidorRoute
-  '/trazabilidad': typeof TrazabilidadRoute
-  '/productor/$slug': typeof ProductorSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/consumidor': typeof ConsumidorRoute
-  '/trazabilidad': typeof TrazabilidadRoute
-  '/productor/$slug': typeof ProductorSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/consumidor' | '/trazabilidad' | '/productor/$slug'
+  fullPaths: '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/consumidor' | '/trazabilidad' | '/productor/$slug'
-  id: '__root__' | '/' | '/consumidor' | '/trazabilidad' | '/productor/$slug'
+  to: '/'
+  id: '__root__' | '/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ConsumidorRoute: typeof ConsumidorRoute
-  TrazabilidadRoute: typeof TrazabilidadRoute
-  ProductorSlugRoute: typeof ProductorSlugRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/trazabilidad': {
-      id: '/trazabilidad'
-      path: '/trazabilidad'
-      fullPath: '/trazabilidad'
-      preLoaderRoute: typeof TrazabilidadRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/consumidor': {
-      id: '/consumidor'
-      path: '/consumidor'
-      fullPath: '/consumidor'
-      preLoaderRoute: typeof ConsumidorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -92,21 +48,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/productor/$slug': {
-      id: '/productor/$slug'
-      path: '/productor/$slug'
-      fullPath: '/productor/$slug'
-      preLoaderRoute: typeof ProductorSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ConsumidorRoute: ConsumidorRoute,
-  TrazabilidadRoute: TrazabilidadRoute,
-  ProductorSlugRoute: ProductorSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

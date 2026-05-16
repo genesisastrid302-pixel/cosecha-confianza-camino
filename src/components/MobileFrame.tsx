@@ -1,0 +1,43 @@
+import { type ReactNode } from "react";
+
+/**
+ * Mobile app frame.
+ * - On phones: full bleed.
+ * - On tablet/desktop: shows a phone mock (notch + rounded edges) centered on a warm canvas.
+ */
+export function MobileFrame({ children }: { children: ReactNode }) {
+  return (
+    <div className="min-h-[100dvh] w-full bg-paper md:flex md:items-center md:justify-center md:py-10">
+      {/* Desktop ambient backdrop */}
+      <div className="pointer-events-none fixed inset-0 hidden md:block">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,oklch(0.78_0.035_130/0.35),transparent_55%),radial-gradient(circle_at_75%_85%,oklch(0.74_0.135_75/0.18),transparent_50%)]" />
+      </div>
+
+      <div className="relative md:w-[420px]">
+        {/* Phone frame chrome (desktop only) */}
+        <div className="hidden md:block absolute -inset-2 rounded-[3rem] bg-ink/95 shadow-[0_30px_80px_-30px_rgba(60,40,20,0.5)]" />
+        <div className="hidden md:block absolute -inset-[1px] rounded-[2.6rem] bg-gradient-to-b from-ink/70 to-ink/40" />
+
+        <div className="relative h-[100dvh] w-full overflow-hidden bg-background md:h-[860px] md:w-[420px] md:rounded-[2.4rem]">
+          {/* iOS-style notch (desktop only) */}
+          <div className="hidden md:block pointer-events-none absolute left-1/2 top-2 z-50 h-7 w-32 -translate-x-1/2 rounded-full bg-ink" />
+
+          {/* Status bar (desktop only) */}
+          <div className="hidden md:flex pointer-events-none absolute inset-x-0 top-0 z-40 h-10 items-center justify-between px-7 text-[11px] font-medium text-foreground">
+            <span>9:41</span>
+            <span className="flex items-center gap-1.5 opacity-80">
+              <span>•••</span>
+              <span>􀙇</span>
+              <span>􀛨</span>
+            </span>
+          </div>
+
+          {/* Content */}
+          <div className="relative h-full w-full overflow-y-auto md:pt-10 [&::-webkit-scrollbar]:hidden">
+            {children}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

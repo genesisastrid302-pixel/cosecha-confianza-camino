@@ -110,7 +110,7 @@ function ProducerPage() {
           <h2 className="display mt-3 text-4xl md:text-5xl">{producer.years} años cultivando.</h2>
 
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {producer.metrics.map((m) => (
+            {producer.metrics.map((m: { label: string; value: string }) => (
               <div key={m.label} className="rounded-2xl border border-border bg-card p-6">
                 <div className="text-xs uppercase tracking-widest text-muted-foreground">
                   {m.label}

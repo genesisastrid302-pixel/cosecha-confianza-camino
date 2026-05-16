@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import { MobileFrame } from "@/components/MobileFrame";
 
 function NotFoundComponent() {
   return (
@@ -113,7 +114,9 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <MobileFrame>
+        <Outlet />
+      </MobileFrame>
     </QueryClientProvider>
   );
 }

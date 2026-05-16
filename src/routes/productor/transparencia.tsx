@@ -1,18 +1,76 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useRef, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { productorTabs } from "@/components/tabs";
-import { Camera, Mic, Video } from "lucide-react";
+import { Camera, Mic, Video, X } from "lucide-react";
+import seedlings from "@/assets/seedlings-hand.jpg";
+import planting from "@/assets/planting-roots.jpg";
+import harvest from "@/assets/harvest-field.jpg";
 import field from "@/assets/field-landscape.jpg";
-import tomato from "@/assets/product-tomato.jpg";
 
 export const Route = createFileRoute("/productor/transparencia")({
   head: () => ({ meta: [{ title: "Transparencia · Productor — Milpa" }] }),
   component: Transparencia,
 });
 
+type Piece = { id: string; img: string; label: string; time: string };
+
+const seedPieces: Piece[] = [
+  { id: "p1", img: seedlings, label: "Plántulas listas para trasplante", time: "Hoy · 6:40 AM" },
+  { id: "p2", img: planting, label: "Trasplante en cama de tierra viva", time: "Ayer" },
+  { id: "p3", img: harvest, label: "Cosecha al amanecer con la cuadrilla", time: "3 d" },
+  { id: "p4", img: field, label: "Surcos descansando entre ciclos", time: "1 sem" },
+];
+
 function Transparencia() {
+  const [pieces, setPieces] = useState<Piece[]>(seedPieces);
+  const photoInput = useRef<HTMLInputElement>(null);
+  const videoInput = useRef<HTMLInputElement>(null);
+  const audioInput = useRef<HTMLInputElement>(null);
+
+  function handleFiles(files: FileList | null, kind: "Foto" | "Video" | "Audio") {
+    if (!files) return;
+    const next: Piece[] = [];
+    Array.from(files).forEach((f, i) => {
+      const url = URL.createObjectURL(f);
+      next.push({
+        id: `${Date.now()}-${i}`,
+        img: kind === "Audio" ? field : url,
+        label: kind === "Audio" ? `Nota de voz · ${f.name}` : f.name,
+        time: "Ahora mismo",
+      });
+    });
+    setPieces((prev) => [...next, ...prev]);
+  }
+
   return (
     <AppShell tabs={productorTabs} tone="milpa" eyebrow="Tu historia viva" title="Transparencia">
+      {/* Inputs ocultos que abren cámara o galería del teléfono */}
+      <input
+        ref={photoInput}
+        type="file"
+        accept="image/*"
+        multiple
+        className="hidden"
+        onChange={(e) => handleFiles(e.target.files, "Foto")}
+      />
+      <input
+        ref={videoInput}
+        type="file"
+        accept="video/*"
+        capture="environment"
+        className="hidden"
+        onChange={(e) => handleFiles(e.target.files, "Video")}
+      />
+      <input
+        ref={audioInput}
+        type="file"
+        accept="audio/*"
+        capture
+        className="hidden"
+        onChange={(e) => handleFiles(e.target.files, "Audio")}
+      />
+
       <div className="space-y-6 px-5">
         {/* Score card */}
         <div className="rounded-2xl border border-border bg-card p-5">
@@ -36,23 +94,22 @@ function Transparencia() {
         <section>
           <div className="eyebrow">Sumar evidencia</div>
           <div className="mt-3 grid grid-cols-3 gap-3">
-            <UploadBtn icon={Camera} label="Foto del cultivo" />
-            <UploadBtn icon={Video} label="Video corto" />
-            <UploadBtn icon={Mic} label="Nota de voz" />
+            <UploadBtn icon={Camera} label="Foto del cultivo" onClick={() => photoInput.current?.click()} />
+            <UploadBtn icon={Video} label="Video corto" onClick={() => videoInput.current?.click()} />
+            <UploadBtn icon={Mic} label="Nota de voz" onClick={() => audioInput.current?.click()} />
           </div>
         </section>
 
-        {/* Portfolio */}
+        {/* Portfolio — proceso de cultivo */}
         <section>
           <div className="flex items-baseline justify-between">
-            <div className="eyebrow">Portafolio vivo</div>
-            <span className="text-[11px] text-muted-foreground">12 piezas</span>
+            <div className="eyebrow">Portafolio vivo · proceso de cultivo</div>
+            <span className="text-[11px] text-muted-foreground">{pieces.length} piezas</span>
           </div>
           <div className="mt-3 grid grid-cols-2 gap-3">
-            <Piece img={field} label="Riego al amanecer" time="Hoy · 6:40 AM" />
-            <Piece img={tomato} label="Cosecha del lunes" time="Ayer" />
-            <Piece img={field} label="Compostaje natural" time="3 d" />
-            <Piece img={tomato} label="Semillas criollas" time="1 sem" />
+            {pieces.map((p) => (
+              <PieceCard key={p.id} piece={p} onRemove={() => setPieces((prev) => prev.filter((x) => x.id !== p.id))} />
+            ))}
           </div>
         </section>
 
@@ -74,24 +131,34 @@ function Transparencia() {
   );
 }
 
-function UploadBtn({ icon: Icon, label }: { icon: typeof Camera; label: string }) {
+function UploadBtn({ icon: Icon, label, onClick }: { icon: typeof Camera; label: string; onClick: () => void }) {
   return (
-    <button className="flex aspect-square flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-card p-2 text-[11px] text-foreground/70">
+    <button
+      onClick={onClick}
+      className="flex aspect-square flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-card p-2 text-[11px] text-foreground/70 transition active:scale-[0.97]"
+    >
       <Icon className="h-6 w-6 text-primary" />
       <span className="text-center leading-tight">{label}</span>
     </button>
   );
 }
 
-function Piece({ img, label, time }: { img: string; label: string; time: string }) {
+function PieceCard({ piece, onRemove }: { piece: Piece; onRemove: () => void }) {
   return (
-    <div className="overflow-hidden rounded-xl bg-card">
+    <div className="relative overflow-hidden rounded-xl bg-card">
+      <button
+        onClick={onRemove}
+        className="absolute right-1.5 top-1.5 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-background/85 text-foreground/70 backdrop-blur"
+        aria-label="Quitar"
+      >
+        <X className="h-3.5 w-3.5" />
+      </button>
       <div className="aspect-square overflow-hidden">
-        <img src={img} alt={label} className="h-full w-full object-cover" />
+        <img src={piece.img} alt={piece.label} className="h-full w-full object-cover" loading="lazy" />
       </div>
       <div className="p-2">
-        <div className="text-xs">{label}</div>
-        <div className="text-[10px] text-muted-foreground">{time}</div>
+        <div className="text-xs leading-tight line-clamp-2">{piece.label}</div>
+        <div className="text-[10px] text-muted-foreground">{piece.time}</div>
       </div>
     </div>
   );

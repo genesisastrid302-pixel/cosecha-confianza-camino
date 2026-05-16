@@ -1,7 +1,7 @@
 import santiago from "@/assets/producer-santiago.jpg";
 import rosa from "@/assets/producer-rosa.jpg";
 import tomato from "@/assets/product-tomato.jpg";
-import honey from "@/assets/product-honey.jpg";
+import limones from "@/assets/product-limones.jpg";
 import cilantro from "@/assets/product-cilantro.jpg";
 import chiles from "@/assets/product-chiles.jpg";
 
@@ -38,13 +38,13 @@ export const producers: Record<string, Producer> = {
     slug: "rosa",
     name: "Rosa María Lozano",
     region: "Galeana, Nuevo León",
-    practice: "Miel agroecológica de floración silvestre",
+    practice: "Cítricos y hortalizas de temporada",
     photo: rosa,
     score: 91,
     years: 18,
-    note: "La floración de mezquite empezó tarde este año. La miel viene más oscura, con cuerpo. Es la favorita de mis nietos.",
+    note: "El limón este año salió con cáscara más gruesa por el frío de marzo, pero el jugo está más perfumado. Corto en la mañana, llega a tu casa el mismo día.",
     metrics: [
-      { label: "Colmenas activas", value: "32" },
+      { label: "Cultivos activos", value: "5" },
       { label: "Score de confianza", value: "91 / 100" },
       { label: "Familias servidas", value: "127" },
       { label: "Distancia a tu mesa", value: "182 km" },
@@ -62,7 +62,7 @@ export type Product = {
   harvestIn: number; // days
   unitsLeft: number;
   story: string;
-  badge?: "miel" | "temporada" | "ultimos";
+  badge?: "temporada" | "ultimos";
 };
 
 export const products: Product[] = [
@@ -79,15 +79,15 @@ export const products: Product[] = [
     badge: "temporada",
   },
   {
-    id: "miel",
-    name: "Miel de mezquite",
+    id: "limones",
+    name: "Limón criollo",
     producerSlug: "rosa",
-    photo: honey,
-    price: 240,
-    unit: "frasco 500g",
+    photo: limones,
+    price: 38,
+    unit: "kilo",
     harvestIn: 0,
-    unitsLeft: 5,
-    story: "Cosechada al amanecer del 8 de mayo. Sin filtrar industrialmente.",
+    unitsLeft: 9,
+    story: "Cortado al amanecer. Cáscara delgada, jugo perfumado.",
     badge: "ultimos",
   },
   {

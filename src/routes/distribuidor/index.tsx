@@ -5,7 +5,7 @@ import { MapPin, AlertTriangle } from "lucide-react";
 
 const stops = [
   { n: 1, who: "Santiago T.", where: "Ramos Arizpe", kg: "12.4 kg", state: "pickup" },
-  { n: 2, who: "Rosa M.", where: "Galeana", kg: "8 frascos", state: "pickup" },
+  { n: 2, who: "Rosa M.", where: "Galeana", kg: "6 kg limón", state: "pickup" },
   { n: 3, who: "Adriana M.", where: "Col. Roma · MTY", kg: "2.5 kg", state: "drop" },
   { n: 4, who: "Jorge T.", where: "Cumbres", kg: "Canasta", state: "drop" },
 ];

@@ -5,6 +5,7 @@ import { consumidorTabs } from "@/components/tabs";
 import santiago from "@/assets/producer-santiago.jpg";
 import {
   ArrowLeft, Camera, CheckCircle2, Star, Sparkles, Thermometer, Leaf, Package, Heart, X,
+  QrCode, Snowflake, CalendarDays, MapPin, Sprout, Truck, ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -13,7 +14,7 @@ export const Route = createFileRoute("/consumidor/recibir")({
   component: Recibir,
 });
 
-type Step = "confirm" | "rate" | "thanks";
+type Step = "confirm" | "scan" | "rate" | "thanks";
 
 const aspects = [
   { id: "frescura", label: "Frescura", icon: Leaf },

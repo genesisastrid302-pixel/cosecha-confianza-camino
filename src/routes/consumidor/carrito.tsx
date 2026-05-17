@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { consumidorTabs } from "@/components/tabs";
 import { products } from "@/lib/data";
-import { Users } from "lucide-react";
 
 export const Route = createFileRoute("/consumidor/carrito")({
   head: () => ({ meta: [{ title: "Carrito · Milpa" }] }),
@@ -28,17 +27,6 @@ function Carrito() {
             <div className="serif text-base">${p.price}</div>
           </div>
         ))}
-
-        <div className="rounded-2xl border-2 border-dashed border-miel/50 bg-miel/10 p-4">
-          <div className="flex items-start gap-3">
-            <Users className="h-5 w-5 text-miel" />
-            <div>
-              <div className="serif text-sm">3 vecinos de Col. Roma también piden esta semana</div>
-              <div className="mt-1 text-[11px] text-muted-foreground">Agrupa la entrega y ahorra $40 en envío.</div>
-              <button className="mt-2 rounded-full bg-miel px-3 py-1.5 text-[11px] text-ink">Sumarme a la entrega comunitaria</button>
-            </div>
-          </div>
-        </div>
 
         <div className="space-y-2 rounded-2xl border border-border bg-card p-4 text-sm">
           <Row l="Subtotal" v={`$${subtotal}`} />

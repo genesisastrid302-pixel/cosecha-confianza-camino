@@ -44,7 +44,7 @@ function Recibir() {
       tabs={consumidorTabs}
       tone="terracota"
       eyebrow={step === "thanks" ? "Gracias" : "Confirmación de llegada"}
-      title={step === "confirm" ? "¿Ya llegó?" : step === "rate" ? "¿Cómo te llegó?" : "Cerrado con cariño"}
+      title={step === "confirm" ? "¿Ya llegó?" : step === "scan" ? "Escanea tu canasta" : step === "rate" ? "¿Cómo te llegó?" : "Cerrado con cariño"}
       right={
         step !== "thanks" && (
           <Link to="/consumidor/pedidos" className="rounded-full bg-secondary p-2">

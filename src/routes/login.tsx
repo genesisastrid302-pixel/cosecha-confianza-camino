@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ChevronLeft } from "lucide-react";
+import illustration from "@/assets/login-illustration.png";
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "Iniciar sesión — Milpa" }] }),
@@ -8,12 +9,19 @@ export const Route = createFileRoute("/login")({
 
 function Login() {
   return (
-    <div className="flex h-full flex-col px-5 pb-8 pt-5">
-      <Link to="/" className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-foreground">
+    <div className="relative flex h-full flex-col overflow-hidden px-5 pb-8 pt-5">
+      <img
+        src={illustration}
+        alt=""
+        aria-hidden
+        className="pointer-events-none absolute -right-10 -top-6 w-[78%] max-w-[420px] opacity-80 select-none"
+      />
+
+      <Link to="/" className="relative z-10 flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-foreground">
         <ChevronLeft className="h-5 w-5" />
       </Link>
 
-      <div className="mt-6">
+      <div className="relative z-10 mt-40">
         <span className="eyebrow">Bienvenido de vuelta</span>
         <h1 className="display mt-2 text-4xl">Hola otra vez.</h1>
         <p className="mt-3 text-sm text-muted-foreground">

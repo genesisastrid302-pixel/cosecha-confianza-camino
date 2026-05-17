@@ -25,7 +25,7 @@ function Catalogo() {
     >
       <div className="space-y-3 px-5">
         <div className="flex gap-2 text-xs">
-          {["Todos", "Verdura", "Fruta", "Miel"].map((t, i) => (
+          {["Todos", "Verdura", "Fruta", "Limón"].map((t, i) => (
             <button
               key={t}
               className={`rounded-full px-3.5 py-1.5 ${

@@ -18,7 +18,6 @@ type Merma = {
 };
 
 function Analytics() {
-  const [open, setOpen] = useState(false);
   const [cantidad, setCantidad] = useState("");
   const [motivo, setMotivo] = useState("");
   const [photo, setPhoto] = useState<string | undefined>();
@@ -44,7 +43,6 @@ function Analytics() {
     setCantidad("");
     setMotivo("");
     setPhoto(undefined);
-    setOpen(false);
   }
 
   return (
@@ -79,73 +77,68 @@ function Analytics() {
         {/* Registro de merma */}
         <section className="rounded-2xl border border-border bg-card p-4">
           <div className="flex items-baseline justify-between">
-            <div>
-              <div className="eyebrow flex items-center gap-1.5"><AlertTriangle className="h-3 w-3" /> Registro de merma</div>
-              <div className="serif mt-1 text-xl">{totalKg.toFixed(1)} kg este mes</div>
-            </div>
-            <button
-              onClick={() => setOpen((v) => !v)}
-              className="rounded-full bg-foreground px-3 py-1.5 text-xs font-medium text-background"
-            >
-              {open ? "Cerrar" : "Registrar"}
-            </button>
+            <div className="eyebrow flex items-center gap-1.5"><AlertTriangle className="h-3 w-3" /> Registro de merma</div>
+            <span className="text-[10px] text-muted-foreground">{totalKg.toFixed(1)} kg este mes</span>
           </div>
 
-          {open && (
-            <div className="mt-4 space-y-3">
-              <div>
-                <label className="eyebrow mb-1 block">Cantidad perdida (kg)</label>
-                <input
-                  type="number"
-                  inputMode="decimal"
-                  value={cantidad}
-                  onChange={(e) => setCantidad(e.target.value)}
-                  placeholder="0.0"
-                  className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                />
-              </div>
-              <div>
-                <label className="eyebrow mb-1 block">Motivo</label>
-                <textarea
-                  value={motivo}
-                  onChange={(e) => setMotivo(e.target.value)}
-                  rows={2}
-                  placeholder="Ej. Golpe en transporte, ruptura de cadena de frío…"
-                  className="w-full resize-none rounded-xl border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                />
-              </div>
-              <div>
-                <label className="eyebrow mb-1 block">Foto evidencia</label>
-                <input ref={fileRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={onPhoto} />
-                {photo ? (
-                  <div className="relative inline-block">
-                    <img src={photo} alt="Evidencia" className="h-24 w-24 rounded-xl object-cover" />
-                    <button
-                      onClick={() => setPhoto(undefined)}
-                      className="absolute -right-1.5 -top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-background border border-border"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => fileRef.current?.click()}
-                    className="flex h-24 w-24 flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-border text-[10px] text-muted-foreground"
-                  >
-                    <Camera className="h-5 w-5" />
-                    Subir foto
-                  </button>
-                )}
-              </div>
-              <button
-                onClick={save}
-                disabled={!cantidad || !motivo}
-                className="w-full rounded-full bg-primary py-3 text-sm font-medium text-primary-foreground disabled:opacity-40"
-              >
-                Guardar merma
-              </button>
+          <form
+            onSubmit={(e) => { e.preventDefault(); save(); }}
+            className="mt-4 space-y-3"
+          >
+            <div>
+              <label className="eyebrow mb-1 block">Cantidad perdida (kg)</label>
+              <input
+                type="number"
+                inputMode="decimal"
+                value={cantidad}
+                onChange={(e) => setCantidad(e.target.value)}
+                placeholder="0.0"
+                className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              />
             </div>
-          )}
+            <div>
+              <label className="eyebrow mb-1 block">Motivo</label>
+              <textarea
+                value={motivo}
+                onChange={(e) => setMotivo(e.target.value)}
+                rows={2}
+                placeholder="Ej. Golpe en transporte, ruptura de cadena de frío…"
+                className="w-full resize-none rounded-xl border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+            </div>
+            <div>
+              <label className="eyebrow mb-1 block">Foto evidencia</label>
+              <input ref={fileRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={onPhoto} />
+              {photo ? (
+                <div className="relative inline-block">
+                  <img src={photo} alt="Evidencia" className="h-24 w-24 rounded-xl object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => setPhoto(undefined)}
+                    className="absolute -right-1.5 -top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-background border border-border"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  className="flex h-24 w-24 flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-border text-[10px] text-muted-foreground"
+                >
+                  <Camera className="h-5 w-5" />
+                  Subir foto
+                </button>
+              )}
+            </div>
+            <button
+              type="submit"
+              disabled={!cantidad || !motivo}
+              className="w-full rounded-full bg-primary py-3 text-sm font-medium text-primary-foreground disabled:opacity-40"
+            >
+              Guardar merma
+            </button>
+          </form>
 
           {registros.length > 0 && (
             <ul className="mt-4 divide-y divide-border border-t border-border">

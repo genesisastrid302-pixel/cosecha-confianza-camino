@@ -5,11 +5,11 @@ import { distribuidorTabs } from "@/components/tabs";
 export const Route = createFileRoute("/distribuidor/recoleccion")({
   head: () => ({ meta: [{ title: "Recolección · Distribuidor — Milpa" }] }),
   component: () => (
-    <AppShell tabs={distribuidorTabs} tone="miel" eyebrow="Parada 1 de 4" title="Santiago T.">
+    <AppShell tabs={distribuidorTabs} tone="miel" eyebrow="Parada 1 de 4" title="Ezequiel M.">
       <div className="space-y-4 px-5">
         <div className="rounded-2xl bg-card border border-border p-4">
           <div className="text-[11px] uppercase tracking-widest text-muted-foreground">Productor</div>
-          <div className="serif mt-1 text-xl">Santiago Treviño</div>
+          <div className="serif mt-1 text-xl">Ezequiel Martínez</div>
           <div className="text-xs text-muted-foreground">Ramos Arizpe · 8.4 km de tu posición</div>
         </div>
 

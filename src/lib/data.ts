@@ -20,9 +20,9 @@ export type Producer = {
 export const producers: Record<string, Producer> = {
   santiago: {
     slug: "santiago",
-    name: "Santiago Treviño",
-    region: "Ramos Arizpe, Coahuila",
-    practice: "Frutas y verduras agroecológicas",
+    name: "Ezequiel Martínez",
+    region: "Rancho Seis Tierras · Ramos Arizpe, Coahuila",
+    practice: "Verduras agroecológicas de semilla ancestral",
     photo: santiago,
     score: 94,
     years: 12,

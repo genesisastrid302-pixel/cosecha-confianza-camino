@@ -25,7 +25,7 @@ export const Route = createFileRoute("/consumidor/perfil")({
           <Row l="Direcciones de entrega" d="2 guardadas" />
           <Row l="Método de pago" d="Tarjeta · CoDi" />
           <Row l="Preferencias" d="Verduras y cítricos" />
-          <Row l="Mis suscripciones" d="Canasta de Santiago" />
+          <Row l="Mis suscripciones" d="Canasta Seis Tierras" />
         </div>
 
         <Link to="/" className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border py-3 text-sm text-muted-foreground">

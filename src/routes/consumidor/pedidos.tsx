@@ -17,10 +17,10 @@ export const Route = createFileRoute("/consumidor/pedidos")({
     <AppShell tabs={consumidorTabs} tone="terracota" eyebrow="En curso" title="Tu pedido">
       <div className="space-y-5 px-5">
         <div className="overflow-hidden rounded-2xl border border-border bg-card">
-          <img src={santiago} alt="Santiago" className="h-32 w-full object-cover" />
+          <img src={santiago} alt="Ezequiel" className="h-32 w-full object-cover" />
           <div className="p-4">
             <div className="text-[10px] uppercase tracking-widest text-muted-foreground">#MLP-0518</div>
-            <div className="serif mt-1 text-lg">De Santiago en Ramos Arizpe</div>
+            <div className="serif mt-1 text-lg">De Ezequiel · Seis Tierras</div>
             <div className="text-[11px] text-muted-foreground">2 kg jitomate · 1 manojo cilantro</div>
           </div>
         </div>
@@ -45,7 +45,7 @@ export const Route = createFileRoute("/consumidor/pedidos")({
         </ol>
 
         <div className="rounded-2xl border-2 border-dashed border-terracota/40 bg-terracota/5 p-4">
-          <div className="eyebrow text-terracota">Nota de Santiago</div>
+          <div className="eyebrow text-terracota">Nota de Ezequiel</div>
           <p className="serif mt-2 italic">"Esta semana el jitomate salió más chico, pero está más dulce."</p>
         </div>
       </div>

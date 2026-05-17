@@ -11,10 +11,10 @@ export const Route = createFileRoute("/productor/perfil")({
 
 function Perfil() {
   return (
-    <AppShell tabs={productorTabs} tone="milpa" eyebrow="Tu perfil" title="Santiago Treviño">
+    <AppShell tabs={productorTabs} tone="milpa" eyebrow="Tu perfil" title="Ezequiel Martínez">
       <div className="space-y-6 px-5">
         <div className="flex items-center gap-4">
-          <img src={santiago} alt="Santiago" className="h-20 w-20 rounded-full object-cover" />
+          <img src={santiago} alt="Ezequiel" className="h-20 w-20 rounded-full object-cover" />
           <div>
             <div className="text-sm">Ramos Arizpe, Coahuila</div>
             <div className="text-xs text-muted-foreground">12 años cultivando · 184 familias</div>

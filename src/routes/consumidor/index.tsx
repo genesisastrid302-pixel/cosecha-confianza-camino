@@ -21,7 +21,7 @@ function ConsumidorHome() {
         <Link to="/consumidor/pedidos" className="block rounded-2xl bg-foreground p-4 text-background">
           <div className="text-[11px] tracking-widest uppercase opacity-70">En camino</div>
           <div className="serif mt-1 text-xl">Tu pedido llega mañana 10–12h</div>
-          <div className="mt-1 text-xs opacity-70">Santiago · Ramos Arizpe · Lote LT-0518</div>
+          <div className="mt-1 text-xs opacity-70">Ezequiel · Seis Tierras · Lote LT-0518</div>
         </Link>
 
         <section>

@@ -21,7 +21,7 @@ export const Route = createFileRoute("/distribuidor/trazabilidad")({
               </span>
             </div>
             <ul className="mt-3 space-y-1.5 text-xs text-muted-foreground">
-              <li className="flex justify-between"><span>Productor</span><span>Santiago T.</span></li>
+              <li className="flex justify-between"><span>Productor</span><span>Ezequiel M.</span></li>
               <li className="flex justify-between"><span>Cosecha</span><span>17 may · 6:40 AM</span></li>
               <li className="flex justify-between"><span>Cadena de frío</span><span className="text-primary">✓ Estable</span></li>
               <li className="flex justify-between"><span>Destino</span><span>Col. Roma · MTY</span></li>

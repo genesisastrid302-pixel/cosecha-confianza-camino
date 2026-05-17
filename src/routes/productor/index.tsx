@@ -14,7 +14,7 @@ function ProductorHome() {
       tabs={productorTabs}
       tone="milpa"
       eyebrow="Buenos días"
-      title="Santiago"
+      title="Ezequiel"
       right={
         <button className="relative flex h-10 w-10 items-center justify-center rounded-full bg-secondary">
           <Bell className="h-5 w-5" />

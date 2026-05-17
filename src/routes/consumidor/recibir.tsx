@@ -5,6 +5,7 @@ import { consumidorTabs } from "@/components/tabs";
 import santiago from "@/assets/producer-santiago.jpg";
 import {
   ArrowLeft, Camera, CheckCircle2, Star, Sparkles, Thermometer, Leaf, Package, Heart, X,
+  QrCode, Snowflake, CalendarDays, MapPin, Sprout, Truck, ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -13,7 +14,7 @@ export const Route = createFileRoute("/consumidor/recibir")({
   component: Recibir,
 });
 
-type Step = "confirm" | "rate" | "thanks";
+type Step = "confirm" | "scan" | "rate" | "thanks";
 
 const aspects = [
   { id: "frescura", label: "Frescura", icon: Leaf },
@@ -24,6 +25,7 @@ const aspects = [
 function Recibir() {
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>("confirm");
+  const [scanned, setScanned] = useState(false);
   const [overall, setOverall] = useState(0);
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [comment, setComment] = useState("");
@@ -42,7 +44,7 @@ function Recibir() {
       tabs={consumidorTabs}
       tone="terracota"
       eyebrow={step === "thanks" ? "Gracias" : "Confirmación de llegada"}
-      title={step === "confirm" ? "¿Ya llegó?" : step === "rate" ? "¿Cómo te llegó?" : "Cerrado con cariño"}
+      title={step === "confirm" ? "¿Ya llegó?" : step === "scan" ? "Escanea tu canasta" : step === "rate" ? "¿Cómo te llegó?" : "Cerrado con cariño"}
       right={
         step !== "thanks" && (
           <Link to="/consumidor/pedidos" className="rounded-full bg-secondary p-2">
@@ -78,7 +80,7 @@ function Recibir() {
 
             <div className="space-y-2">
               <Button
-                onClick={() => setStep("rate")}
+                onClick={() => setStep("scan")}
                 className="h-14 w-full rounded-2xl bg-foreground text-background text-base"
               >
                 <CheckCircle2 className="mr-2 h-5 w-5" /> Sí, ya tengo mi canasta
@@ -91,6 +93,76 @@ function Recibir() {
                 Aún no llega
               </Button>
             </div>
+          </>
+        )}
+
+        {step === "scan" && (
+          <>
+            <div className="rounded-2xl border border-border bg-card p-5 text-center">
+              <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                <QrCode className="h-7 w-7 text-primary" />
+              </div>
+              <div className="serif text-xl leading-tight">Escanea el QR de tu canasta</div>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Verifica la trazabilidad: lote, cosecha y cadena de frío antes de abrirla.
+              </p>
+            </div>
+
+            {!scanned ? (
+              <>
+                <button
+                  onClick={() => setScanned(true)}
+                  className="relative flex aspect-square w-full items-center justify-center rounded-2xl border-2 border-dashed border-primary/40 bg-primary/5"
+                >
+                  <div className="absolute inset-6 rounded-xl border-2 border-primary/30" />
+                  <div className="flex flex-col items-center gap-2 text-primary">
+                    <QrCode className="h-12 w-12" />
+                    <span className="text-xs font-medium uppercase tracking-widest">Tocar para escanear</span>
+                  </div>
+                </button>
+                <Button
+                  variant="ghost"
+                  className="h-12 w-full rounded-2xl text-muted-foreground"
+                  onClick={() => setStep("rate")}
+                >
+                  Omitir y continuar
+                </Button>
+              </>
+            ) : (
+              <>
+                <section className="overflow-hidden rounded-2xl border-2 border-primary/30 bg-primary/5">
+                  <div className="flex items-center gap-2 border-b border-primary/20 bg-primary/10 px-4 py-2.5">
+                    <ShieldCheck className="h-4 w-4 text-primary" />
+                    <span className="text-[11px] font-medium uppercase tracking-widest text-primary">
+                      Lote MLP-0518 · Verificado
+                    </span>
+                  </div>
+                  <div className="divide-y divide-border">
+                    <CultivoRow icon={Sprout} label="Cultivo" value="Jitomate heirloom · variedad criolla" />
+                    <CultivoRow icon={MapPin} label="Origen" value="Rancho Seis Tierras · Ramos Arizpe, Coah." />
+                    <CultivoRow icon={CalendarDays} label="Cosechado" value="Hoy, 5:40 a.m." />
+                    <CultivoRow icon={Snowflake} label="Cadena de frío" value="4–7 °C constantes · sin rupturas" />
+                    <CultivoRow icon={Truck} label="Trayecto" value="98 km · 1 parada · 3 h 12 min" />
+                    <CultivoRow icon={Leaf} label="Prácticas" value="Agroecológico · agua de lluvia captada" />
+                  </div>
+                </section>
+
+                <div className="rounded-2xl border-2 border-dashed border-primary/30 bg-card p-4">
+                  <div className="eyebrow text-primary">Nota del productor</div>
+                  <p className="serif mt-1 text-sm leading-relaxed">
+                    "Este lote se cortó cuando el sol apenas calentaba. Salió más
+                    dulce por las lluvias del fin de semana."
+                  </p>
+                </div>
+
+                <Button
+                  onClick={() => setStep("rate")}
+                  className="h-14 w-full rounded-2xl bg-foreground text-base text-background"
+                >
+                  Continuar al feedback
+                </Button>
+              </>
+            )}
           </>
         )}
 
@@ -310,6 +382,28 @@ function Row({ label, value }: { label: string; value: string }) {
     <div className="flex items-center justify-between text-sm">
       <span className="text-muted-foreground">{label}</span>
       <span className="serif">{value}</span>
+    </div>
+  );
+}
+
+function CultivoRow({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: typeof Leaf;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="flex items-start gap-3 px-4 py-3">
+      <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-background">
+        <Icon className="h-4 w-4 text-primary" />
+      </div>
+      <div className="flex-1">
+        <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</div>
+        <div className="serif text-sm leading-snug">{value}</div>
+      </div>
     </div>
   );
 }

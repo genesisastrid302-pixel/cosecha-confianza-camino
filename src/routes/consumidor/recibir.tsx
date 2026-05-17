@@ -385,3 +385,25 @@ function Row({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
+function CultivoRow({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: typeof Leaf;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="flex items-start gap-3 px-4 py-3">
+      <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-background">
+        <Icon className="h-4 w-4 text-primary" />
+      </div>
+      <div className="flex-1">
+        <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</div>
+        <div className="serif text-sm leading-snug">{value}</div>
+      </div>
+    </div>
+  );
+}

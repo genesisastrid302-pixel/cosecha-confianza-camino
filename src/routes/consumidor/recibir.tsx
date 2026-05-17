@@ -25,6 +25,7 @@ const aspects = [
 function Recibir() {
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>("confirm");
+  const [scanned, setScanned] = useState(false);
   const [overall, setOverall] = useState(0);
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [comment, setComment] = useState("");

@@ -10,17 +10,17 @@ export const Route = createFileRoute("/login")({
 function Login() {
   return (
     <div className="relative flex h-full flex-col overflow-hidden px-5 pb-6 pt-5">
-      <div className="relative -mx-5 -mt-5 h-56 overflow-hidden bg-secondary/40">
+      <div className="relative -mx-5 -mt-5 h-64 overflow-hidden">
         <img
           src={illustration}
           alt=""
           aria-hidden
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center opacity-90 select-none"
+          className="pointer-events-none absolute inset-0 h-full w-full object-contain object-top opacity-80 select-none [mask-image:linear-gradient(to_bottom,black_0%,black_55%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,black_0%,black_55%,transparent_100%)]"
         />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-background" />
+        <div className="pointer-events-none absolute inset-x-0 -bottom-px h-40 bg-gradient-to-b from-transparent via-background/80 to-background" />
         <Link
           to="/"
-          className="absolute left-5 top-5 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-background/80 backdrop-blur text-foreground"
+          className="absolute left-5 top-5 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-background/70 backdrop-blur text-foreground"
         >
           <ChevronLeft className="h-5 w-5" />
         </Link>

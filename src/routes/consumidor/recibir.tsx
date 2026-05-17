@@ -80,7 +80,7 @@ function Recibir() {
 
             <div className="space-y-2">
               <Button
-                onClick={() => setStep("rate")}
+                onClick={() => setStep("scan")}
                 className="h-14 w-full rounded-2xl bg-foreground text-background text-base"
               >
                 <CheckCircle2 className="mr-2 h-5 w-5" /> Sí, ya tengo mi canasta

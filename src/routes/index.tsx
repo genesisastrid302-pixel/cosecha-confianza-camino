@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import heroHands from "@/assets/hero-hands.jpg";
+import illustration from "@/assets/login-illustration.png";
 import { Seal } from "@/components/Seal";
 
 export const Route = createFileRoute("/")({
@@ -16,11 +16,11 @@ function Apertura() {
   return (
     <div className="relative flex h-full flex-col text-paper">
       <img
-        src={heroHands}
-        alt="Manos del agricultor con jitomates recién cosechados"
+        src={illustration}
+        alt="Ilustración de la cadena corta Milpa"
         className="absolute inset-0 h-full w-full object-cover"
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-ink/40 via-ink/55 to-ink/95" />
+      <div className="absolute inset-0 bg-gradient-to-b from-ink/40 via-ink/65 to-ink/95" />
 
       <div className="relative flex h-full flex-col px-6 pb-8 pt-14">
         <Seal className="h-14 w-14 text-paper" />

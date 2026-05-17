@@ -9,19 +9,24 @@ export const Route = createFileRoute("/login")({
 
 function Login() {
   return (
-    <div className="relative flex h-full flex-col overflow-hidden px-5 pb-8 pt-5">
-      <img
-        src={illustration}
-        alt=""
-        aria-hidden
-        className="pointer-events-none absolute -right-10 -top-6 w-[78%] max-w-[420px] opacity-80 select-none"
-      />
+    <div className="relative flex h-full flex-col overflow-hidden px-5 pb-6 pt-5">
+      <div className="relative -mx-5 -mt-5 h-56 overflow-hidden bg-secondary/40">
+        <img
+          src={illustration}
+          alt=""
+          aria-hidden
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center opacity-90 select-none"
+        />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-background" />
+        <Link
+          to="/"
+          className="absolute left-5 top-5 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-background/80 backdrop-blur text-foreground"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </Link>
+      </div>
 
-      <Link to="/" className="relative z-10 flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-foreground">
-        <ChevronLeft className="h-5 w-5" />
-      </Link>
-
-      <div className="relative z-10 mt-40">
+      <div className="relative z-10 mt-6">
         <span className="eyebrow">Bienvenido de vuelta</span>
         <h1 className="display mt-2 text-4xl">Hola otra vez.</h1>
         <p className="mt-3 text-sm text-muted-foreground">

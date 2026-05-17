@@ -96,6 +96,76 @@ function Recibir() {
           </>
         )}
 
+        {step === "scan" && (
+          <>
+            <div className="rounded-2xl border border-border bg-card p-5 text-center">
+              <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                <QrCode className="h-7 w-7 text-primary" />
+              </div>
+              <div className="serif text-xl leading-tight">Escanea el QR de tu canasta</div>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Verifica la trazabilidad: lote, cosecha y cadena de frío antes de abrirla.
+              </p>
+            </div>
+
+            {!scanned ? (
+              <>
+                <button
+                  onClick={() => setScanned(true)}
+                  className="relative flex aspect-square w-full items-center justify-center rounded-2xl border-2 border-dashed border-primary/40 bg-primary/5"
+                >
+                  <div className="absolute inset-6 rounded-xl border-2 border-primary/30" />
+                  <div className="flex flex-col items-center gap-2 text-primary">
+                    <QrCode className="h-12 w-12" />
+                    <span className="text-xs font-medium uppercase tracking-widest">Tocar para escanear</span>
+                  </div>
+                </button>
+                <Button
+                  variant="ghost"
+                  className="h-12 w-full rounded-2xl text-muted-foreground"
+                  onClick={() => setStep("rate")}
+                >
+                  Omitir y continuar
+                </Button>
+              </>
+            ) : (
+              <>
+                <section className="overflow-hidden rounded-2xl border-2 border-primary/30 bg-primary/5">
+                  <div className="flex items-center gap-2 border-b border-primary/20 bg-primary/10 px-4 py-2.5">
+                    <ShieldCheck className="h-4 w-4 text-primary" />
+                    <span className="text-[11px] font-medium uppercase tracking-widest text-primary">
+                      Lote MLP-0518 · Verificado
+                    </span>
+                  </div>
+                  <div className="divide-y divide-border">
+                    <CultivoRow icon={Sprout} label="Cultivo" value="Jitomate heirloom · variedad criolla" />
+                    <CultivoRow icon={MapPin} label="Origen" value="Rancho Seis Tierras · Ramos Arizpe, Coah." />
+                    <CultivoRow icon={CalendarDays} label="Cosechado" value="Hoy, 5:40 a.m." />
+                    <CultivoRow icon={Snowflake} label="Cadena de frío" value="4–7 °C constantes · sin rupturas" />
+                    <CultivoRow icon={Truck} label="Trayecto" value="98 km · 1 parada · 3 h 12 min" />
+                    <CultivoRow icon={Leaf} label="Prácticas" value="Agroecológico · agua de lluvia captada" />
+                  </div>
+                </section>
+
+                <div className="rounded-2xl border-2 border-dashed border-primary/30 bg-card p-4">
+                  <div className="eyebrow text-primary">Nota del productor</div>
+                  <p className="serif mt-1 text-sm leading-relaxed">
+                    "Este lote se cortó cuando el sol apenas calentaba. Salió más
+                    dulce por las lluvias del fin de semana."
+                  </p>
+                </div>
+
+                <Button
+                  onClick={() => setStep("rate")}
+                  className="h-14 w-full rounded-2xl bg-foreground text-base text-background"
+                >
+                  Continuar al feedback
+                </Button>
+              </>
+            )}
+          </>
+        )}
+
         {step === "rate" && (
           <>
             {/* Estrellas globales */}

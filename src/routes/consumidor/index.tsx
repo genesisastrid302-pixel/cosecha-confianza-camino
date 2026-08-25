@@ -24,6 +24,18 @@ function ConsumidorHome() {
           <div className="mt-1 text-xs opacity-70">Ezequiel · Seis Tierras · Lote LT-0518</div>
         </Link>
 
+        <div className="grid grid-cols-2 gap-3">
+          <Link to="/consumidor/racha" className="rounded-2xl border border-border bg-card p-4">
+            <div className="eyebrow text-tierra">Tu racha</div>
+            <div className="serif mt-1 text-3xl">9<span className="ml-1 text-sm text-muted-foreground">sem</span></div>
+            <div className="text-[10px] text-muted-foreground">3 más y rompes tu récord</div>
+          </Link>
+          <Link to="/consumidor/cosecha" className="rounded-2xl border-2 border-dashed border-primary/40 bg-primary/5 p-4">
+            <div className="eyebrow text-primary">Cosecha compartida</div>
+            <div className="serif mt-1 text-base leading-tight">Apadrina la próxima siembra</div>
+          </Link>
+        </div>
+
         <section>
           <div className="flex items-baseline justify-between">
             <div className="eyebrow">Lo que el campo da hoy</div>

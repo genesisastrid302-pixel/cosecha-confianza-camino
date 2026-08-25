@@ -27,6 +27,7 @@ import { Route as ConsumidorRecibirRouteImport } from './routes/consumidor/recib
 import { Route as ConsumidorProductoresRouteImport } from './routes/consumidor/productores'
 import { Route as ConsumidorPerfilRouteImport } from './routes/consumidor/perfil'
 import { Route as ConsumidorPedidosRouteImport } from './routes/consumidor/pedidos'
+import { Route as ConsumidorCosechaRouteImport } from './routes/consumidor/cosecha'
 import { Route as ConsumidorCarritoRouteImport } from './routes/consumidor/carrito'
 
 const RegistroRoute = RegistroRouteImport.update({
@@ -120,6 +121,11 @@ const ConsumidorPedidosRoute = ConsumidorPedidosRouteImport.update({
   path: '/consumidor/pedidos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConsumidorCosechaRoute = ConsumidorCosechaRouteImport.update({
+  id: '/consumidor/cosecha',
+  path: '/consumidor/cosecha',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConsumidorCarritoRoute = ConsumidorCarritoRouteImport.update({
   id: '/consumidor/carrito',
   path: '/consumidor/carrito',
@@ -131,6 +137,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/registro': typeof RegistroRoute
   '/consumidor/carrito': typeof ConsumidorCarritoRoute
+  '/consumidor/cosecha': typeof ConsumidorCosechaRoute
   '/consumidor/pedidos': typeof ConsumidorPedidosRoute
   '/consumidor/perfil': typeof ConsumidorPerfilRoute
   '/consumidor/productores': typeof ConsumidorProductoresRoute
@@ -152,6 +159,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/registro': typeof RegistroRoute
   '/consumidor/carrito': typeof ConsumidorCarritoRoute
+  '/consumidor/cosecha': typeof ConsumidorCosechaRoute
   '/consumidor/pedidos': typeof ConsumidorPedidosRoute
   '/consumidor/perfil': typeof ConsumidorPerfilRoute
   '/consumidor/productores': typeof ConsumidorProductoresRoute
@@ -174,6 +182,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/registro': typeof RegistroRoute
   '/consumidor/carrito': typeof ConsumidorCarritoRoute
+  '/consumidor/cosecha': typeof ConsumidorCosechaRoute
   '/consumidor/pedidos': typeof ConsumidorPedidosRoute
   '/consumidor/perfil': typeof ConsumidorPerfilRoute
   '/consumidor/productores': typeof ConsumidorProductoresRoute
@@ -197,6 +206,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/registro'
     | '/consumidor/carrito'
+    | '/consumidor/cosecha'
     | '/consumidor/pedidos'
     | '/consumidor/perfil'
     | '/consumidor/productores'
@@ -218,6 +228,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/registro'
     | '/consumidor/carrito'
+    | '/consumidor/cosecha'
     | '/consumidor/pedidos'
     | '/consumidor/perfil'
     | '/consumidor/productores'
@@ -239,6 +250,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/registro'
     | '/consumidor/carrito'
+    | '/consumidor/cosecha'
     | '/consumidor/pedidos'
     | '/consumidor/perfil'
     | '/consumidor/productores'
@@ -261,6 +273,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   RegistroRoute: typeof RegistroRoute
   ConsumidorCarritoRoute: typeof ConsumidorCarritoRoute
+  ConsumidorCosechaRoute: typeof ConsumidorCosechaRoute
   ConsumidorPedidosRoute: typeof ConsumidorPedidosRoute
   ConsumidorPerfilRoute: typeof ConsumidorPerfilRoute
   ConsumidorProductoresRoute: typeof ConsumidorProductoresRoute
@@ -406,6 +419,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConsumidorPedidosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/consumidor/cosecha': {
+      id: '/consumidor/cosecha'
+      path: '/consumidor/cosecha'
+      fullPath: '/consumidor/cosecha'
+      preLoaderRoute: typeof ConsumidorCosechaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/consumidor/carrito': {
       id: '/consumidor/carrito'
       path: '/consumidor/carrito'
@@ -421,6 +441,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   RegistroRoute: RegistroRoute,
   ConsumidorCarritoRoute: ConsumidorCarritoRoute,
+  ConsumidorCosechaRoute: ConsumidorCosechaRoute,
   ConsumidorPedidosRoute: ConsumidorPedidosRoute,
   ConsumidorPerfilRoute: ConsumidorPerfilRoute,
   ConsumidorProductoresRoute: ConsumidorProductoresRoute,

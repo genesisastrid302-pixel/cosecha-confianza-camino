@@ -9,13 +9,14 @@ export const productorTabs: Tab[] = [
   { to: "/productor/perfil", label: "Perfil", icon: User },
 ];
 
-import { Home, ShoppingBasket, Users, ListOrdered, User as UserIcon } from "lucide-react";
+import { Home, ShoppingBasket, HandHeart, ListOrdered, Flame, User as UserIcon } from "lucide-react";
 
 export const consumidorTabs: Tab[] = [
   { to: "/consumidor", label: "Mercado", icon: Home },
-  { to: "/consumidor/productores", label: "Productores", icon: Users },
+  { to: "/consumidor/cosecha", label: "Cosecha", icon: HandHeart },
   { to: "/consumidor/carrito", label: "Carrito", icon: ShoppingBasket },
   { to: "/consumidor/pedidos", label: "Pedidos", icon: ListOrdered },
+  { to: "/consumidor/racha", label: "Racha", icon: Flame },
   { to: "/consumidor/perfil", label: "Perfil", icon: UserIcon },
 ];
 

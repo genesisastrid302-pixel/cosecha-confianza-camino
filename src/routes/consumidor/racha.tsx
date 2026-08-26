@@ -32,7 +32,7 @@ const insignias = [
   { n: "Primer surco", d: "1ª entrega recibida", got: true },
   { n: "Manos de tierra", d: "5 semanas seguidas", got: true },
   { n: "Temporada entera", d: "12 semanas seguidas", got: true },
-  { n: "Guardián de semilla", d: "Apadrinar una cosecha", got: true },
+  { n: "Guardián de semilla", d: "Hacer un Farm Drop", got: true },
   { n: "Sin merma", d: "10 entregas sin desperdicio", got: false },
   { n: "Año de milpa", d: "52 semanas seguidas", got: false },
 ];

@@ -31,8 +31,8 @@ function ConsumidorHome() {
             <div className="text-[10px] text-muted-foreground">3 más y rompes tu récord</div>
           </Link>
           <Link to="/consumidor/cosecha" className="rounded-2xl border-2 border-dashed border-primary/40 bg-primary/5 p-4">
-            <div className="eyebrow text-primary">Cosecha compartida</div>
-            <div className="serif mt-1 text-base leading-tight">Apadrina la próxima siembra</div>
+            <div className="eyebrow text-primary">Farm Drop</div>
+            <div className="serif mt-1 text-base leading-tight">Reserva tu caja de la semana</div>
           </Link>
         </div>
 

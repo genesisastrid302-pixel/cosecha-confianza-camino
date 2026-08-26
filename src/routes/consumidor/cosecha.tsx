@@ -8,10 +8,10 @@ import { Sprout, Check, CalendarDays, HandHeart } from "lucide-react";
 export const Route = createFileRoute("/consumidor/cosecha")({
   head: () => ({
     meta: [
-      { title: "Cosecha compartida · Milpa" },
-      { name: "description", content: "Apadrina una cosecha: reserva tu parte del cultivo antes de la siembra y acompaña al productor toda la temporada." },
-      { property: "og:title", content: "Cosecha compartida · Milpa" },
-      { property: "og:description", content: "Apadrina una cosecha y recibe tu parte cada semana, directo del productor." },
+      { title: "Farm Drop · Milpa" },
+      { name: "description", content: "Haz Farm Drop: reserva tu caja del cultivo antes de la siembra y acompaña al productor toda la temporada." },
+      { property: "og:title", content: "Farm Drop · Milpa" },
+      { property: "og:description", content: "Haz Farm Drop y recibe tu caja cada semana, directo del productor." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -24,7 +24,6 @@ type Plan = { id: string; nombre: string; semanas: number; kgSemana: string; pre
 const planes: Plan[] = [
   { id: "raiz", nombre: "Raíz", semanas: 8, kgSemana: "2–3 kg", precio: 1180, nota: "Para una o dos personas. Verdura de la semana." },
   { id: "milpa", nombre: "Milpa", semanas: 12, kgSemana: "4–5 kg", precio: 2340, nota: "Para familia. Verdura, cítricos y hierbas." },
-  { id: "temporada", nombre: "Temporada completa", semanas: 24, kgSemana: "4–5 kg", precio: 4290, nota: "Acompañas el ciclo entero del cultivo." },
 ];
 
 function CosechaCompartida() {
@@ -36,15 +35,15 @@ function CosechaCompartida() {
 
   if (listo) {
     return (
-      <AppShell tabs={consumidorTabs} tone="terracota" eyebrow="Cosecha compartida" title="Sembrado">
+      <AppShell tabs={consumidorTabs} tone="terracota" eyebrow="Farm Drop" title="Reserva hecha">
         <div className="space-y-5 px-5">
           <div className="rounded-2xl bg-primary p-6 text-primary-foreground">
             <Sprout className="h-6 w-6" />
             <div className="serif mt-3 text-2xl leading-snug">
-              Apadrinaste {elegido.semanas} semanas con {prod.name.split(" ")[0]}.
+              Hiciste Farm Drop por {elegido.semanas} semanas con {prod.name.split(" ")[0]}.
             </div>
             <p className="mt-2 text-sm opacity-90">
-              Tu parte queda reservada desde la siembra. Cada semana recibes tu porción y las fotos del cultivo creciendo.
+              Tu caja queda reservada desde la siembra. Cada semana recibes tu porción y las fotos del cultivo creciendo.
             </p>
           </div>
           <div className="rounded-2xl border border-border bg-card p-4 text-sm">
@@ -64,10 +63,10 @@ function CosechaCompartida() {
   }
 
   return (
-    <AppShell tabs={consumidorTabs} tone="terracota" eyebrow="Antes de la siembra" title="Cosecha compartida">
+    <AppShell tabs={consumidorTabs} tone="terracota" eyebrow="Antes de la siembra" title="Farm Drop">
       <div className="space-y-5 px-5">
         <div className="rounded-2xl border-2 border-dashed border-primary/40 bg-primary/5 p-4">
-          <div className="eyebrow flex items-center gap-1.5 text-primary"><HandHeart className="h-3 w-3" /> Apadrinamiento</div>
+          <div className="eyebrow flex items-center gap-1.5 text-primary"><HandHeart className="h-3 w-3" /> Farm Drop</div>
           <p className="serif mt-2 text-base leading-snug">
             Reservas tu parte de la cosecha antes de que exista. El productor siembra con la certeza de que su trabajo ya tiene mesa.
           </p>
@@ -157,7 +156,7 @@ function CosechaCompartida() {
           onClick={() => setListo(true)}
           className="w-full rounded-full bg-primary py-4 text-sm font-medium text-primary-foreground"
         >
-          Apadrinar esta cosecha
+          Hacer Farm Drop
         </button>
       </div>
     </AppShell>

@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { ChevronLeft, Sprout, Truck, Home } from "lucide-react";
+import { ConsumidorForm } from "@/components/ConsumidorForm";
 
 export const Route = createFileRoute("/registro")({
   head: () => ({ meta: [{ title: "Crear cuenta — Milpa" }] }),

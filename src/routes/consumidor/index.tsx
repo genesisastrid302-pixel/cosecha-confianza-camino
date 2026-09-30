@@ -1,73 +1,80 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { consumidorTabs } from "@/components/tabs";
-import { products, getProducer } from "@/lib/data";
+import { products, getProducer, trustScore10, scoreTone } from "@/lib/data";
 import { Search } from "lucide-react";
 
 export const Route = createFileRoute("/consumidor/")({
-  head: () => ({ meta: [{ title: "Mercado · Consumidor — Milpa" }] }),
+  head: () => ({
+    meta: [
+      { title: "Mercado · Consumidor — Milpa" },
+      { name: "description", content: "Cultivos agroecológicos disponibles cerca de Monterrey." },
+    ],
+  }),
   component: ConsumidorHome,
 });
 
+const filters = ["Por temporada", "Por producto", "Por disponibilidad"] as const;
+type Filter = (typeof filters)[number];
+
 function ConsumidorHome() {
+  const [filter, setFilter] = useState<Filter | null>(null);
+  const [q, setQ] = useState("");
+
+  const list = useMemo(() => {
+    let l = products.filter((p) => p.name.toLowerCase().includes(q.toLowerCase()));
+    if (filter === "Por temporada") l = l.filter((p) => p.badge === "temporada");
+    if (filter === "Por producto") l = [...l].sort((a, b) => a.name.localeCompare(b.name));
+    if (filter === "Por disponibilidad") l = [...l].sort((a, b) => a.harvestIn - b.harvestIn);
+    return l;
+  }, [filter, q]);
+
   return (
-    <AppShell tabs={consumidorTabs} tone="terracota" eyebrow="Semana 19 · Monterrey" title="Hola, Adriana">
-      <div className="space-y-5 px-5">
+    <AppShell tabs={consumidorTabs} tone="terracota" eyebrow="Semana 19 · Monterrey" title="Mercado">
+      <div className="space-y-4 px-5">
         <div className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2.5">
           <Search className="h-4 w-4 text-muted-foreground" />
-          <input placeholder="Buscar cultivo o productor" className="flex-1 bg-transparent text-sm placeholder:text-muted-foreground/70 focus:outline-none" />
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar cultivo" className="flex-1 bg-transparent text-sm placeholder:text-muted-foreground/70 focus:outline-none" />
         </div>
 
-        <Link to="/consumidor/pedidos" className="block rounded-2xl bg-foreground p-4 text-background">
-          <div className="text-[11px] tracking-widest uppercase opacity-70">En camino</div>
-          <div className="serif mt-1 text-xl">Tu pedido llega mañana 10–12h</div>
-          <div className="mt-1 text-xs opacity-70">Ezequiel · Seis Tierras · Lote LT-0518</div>
-        </Link>
+        <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1">
+          {filters.map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(filter === f ? null : f)}
+              className={`shrink-0 rounded-full border px-3.5 py-1.5 text-xs transition ${
+                filter === f ? "border-foreground bg-foreground text-background" : "border-border bg-card text-foreground/70"
+              }`}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <Link to="/consumidor/racha" className="rounded-2xl border border-border bg-card p-4">
-            <div className="eyebrow text-tierra">Tu racha</div>
-            <div className="serif mt-1 text-3xl">9<span className="ml-1 text-sm text-muted-foreground">sem</span></div>
-            <div className="text-[10px] text-muted-foreground">3 más y rompes tu récord</div>
-          </Link>
-          <Link to="/consumidor/cosecha" className="rounded-2xl border-2 border-dashed border-primary/40 bg-primary/5 p-4">
-            <div className="eyebrow text-primary">Farm Drop</div>
-            <div className="serif mt-1 text-base leading-tight">Reserva tu caja de la semana</div>
-          </Link>
+          {list.map((p) => {
+            const prod = getProducer(p.producerSlug);
+            const s = trustScore10(p.producerSlug);
+            return (
+              <Link to="/consumidor/productor/$slug" params={{ slug: p.producerSlug }} key={p.id} className="overflow-hidden rounded-2xl border border-border bg-card">
+                <div className="relative aspect-square bg-muted">
+                  <img src={p.photo} alt={p.name} className="h-full w-full object-cover" />
+                  <span className={`absolute right-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-medium ${scoreTone(s)}`}>{s}/10</span>
+                </div>
+                <div className="p-2.5">
+                  <div className="serif text-sm leading-tight">{p.name}</div>
+                  <div className="mt-0.5 text-sm">${p.price}<span className="text-[10px] text-muted-foreground"> / {p.unit === "kilo" ? "kg" : p.unit}</span></div>
+                  <div className="mt-2 flex items-center gap-1.5">
+                    <img src={prod.photo} alt={prod.name} className="h-5 w-5 rounded-full object-cover" />
+                    <span className="truncate text-[11px] text-muted-foreground">{prod.name}</span>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
         </div>
-
-        <section>
-          <div className="flex items-baseline justify-between">
-            <div className="eyebrow">Lo que el campo da hoy</div>
-            <Link to="/consumidor/productores" className="text-[11px] text-muted-foreground underline">Ver productores</Link>
-          </div>
-          <div className="mt-3 grid grid-cols-2 gap-3">
-            {products.map((p) => {
-              const prod = getProducer(p.producerSlug);
-              return (
-                <Link to="/consumidor/carrito" key={p.id} className="group">
-                  <div className="relative aspect-square overflow-hidden rounded-xl bg-muted">
-                    <img src={p.photo} alt={p.name} className="h-full w-full object-cover" />
-                    {p.badge && (
-                      <span className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] ${
-                        p.badge === "ultimos" ? "bg-terracota text-paper" : "bg-primary text-primary-foreground"
-                      }`}>
-                        {p.badge === "ultimos" ? `Últimos ${p.unitsLeft}` : p.harvestIn > 0 ? `${p.harvestIn}d` : "Hoy"}
-                      </span>
-                    )}
-                  </div>
-                  <div className="mt-2">
-                    <div className="serif text-sm leading-tight">{p.name}</div>
-                    <div className="flex items-baseline justify-between">
-                      <div className="text-[11px] text-muted-foreground">{prod.name.split(" ")[0]}</div>
-                      <div className="text-sm">${p.price}</div>
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </section>
+        {list.length === 0 && <p className="py-8 text-center text-sm text-muted-foreground">No hay cultivos con ese filtro esta semana.</p>}
       </div>
     </AppShell>
   );

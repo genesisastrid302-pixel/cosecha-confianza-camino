@@ -11,6 +11,9 @@ type Role = "productor" | "distribuidor" | "consumidor";
 
 function Registro() {
   const [role, setRole] = useState<Role | null>(null);
+  const [step, setStep] = useState<1 | 2>(1);
+
+  if (step === 2) return <ConsumidorForm onBack={() => setStep(1)} />;
 
   return (
     <div className="flex h-full flex-col px-5 pb-8 pt-5">
@@ -57,9 +60,16 @@ function Registro() {
       </div>
 
       <div className="mt-auto pt-8">
-        {role ? (
+        {role === "consumidor" ? (
+          <button
+            onClick={() => setStep(2)}
+            className="block w-full rounded-full bg-foreground py-4 text-center text-sm font-medium text-background transition active:scale-[0.98]"
+          >
+            Continuar como consumidor
+          </button>
+        ) : role ? (
           <Link
-            to={`/${role}` as "/productor" | "/distribuidor" | "/consumidor"}
+            to={`/${role}` as "/productor" | "/distribuidor"}
             className="block w-full rounded-full bg-foreground py-4 text-center text-sm font-medium text-background transition active:scale-[0.98]"
           >
             Continuar como {role}

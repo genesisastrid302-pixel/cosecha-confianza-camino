@@ -121,3 +121,48 @@ export function getProducer(slug: string) {
 export function getProductsByProducer(slug: string) {
   return products.filter((p) => p.producerSlug === slug);
 }
+
+import seedlings from "@/assets/seedlings-hand.jpg";
+import planting from "@/assets/planting-roots.jpg";
+import harvest from "@/assets/harvest-field.jpg";
+import landscape from "@/assets/field-landscape.jpg";
+
+export type ProducerDetail = {
+  story: string;
+  practices: string[];
+  coldChain: string;
+  gallery: string[];
+  // each 0-100
+  components: { rating: number; profile: number; onTime: number; waste: number };
+};
+
+export const producerDetails: Record<string, ProducerDetail> = {
+  santiago: {
+    story:
+      "Ezequiel heredó Seis Tierras de su abuelo. Recuperó semillas criollas que la familia guardaba en frascos y hoy siembra sin químicos, rotando cultivos como se hacía antes.",
+    practices: ["Semilla criolla propia", "Composta y abono verde", "Riego por goteo con agua de lluvia", "Rotación y asociación de cultivos"],
+    coldChain: "Cosecha al amanecer, cámara a 8 °C en el rancho y hielera térmica hasta tu puerta. Menos de 24 h del surco a tu mesa.",
+    gallery: [seedlings, planting, harvest, landscape],
+    components: { rating: 96, profile: 95, onTime: 92, waste: 88 },
+  },
+  rosa: {
+    story:
+      "Rosa María cuida la huerta de cítricos que plantó su padre en Galeana. Poda a mano, cosecha fruta madura y vende solo lo que la tierra da en temporada.",
+    practices: ["Poda manual", "Control biológico de plagas", "Coberturas vegetales", "Cosecha en punto de madurez"],
+    coldChain: "Corte en la mañana, sombra y ventilación natural; traslado refrigerado el mismo día.",
+    gallery: [harvest, landscape, seedlings, planting],
+    components: { rating: 90, profile: 85, onTime: 80, waste: 70 },
+  },
+};
+
+export function trustScore10(slug: string) {
+  const c = producerDetails[slug]?.components;
+  if (!c) return 0;
+  return Math.round((c.rating * 0.4 + c.profile * 0.3 + c.onTime * 0.2 + c.waste * 0.1) / 10 * 10) / 10;
+}
+
+export function scoreTone(score: number) {
+  if (score >= 8) return "bg-primary text-primary-foreground";
+  if (score >= 6) return "bg-miel text-ink";
+  return "bg-destructive text-destructive-foreground";
+}

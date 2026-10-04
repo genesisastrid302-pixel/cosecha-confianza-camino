@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
+import { ScoreCard } from "@/components/ScoreCard";
 
 export const Route = createFileRoute("/productor/transparencia")({
   head: () => ({ meta: [{ title: "Transparencia · Productor — Milpa" }] }),
@@ -93,23 +94,11 @@ function Transparencia() {
         onChange={(e) => { onFiles(e.target.files, "Audio"); e.target.value = ""; }} />
 
       <div className="space-y-6 px-5">
-        {/* Score card */}
-        <div className="rounded-2xl border border-border bg-card p-5">
-          <div className="flex items-baseline justify-between">
-            <span className="eyebrow">Tu score de confianza</span>
-            <span className="text-[10px] text-muted-foreground">Auto-generado</span>
-          </div>
-          <div className="mt-2 flex items-end gap-2">
-            <span className="display text-6xl text-primary">94</span>
-            <span className="mb-2 text-sm text-muted-foreground">/ 100</span>
-          </div>
-          <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-secondary">
-            <div className="h-full rounded-full bg-primary" style={{ width: "94%" }} />
-          </div>
-          <p className="mt-3 text-xs text-muted-foreground">
-            Sube esta semana con más evidencia visual y notas de voz.
-          </p>
-        </div>
+        {/* Mismo score que en Inicio */}
+        <ScoreCard showChecklist={false} />
+        <p className="-mt-3 text-xs text-muted-foreground">
+          La evidencia que subes aquí es la que ven las familias en tu perfil y en el QR de cada pedido.
+        </p>
 
         {/* Upload actions */}
         <section>

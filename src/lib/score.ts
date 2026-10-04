@@ -13,7 +13,7 @@ export type ScoreLayers = {
 
 export const SCORE_LAYERS: { key: keyof ScoreLayers; label: string; weight: number; help: string }[] = [
   { key: "calificacion", label: "Calificación de consumidores", weight: 40, help: "Promedio de las últimas 20 reseñas, incluye la merma que reportan" },
-  { key: "consistencia", label: "Consistencia de datos", weight: 30, help: "Fotos con fecha y ubicación, temporadas reales y perfil completo" },
+  { key: "consistencia", label: "Consistencia de datos", weight: 30, help: "Información básica completa: datos, identificación, cuenta de cobro y fotos del campo" },
   { key: "distribuidor", label: "Registro del distribuidor", weight: 30, help: "Entregas a tiempo y estado del producto al recolectar" },
 ];
 

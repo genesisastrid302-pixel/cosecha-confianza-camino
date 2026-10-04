@@ -42,10 +42,10 @@ function Perfil() {
   return (
     <AppShell tabs={productorTabs} tone="milpa" eyebrow="Tu perfil" title={p.name || "Productor"}>
       <div className="space-y-6 px-5">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 pt-3">
           <div className="relative shrink-0">
             <img src={foto} alt={p.name} className="h-20 w-20 rounded-full object-cover" />
-            {esNuevo(state) && <NuevoStamp size={46} className="absolute -left-2 -top-4" />}
+            {esNuevo(state) && <NuevoStamp size={44} className="absolute -left-2 -top-2" />}
           </div>
           <div>
             <div className="text-sm">{p.zona ? `${p.zona}, ${p.zona === "Ramos Arizpe" ? "Coahuila" : "Nuevo León"}` : "Ubicación sin capturar"}</div>
@@ -124,9 +124,9 @@ function Perfil() {
         <section>
           <div className="eyebrow">Negocio</div>
           <div className="mt-3 divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
-            <LinkFila to="/productor/finanzas" label="Ventas y pagos" detail="Lo que recibes y cuándo" />
-            <LinkFila to="/productor/transparencia" label="Evidencia y postales" detail={`${p.photos.length} fotos del campo`} />
-            <LinkFila to="/productor/catalogo" label="Catálogo y cosecha compartida" detail={`${state.cosechas.length} cosechas`} />
+            <LinkFila to="/productor/finanzas" label="Finanzas" detail="Ventas, aportación y pagos" />
+            <LinkFila to="/productor/transparencia" label="Transparencia" detail="Evidencia de tu cultivo" />
+            <LinkFila to="/productor/catalogo" label="Catálogo" detail={`${state.crops.length} cultivos · ${state.cosechas.length} cosechas compartidas`} />
           </div>
         </section>
 

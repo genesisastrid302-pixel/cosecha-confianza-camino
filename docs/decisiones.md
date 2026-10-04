@@ -37,7 +37,9 @@ Validación por sistema en 3 capas, como en el modelo de negocio (`src/lib/score
 
 - **Calificación de consumidores · 40 %**: promedio de las últimas 20 reseñas, incluida la merma que reporta el consumidor.
 - **Productor nuevo**: mientras tenga menos de 10 reseñas no muestra score; lleva una estampa roja "Nuevo" sobre su foto y ve su avance (x/10 reseñas). Al registrarse como nuevo debe subir entre 5 y 15 fotos de su campo.
-- **Consistencia de datos · 30 %**: perfil completo, fotos con fecha y ubicación, temporadas reales.
+- **Consistencia de datos · 30 %**: información básica completa (datos de contacto, identificación, historia, ubicación, cuenta de cobro, acuerdo de socio y fotos del campo). Completarla da el 30 % del score.
+- El score del productor se muestra con una sola tarjeta (`src/components/ScoreCard.tsx`) en Inicio y en Transparencia; debe coincidir con el que ve el consumidor.
+- Los nombres de los enlaces y accesos coinciden con el título de la pantalla a la que llevan (Transparencia, Catálogo, Pedidos, Finanzas).
 - **Registro del distribuidor · 30 %**: entregas a tiempo y estado del producto al recolectar.
 - Colores: verde ≥ 8, amarillo ≥ 5, rojo < 5. Siempre se muestra como `9.4/10`. El mercado muestra primero a los productores con mejor score.
 - Solo califica quien compró, y solo dentro de la app.

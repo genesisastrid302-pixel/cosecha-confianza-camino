@@ -41,7 +41,7 @@ function Pedidos() {
   const pendientes = orders.filter((o) => o.status === "nuevo").length;
 
   return (
-    <AppShell tabs={productorTabs} tone="milpa" eyebrow="Tus pedidos" title="Esta semana">
+    <AppShell tabs={productorTabs} tone="milpa" eyebrow="Esta semana" title="Pedidos">
       <div className="px-5">
         <div className="flex gap-2 text-xs">
           {(["Pendientes", "En proceso", "Entregados"] as Filtro[]).map((t) => (

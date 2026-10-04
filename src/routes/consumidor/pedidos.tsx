@@ -24,7 +24,7 @@ function Pedidos() {
   const active = orders.find((o) => o.status !== "calificado" && o.status !== "rechazado");
   const past = orders.filter((o) => o !== active);
   return (
-    <AppShell tabs={consumidorTabs} tone="terracota" eyebrow="En curso" title="Tu pedido">
+    <AppShell tabs={consumidorTabs} tone="terracota" eyebrow="En curso" title="Pedidos">
       <div className="space-y-5 px-5">
         {active ? <LiveOrder order={active} /> : <DemoOrder />}
         <section>

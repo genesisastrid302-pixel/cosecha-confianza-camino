@@ -29,12 +29,12 @@ export const producers: Record<string, Producer> = {
     region: "Rancho Seis Tierras · Ramos Arizpe, Coahuila",
     practice: "Verduras agroecológicas de semilla ancestral",
     photo: santiago,
-    score: 9.4,
+    score: 9.6,
     years: 12,
     note: "Esta semana el jitomate salió más chico porque llovió menos, pero está más dulce. Cosecho lo que ustedes piden — ni un kilo más.",
     metrics: [
       { label: "Cultivos activos", value: "7" },
-      { label: "Score de confianza", value: "9.4/10" },
+      { label: "Score de confianza", value: "9.6/10" },
       { label: "Familias servidas", value: "184" },
       { label: "Distancia a tu mesa", value: "98 km" },
     ],
@@ -182,7 +182,7 @@ export const producerDetails: Record<string, ProducerDetail> = {
     practices: ["Semilla criolla propia", "Composta y abono verde", "Riego por goteo con agua de lluvia", "Rotación y asociación de cultivos"],
     coldChain: "Cosecha al amanecer, cámara a 4–7 °C en el rancho y hielera térmica hasta tu puerta. Menos de 24 h del surco a tu mesa.",
     gallery: [seedlings, planting, harvest, landscape],
-    components: { calificacion: 95, consistencia: 95, distribuidor: 92 },
+    components: { calificacion: 95, consistencia: 100, distribuidor: 92 },
   },
   rosa: {
     story:

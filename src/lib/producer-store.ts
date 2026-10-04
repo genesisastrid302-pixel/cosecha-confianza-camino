@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getProductsByProducer, producerDetails } from "@/lib/data";
+import { getProductsByProducer, producerDetails, producers } from "@/lib/data";
 import { SCORE_LAYERS, score10 } from "@/lib/score";
 
 export type Zona = "Galeana" | "Allende" | "Ramos Arizpe";
@@ -146,7 +146,23 @@ function inDays(n: number) {
 
 function seed(): ProducerState {
   return {
-    profile: { ...EMPTY_PROFILE, name: "Ezequiel Martínez", zona: "Ramos Arizpe" },
+    // Productor de ejemplo con su información básica completa (datos ficticios)
+    profile: {
+      ...EMPTY_PROFILE,
+      name: "Ezequiel Martínez",
+      correo: "ezequiel@seistierras.mx",
+      telefono: "8441234567",
+      story: producerDetails.santiago.story,
+      zona: "Ramos Arizpe",
+      pagos: ["CLABE", "Efectivo"],
+      clabe: "012180001234567890",
+      banco: "BBVA",
+      titular: "Ezequiel Martínez",
+      photos: [producers.santiago.photo, ...producerDetails.santiago.gallery],
+      socio: true,
+      idTipo: "INE",
+      idEstado: "verificada",
+    },
     crops: getProductsByProducer("santiago").map((p) => ({
       id: p.id,
       name: p.name,
@@ -230,15 +246,14 @@ export function profileCompleteness(p: ProducerProfile) {
 
 /**
  * Score de confianza sobre 10, con las 3 capas del modelo (src/lib/score.ts).
- * La capa de consistencia depende de lo que el productor captura; las otras dos
- * vienen de consumidores y distribuidor (en la demo, datos de ejemplo).
+ * - Consistencia de datos (30 %): información básica completa del productor.
+ * - Calificación (40 %) y registro del distribuidor (30 %): vienen de consumidores
+ *   y distribuidor; en la demo usan los datos de ejemplo.
  */
 export function trustScore(s: ProducerState) {
-  const perfil = profileCompleteness(s.profile).pct;
-  const evidencia = Math.min(100, 60 + s.cosechas.reduce((n, c) => n + c.postales.length, 0) * 10 + s.profile.photos.length * 4);
   const base = producerDetails.santiago.components;
   const layers = {
-    consistencia: Math.round((perfil + evidencia) / 2),
+    consistencia: profileCompleteness(s.profile).pct,
     calificacion: base.calificacion,
     distribuidor: base.distribuidor,
   };

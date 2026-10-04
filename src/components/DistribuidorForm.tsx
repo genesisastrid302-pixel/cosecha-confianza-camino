@@ -2,7 +2,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { ChevronLeft, Truck, Package } from "lucide-react";
 import {
-  DEMO_DISTRIBUTOR,
+  EMPTY_DISTRIBUTOR,
   MUNICIPIOS,
   saveDistributor,
   validarAcceso,
@@ -19,7 +19,7 @@ export function cobroDistribuidorCompleto(d: DistributorProfile) {
 export function DistribuidorForm({ onBack }: { onBack: () => void }) {
   const navigate = useNavigate();
   const [paso, setPaso] = useState<2 | 3>(2);
-  const [d, setD] = useState<DistributorProfile>({ ...DEMO_DISTRIBUTOR, nombre: "", zonas: [], transporte: "", vehiculo: "" });
+  const [d, setD] = useState<DistributorProfile>(EMPTY_DISTRIBUTOR);
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
   const [error, setError] = useState("");

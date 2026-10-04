@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ChevronLeft, Check, Camera, Printer, Truck, Tractor, PackageCheck, Snowflake, QrCode as QrIcon } from "lucide-react";
+import { AlertTriangle, ChevronLeft, Check, Camera, Printer, Star, Truck, Tractor, PackageCheck, Snowflake, QrCode as QrIcon } from "lucide-react";
+import { LOCAL_DISTRIBUIDOR } from "@/lib/distribucion";
 import { AppShell } from "@/components/AppShell";
 import { QrCode } from "@/components/QrCode";
 import { getProducer, unitLabel } from "@/lib/data";
@@ -62,6 +63,7 @@ function PedidoProductor() {
                 Rechazaste este pedido. Le avisamos a {order.cliente} y se le devuelve su pago.
               </div>
             )}
+            {order.status === "con_problema" && <ProblemaReportado order={order} />}
             {!["nuevo", "aceptado", "rechazado"].includes(order.status) && <Listo order={order} />}
           </>
         )}
@@ -74,6 +76,9 @@ function tituloPorEstado(o: Order) {
   if (o.status === "nuevo") return "Nuevo pedido";
   if (o.status === "aceptado") return "Prepara el pedido";
   if (o.status === "rechazado") return "Pedido rechazado";
+  if (o.status === "con_problema") return "Revisa este pedido";
+  if (o.status === "en_recoleccion" || o.status === "en_ruta") return "Pedido en camino";
+  if (["entregado", "recibido", "calificado"].includes(o.status)) return "Pedido entregado";
   return "Pedido listo";
 }
 
@@ -102,7 +107,7 @@ function Resumen({ order }: { order: Order }) {
                 <li key={i.productId} className="flex justify-between">
                   <span>{i.name}</span>
                   <span className="text-muted-foreground">
-                    {i.quantity} {unitLabel(i.unit)}
+                    {i.quantity} {unitLabel(i.unit, i.quantity)}
                   </span>
                 </li>
               ))}
@@ -177,7 +182,7 @@ function PasoEmpacar({ order, onNext }: { order: Order; onNext: () => void }) {
             </span>
             <span className="flex-1 text-sm">{i.name}</span>
             <span className="text-xs text-muted-foreground">
-              {i.quantity} {unitLabel(i.unit)}
+              {i.quantity} {unitLabel(i.unit, i.quantity)}
             </span>
           </button>
         );
@@ -376,17 +381,62 @@ function PasoTraslado({ order }: { order: Order }) {
   );
 }
 
+/** Alerta del distribuidor al recolectar; el productor lo corrige y lo deja listo otra vez */
+function ProblemaReportado({ order }: { order: Order }) {
+  const pr = order.problema;
+  return (
+    <section className="space-y-3 rounded-2xl border-2 border-dashed border-terracota/40 bg-terracota/5 p-4">
+      <div className="flex items-center gap-2 text-sm font-medium text-terracota">
+        <AlertTriangle className="h-4 w-4" /> El distribuidor reportó un problema
+      </div>
+      {pr && (
+        <>
+          <div className="text-sm">{pr.motivo}</div>
+          {pr.detalle && <p className="text-xs text-muted-foreground">“{pr.detalle}” · {formatTime(pr.at)}</p>}
+          {pr.foto && <img src={pr.foto} alt="Evidencia del problema" className="h-32 w-full rounded-xl object-cover" />}
+        </>
+      )}
+      <button
+        onClick={() => updateOrder(order.id, { status: "empacado" })}
+        className="w-full rounded-full bg-foreground py-3.5 text-sm font-medium text-background"
+      >
+        Ya lo corregí · dejarlo listo otra vez
+      </button>
+      <p className="text-[11px] text-muted-foreground">El pedido vuelve a la ruta del distribuidor y le avisamos al consumidor.</p>
+    </section>
+  );
+}
+
 function Listo({ order }: { order: Order }) {
   const e = order.empaque;
+  const f = order.feedback;
   return (
     <section className="space-y-4">
-      <div className="flex items-center gap-3 rounded-2xl bg-primary/10 p-4">
-        <PackageCheck className="h-6 w-6 shrink-0 text-primary" />
-        <div>
-          <div className="text-sm font-medium">{STATUS_LABEL[order.status]}</div>
-          <div className="text-[11px] text-muted-foreground">{order.traslado ? TRASLADO_LABEL[order.traslado] : ""}</div>
+      {order.status !== "con_problema" && (
+        <div className="flex items-center gap-3 rounded-2xl bg-primary/10 p-4">
+          <PackageCheck className="h-6 w-6 shrink-0 text-primary" />
+          <div>
+            <div className="text-sm font-medium">{STATUS_LABEL[order.status]}</div>
+            <div className="text-[11px] text-muted-foreground">
+              {order.traslado ? TRASLADO_LABEL[order.traslado] : ""}
+              {order.status === "empacado" && order.traslado === "productor_lleva" ? ` · Llévalo a ${LOCAL_DISTRIBUIDOR}; el distribuidor confirma al recibirlo.` : ""}
+              {order.status === "empacado" && order.traslado === "distribuidor_recoge" ? " · Ya está en su ruta." : ""}
+            </div>
+          </div>
         </div>
-      </div>
+      )}
+      {f && (
+        <div className="rounded-2xl border border-border bg-card p-4 text-sm">
+          <div className="eyebrow">Calificación de {order.cliente}</div>
+          <div className="mt-2 flex items-center gap-1 text-miel" aria-label={`${f.estrellas} de 5 estrellas`}>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Star key={i} className={`h-4 w-4 ${i < f.estrellas ? "fill-current" : "opacity-30"}`} />
+            ))}
+          </div>
+          {f.nota && <p className="serif mt-2 italic">“{f.nota}”</p>}
+          {f.merma && <p className="mt-2 text-xs text-terracota">Reportó merma al recibir.</p>}
+        </div>
+      )}
       {e && (
         <div className="space-y-2 rounded-2xl border border-border bg-card p-4 text-sm">
           <div className="eyebrow flex items-center gap-1.5"><Snowflake className="h-3 w-3" /> Cadena de frío</div>

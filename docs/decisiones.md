@@ -11,8 +11,8 @@ Una sola lista para consumidor, productor y distribuidor:
 | `nuevo` | Consumidor paga en el checkout | "Pedido recibido" |
 | `aceptado` | Productor toca "Puedo entregar" | "Aceptado por el productor" |
 | `empacado` | Productor registra cadena de frío y genera el QR | "Empacando" |
-| `en_recoleccion` | Distribuidor confirma recolección (o el productor entrega en el local) | "Recolectado" |
-| `en_ruta` | Distribuidor inicia la ruta | "En camino" |
+| `en_recoleccion` | Distribuidor confirma la recolección de todos los lotes del pedido (o los recibe en su local) | "Recolectado" |
+| `en_ruta` | Distribuidor termina las recolecciones y toca "Salir a entregar" | "En camino" |
 | `entregado` | Distribuidor confirma la entrega | "Entregado" |
 | `recibido` | Consumidor confirma "Sí, ya tengo mi canasta" (o pasan 24 h) | "Recibido" |
 | `calificado` | Consumidor envía feedback | "Calificado" |
@@ -30,6 +30,19 @@ Un QR por **pedido** (`MLP-0518`). Dentro muestra cada **lote** que trae la cana
 ## Entrega
 
 La marca el distribuidor (`entregado`) y el consumidor la confirma (`recibido`). Si el consumidor no confirma en 24 h, se da por recibida. Pick up o domicilio viene del pedido; el distribuidor no lo elige.
+
+## Ruta del distribuidor
+
+Todo sale de los pedidos (`src/lib/orders.ts` y `src/lib/distribucion.ts`); no hay datos de ruta aparte.
+
+1. **Iniciar ruta** → paradas de recolección: una por productor con pedidos empacados. Si el productor lleva el producto, la parada es "Recibir en local" y no cuenta como viaje.
+2. En cada parada: confirmar llegada → escanear el QR de cada pedido → temperatura → "¿Producto en buen estado?". Si no, se reporta el problema con motivo y foto: el pedido pasa a `con_problema`, el productor lo ve y lo deja listo otra vez.
+3. **Salir a entregar** → los pedidos pasan a `en_ruta` y el consumidor ve su **código de entrega** (4 dígitos).
+4. En cada entrega el distribuidor pide el código. A domicilio además captura firma; para recoger confirma que llegó el consumidor y verifica su identidad. Si el pago es en efectivo, lo cobra ahí.
+5. Después de cada entrega: "¿Hubo merma?" con kg, motivo, lote y foto. El % de merma del distribuidor se calcula solo (kg perdidos / kg entregados).
+6. El consumidor confirma, escanea el QR (ve lote, empaque y temperaturas reales) y califica. Esa calificación suma una reseña al productor y libera su pago.
+
+Finanzas del distribuidor: gana la logística ($18) por pedido entregado; del efectivo que cobra liquida el resto a productores y Milpa.
 
 ## Score de confianza (sobre 10)
 

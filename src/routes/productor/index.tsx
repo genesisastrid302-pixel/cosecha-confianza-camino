@@ -62,7 +62,7 @@ function ProductorHome() {
                 <div>
                   <div className="serif text-lg">Pedido #{pendiente.id}</div>
                   <div className="text-xs text-muted-foreground">
-                    {pendiente.cliente} · {pendiente.items.map((i) => `${i.quantity} ${unitLabel(i.unit)} ${i.name.toLowerCase()}`).join(", ")}
+                    {pendiente.cliente} · {pendiente.items.map((i) => `${i.quantity} ${unitLabel(i.unit, i.quantity)} ${i.name.toLowerCase()}`).join(", ")}
                   </div>
                 </div>
                 <div className="serif text-xl text-terracota">${pendiente.subtotal}</div>

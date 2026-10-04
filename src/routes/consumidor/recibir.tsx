@@ -1,6 +1,9 @@
 import { addResena } from "@/lib/producer-store";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { getProducer, products, unitLabel } from "@/lib/data";
+import { formatTime, updateOrder, useOrders } from "@/lib/orders";
+import { nombreCorto, useDistributor } from "@/lib/accounts";
 import { AppShell } from "@/components/AppShell";
 import { consumidorTabs } from "@/components/tabs";
 import santiago from "@/assets/producer-santiago.jpg";
@@ -34,6 +37,28 @@ function Recibir() {
   const [tipMerma, setTipMerma] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
 
+  // Pedido real: el que el distribuidor marcó como entregado (si no hay, se muestra el ejemplo)
+  const orders = useOrders();
+  const [orderId, setOrderId] = useState<string | null>(null);
+  const order =
+    orders.find((o) => o.id === orderId) ?? orders.find((o) => o.status === "entregado") ?? orders.find((o) => o.status === "recibido");
+  const distribuidor = nombreCorto(useDistributor().nombre).split(" ")[0];
+  const productores = order ? [...new Set(order.items.map((i) => i.producerSlug))].map(getProducer) : [getProducer("santiago")];
+  const primer = productores[0].name.split(" ")[0];
+  const pedidoId = order?.id ?? "MLP-0518";
+  const lotes = order ? Object.values(order.lots).join(", ") : "LT-0518";
+  const resumen = order
+    ? order.items.map((i) => `${i.quantity} ${unitLabel(i.unit, i.quantity)} ${i.name.toLowerCase()}`).join(" · ")
+    : "2 kg jitomate · 1 manojo cilantro";
+
+  // Si ya confirmó que la recibió, entra directo a escanear y calificar
+  useEffect(() => {
+    if (order?.status === "recibido" && step === "confirm") {
+      setOrderId(order.id);
+      setStep("scan");
+    }
+  }, [order?.id, order?.status, step]);
+
   function onPhotos(files: FileList | null) {
     if (!files) return;
     const next = Array.from(files).map((f) => URL.createObjectURL(f));
@@ -58,11 +83,13 @@ function Recibir() {
         {/* Tarjeta del pedido */}
         <div className="overflow-hidden rounded-2xl border border-border bg-card">
           <div className="flex gap-3 p-3">
-            <img src={santiago} alt="" className="h-16 w-16 rounded-xl object-cover" />
+            <img src={order ? productores[0].photo : santiago} alt="" className="h-16 w-16 rounded-xl object-cover" />
             <div className="flex-1">
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">#MLP-0518</div>
-              <div className="serif text-base leading-tight">De Ezequiel · Seis Tierras</div>
-              <div className="text-[11px] text-muted-foreground">2 kg jitomate · 1 manojo cilantro</div>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">#{pedidoId}</div>
+              <div className="serif text-base leading-tight">
+                {order ? `De ${productores.map((x) => x.name.split(" ")[0]).join(" y ")}` : "De Ezequiel · Seis Tierras"}
+              </div>
+              <div className="text-[11px] text-muted-foreground">{resumen}</div>
             </div>
           </div>
         </div>
@@ -73,7 +100,9 @@ function Recibir() {
               <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
                 <Sparkles className="h-7 w-7 text-primary" />
               </div>
-              <div className="serif text-xl leading-tight">Claudia dejó tu canasta en la puerta</div>
+              <div className="serif text-xl leading-tight">
+                {order?.entrega === "pickup" ? `${distribuidor} te entregó tu canasta` : `${distribuidor} dejó tu canasta en la puerta`}
+              </div>
               <p className="mt-2 text-sm text-muted-foreground">
                 Confirma para cerrar el ciclo. Tu retroalimentación llega de regreso al campo.
               </p>
@@ -81,7 +110,13 @@ function Recibir() {
 
             <div className="space-y-2">
               <Button
-                onClick={() => setStep("scan")}
+                onClick={() => {
+                  if (order) {
+                    setOrderId(order.id);
+                    updateOrder(order.id, { status: "recibido" });
+                  }
+                  setStep("scan");
+                }}
                 className="h-14 w-full rounded-2xl bg-foreground text-background text-base"
               >
                 <CheckCircle2 className="mr-2 h-5 w-5" /> Sí, ya tengo mi canasta
@@ -135,26 +170,68 @@ function Recibir() {
                   <div className="flex items-center gap-2 border-b border-primary/20 bg-primary/10 px-4 py-2.5">
                     <ShieldCheck className="h-4 w-4 text-primary" />
                     <span className="text-[11px] font-medium uppercase tracking-widest text-primary">
-                      Pedido MLP-0518 · Lote LT-0518 · Verificado
+                      Pedido {pedidoId} · Lote {lotes} · Verificado
                     </span>
                   </div>
                   <div className="divide-y divide-border">
-                    <CultivoRow icon={Sprout} label="Cultivo" value="Jitomate heirloom · variedad criolla" />
-                    <CultivoRow icon={MapPin} label="Origen" value="Rancho Seis Tierras · Ramos Arizpe, Coah." />
-                    <CultivoRow icon={CalendarDays} label="Cosechado" value="Ayer, 6:40 a.m." />
-                    <CultivoRow icon={Snowflake} label="Cadena de frío" value="4–7 °C constantes · sin rupturas" />
-                    <CultivoRow icon={Truck} label="Trayecto" value="98 km · 1 parada · 3 h 12 min" />
-                    <CultivoRow icon={Leaf} label="Prácticas" value="Agroecológico · agua de lluvia captada" />
+                    {order ? (
+                      <>
+                        <CultivoRow icon={Sprout} label="Cultivo" value={order.items.map((i) => i.name).join(" · ")} />
+                        <CultivoRow icon={MapPin} label="Origen" value={productores.map((x) => x.region).join(" · ")} />
+                        <CultivoRow
+                          icon={CalendarDays}
+                          label="Empacado"
+                          value={order.empaque ? `${formatTime(order.empaque.registradoEn)} · ${order.empaque.tipo}` : "Sin registro"}
+                        />
+                        <CultivoRow
+                          icon={Snowflake}
+                          label="Cadena de frío"
+                          value={
+                            order.empaque
+                              ? `${order.empaque.temperatura} °C al empacar${order.temperaturaRecoleccion !== undefined ? ` · ${order.temperaturaRecoleccion} °C ${order.traslado === "productor_lleva" ? "al recibirlo el distribuidor" : "al recolectar"}` : ""}`
+                              : "Sin registro"
+                          }
+                        />
+                        <CultivoRow
+                          icon={Truck}
+                          label="Trayecto"
+                          value={`${order.traslado === "productor_lleva" ? "El productor lo llevó al local" : `Recolectado en campo por ${distribuidor}`} · entregado ${order.entregaRegistro ? formatTime(order.entregaRegistro.at) : ""}`}
+                        />
+                        <CultivoRow
+                          icon={Leaf}
+                          label="Prácticas"
+                          value={products.find((x) => x.id === order.items[0]?.productId)?.cropPractice ?? "Agroecológico"}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <CultivoRow icon={Sprout} label="Cultivo" value="Jitomate heirloom · variedad criolla" />
+                        <CultivoRow icon={MapPin} label="Origen" value="Rancho Seis Tierras · Ramos Arizpe, Coah." />
+                        <CultivoRow icon={CalendarDays} label="Cosechado" value="Ayer, 6:40 a.m." />
+                        <CultivoRow icon={Snowflake} label="Cadena de frío" value="4–7 °C constantes · sin rupturas" />
+                        <CultivoRow icon={Truck} label="Trayecto" value="98 km · 1 parada · 3 h 12 min" />
+                        <CultivoRow icon={Leaf} label="Prácticas" value="Agroecológico · agua de lluvia captada" />
+                      </>
+                    )}
                   </div>
                 </section>
 
-                <div className="rounded-2xl border-2 border-dashed border-primary/30 bg-card p-4">
-                  <div className="eyebrow text-primary">Nota del productor</div>
-                  <p className="serif mt-1 text-sm leading-relaxed">
-                    "Este lote se cortó cuando el sol apenas calentaba. Salió más
-                    dulce por las lluvias del fin de semana."
-                  </p>
-                </div>
+                {order ? (
+                  order.empaque?.condiciones && (
+                    <div className="rounded-2xl border-2 border-dashed border-primary/30 bg-card p-4">
+                      <div className="eyebrow text-primary">Cómo lo guardó {primer}</div>
+                      <p className="serif mt-1 text-sm leading-relaxed">{order.empaque.condiciones}</p>
+                    </div>
+                  )
+                ) : (
+                  <div className="rounded-2xl border-2 border-dashed border-primary/30 bg-card p-4">
+                    <div className="eyebrow text-primary">Nota del productor</div>
+                    <p className="serif mt-1 text-sm leading-relaxed">
+                      "Este lote se cortó cuando el sol apenas calentaba. Salió más
+                      dulce por las lluvias del fin de semana."
+                    </p>
+                  </div>
+                )}
 
                 <Button
                   onClick={() => setStep("rate")}
@@ -273,7 +350,7 @@ function Recibir() {
 
             {/* Comentario */}
             <section className="rounded-2xl border-2 border-dashed border-terracota/40 bg-terracota/5 p-4">
-              <div className="eyebrow text-terracota">Nota para Ezequiel</div>
+              <div className="eyebrow text-terracota">Nota para {primer}</div>
               <textarea
                 rows={3}
                 value={comment}
@@ -314,6 +391,12 @@ function Recibir() {
             <Button
               disabled={overall === 0}
               onClick={() => {
+                if (order) {
+                  updateOrder(order.id, {
+                    status: "calificado",
+                    feedback: { estrellas: overall, merma: tipMerma, nota: comment.trim(), at: new Date().toISOString() },
+                  });
+                }
                 addResena();
                 setStep("thanks");
               }}
@@ -332,7 +415,7 @@ function Recibir() {
             <div>
               <div className="serif text-2xl leading-tight">Cerraste el ciclo</div>
               <p className="mt-2 text-sm text-muted-foreground">
-                Ezequiel recibe tu nota junto con la cosecha de mañana. Así sigue la
+                {primer} recibe tu nota junto con la cosecha de mañana. Así sigue la
                 conversación entre tu mesa y el campo.
               </p>
             </div>

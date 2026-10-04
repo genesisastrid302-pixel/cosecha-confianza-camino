@@ -4,6 +4,7 @@ import { AppShell } from "@/components/AppShell";
 import { consumidorTabs } from "@/components/tabs";
 import { producers, products } from "@/lib/data";
 import { formatScore } from "@/lib/score";
+import { addReserva } from "@/lib/distribucion";
 import { trustScore10 } from "@/lib/data";
 import { Sprout, Check, CalendarDays, HandHeart } from "lucide-react";
 
@@ -157,7 +158,12 @@ function CosechaCompartida() {
         </div>
 
         <button
-          onClick={() => setListo(true)}
+          onClick={() => {
+            // Promedio del rango "4–5 kg" → 4.5 kg por semana
+            const [a, b] = elegido.kgSemana.match(/\d+/g)?.map(Number) ?? [0, 0];
+            addReserva({ producerSlug: productor, plan: elegido.nombre, semanas: elegido.semanas, kgSemana: (a + (b ?? a)) / 2 });
+            setListo(true);
+          }}
           className="w-full rounded-full bg-primary py-4 text-sm font-medium text-primary-foreground"
         >
           Reservar mi cosecha

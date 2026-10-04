@@ -3,3 +3,5 @@
 
 - Follow `docs/decisiones.md` for order states, QR, delivery and trust-score rules; it overrides older prompts.
 - Keep orders in the client-only `src/lib/orders.ts` (localStorage) so consumer, producer and distributor screens share the same demo state.
+- Derive the distributor route, KPIs and finances from orders through `src/lib/distribucion.ts`; do not add separate hardcoded route data.
+- Keep link labels equal to the title of the screen they open.

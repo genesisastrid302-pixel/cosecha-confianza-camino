@@ -145,7 +145,7 @@ function Checkout() {
               {items.map((p) => (
                 <div key={p.id} className="flex justify-between text-muted-foreground">
                   <span>
-                    {p.quantity} {unitLabel(p.unit)} · {p.name}
+                    {p.quantity} {unitLabel(p.unit, p.quantity)} · {p.name}
                   </span>
                   <span>${p.price * p.quantity}</span>
                 </div>

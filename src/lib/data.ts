@@ -202,6 +202,7 @@ export function trustScore10(slug: string) {
 export { scoreTone } from "@/lib/score";
 
 /** Unidad corta para mostrar precios: "kilo" → "kg" */
-export function unitLabel(unit: string) {
-  return unit === "kilo" ? "kg" : unit;
+export function unitLabel(unit: string, cantidad = 1) {
+  if (unit === "kilo") return "kg";
+  return cantidad === 1 ? unit : `${unit}s`;
 }

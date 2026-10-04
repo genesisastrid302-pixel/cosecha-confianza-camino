@@ -40,6 +40,18 @@ export type Empaque = {
 
 export type Traslado = "productor_lleva" | "distribuidor_recoge";
 
+/** Problema que reporta el distribuidor al recolectar; alerta al productor */
+export type Problema = { motivo: string; detalle: string; foto?: string; at: string };
+
+/** Merma que registra el distribuidor después de entregar */
+export type Merma = { kg: number; motivo: "Daño" | "Temperatura" | "Otro"; lote: string; foto?: string; at: string };
+
+/** Lo que el distribuidor confirma al entregar */
+export type EntregaRegistro = { at: string; firmado: boolean; identidad: boolean; cobroEfectivo: boolean };
+
+/** Calificación del consumidor al recibir */
+export type Feedback = { estrellas: number; merma: boolean; nota: string; at: string };
+
 export type Order = {
   id: string; // MLP-0601
   cliente: string;
@@ -59,6 +71,16 @@ export type Order = {
   empaque?: Empaque;
   traslado?: Traslado;
   qrGeneradoEn?: string;
+  /** Código de 4 dígitos que el consumidor da al recibir */
+  codigoEntrega?: string;
+  /** Productores cuyo lote ya recolectó (o recibió en su local) el distribuidor */
+  recolectados?: string[];
+  /** Temperatura medida por el distribuidor al recolectar, en °C */
+  temperaturaRecoleccion?: number;
+  problema?: Problema;
+  entregaRegistro?: EntregaRegistro;
+  merma?: Merma;
+  feedback?: Feedback;
 };
 
 export const LOGISTICA = 18;
@@ -150,6 +172,7 @@ export function createOrder(input: {
     total: subtotal + LOGISTICA + PLATAFORMA,
     status: "nuevo",
     history: [{ status: "nuevo", at: now }],
+    codigoEntrega: String(1000 + ((Number(n) * 7919) % 9000)),
   };
   writeOrders([order, ...readOrders()]);
   return order;
@@ -172,6 +195,49 @@ export function updateOrder(id: string, patch: Partial<Omit<Order, "id" | "histo
       return { ...o, ...patch, history };
     }),
   );
+}
+
+/** Código de entrega del pedido (los pedidos viejos lo derivan de su número) */
+export function codigoDe(o: Order) {
+  return o.codigoEntrega ?? String(1000 + ((Number(o.id.replace(/\D/g, "")) * 7919) % 9000));
+}
+
+/** Peso aproximado de un renglón en kg (manojos y piezas cuentan 0.25 kg) */
+export function pesoKg(i: OrderItem) {
+  return i.unit === "kilo" ? i.quantity : i.quantity * 0.25;
+}
+
+export function pesoPedido(o: Order) {
+  return o.items.reduce((n, i) => n + pesoKg(i), 0);
+}
+
+/** Pedido de ejemplo ya empacado, para probar la ruta del distribuidor sin pasar por los otros roles */
+export function crearPedidoEjemplo() {
+  const o = createOrder({
+    lines: [
+      { id: "jitomate", quantity: 2 },
+      { id: "cilantro", quantity: 1 },
+    ],
+    entrega: "domicilio",
+    direccion: "Calle Hidalgo 214, Col. Roma, Monterrey",
+    pago: "Tarjeta",
+  });
+  const now = new Date().toISOString();
+  updateOrder(o.id, { status: "aceptado" });
+  updateOrder(o.id, {
+    status: "empacado",
+    traslado: "distribuidor_recoge",
+    qrGeneradoEn: now,
+    empaque: {
+      temperatura: 6,
+      tipo: "Caja",
+      refrigeracion: true,
+      condiciones: "Sombra y ventilación; cámara fría hasta la recolección.",
+      hora: "07:30",
+      registradoEn: now,
+    },
+  });
+  return o.id;
 }
 
 export function getOrder(id: string) {

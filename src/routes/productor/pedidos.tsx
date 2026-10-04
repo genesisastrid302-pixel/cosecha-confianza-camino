@@ -99,7 +99,7 @@ function OrderCard({ order }: { order: Order }) {
           <div className="text-[10px] uppercase tracking-widest text-muted-foreground">#{order.id} · {formatTime(order.createdAt)}</div>
           <div className="serif mt-1 text-base">{order.cliente} · {order.entrega === "domicilio" ? "Domicilio" : "Recoge"}</div>
           <div className="mt-1 text-xs text-muted-foreground">
-            {order.items.map((i) => `${i.quantity} ${unitLabel(i.unit)} ${i.name.toLowerCase()}`).join(" · ")}
+            {order.items.map((i) => `${i.quantity} ${unitLabel(i.unit, i.quantity)} ${i.name.toLowerCase()}`).join(" · ")}
           </div>
         </div>
         <div className="serif text-xl">${order.subtotal}</div>

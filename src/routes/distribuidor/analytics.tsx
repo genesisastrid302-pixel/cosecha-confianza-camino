@@ -1,173 +1,84 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { AlertTriangle, ChevronLeft } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { distribuidorTabs } from "@/components/tabs";
-import { Camera, X, AlertTriangle } from "lucide-react";
+import { formatTime, pesoPedido, useOrders } from "@/lib/orders";
+import { kpis } from "@/lib/distribucion";
 
 export const Route = createFileRoute("/distribuidor/analytics")({
-  head: () => ({ meta: [{ title: "Analytics · Distribuidor — Milpa" }] }),
-  component: Analytics,
+  head: () => ({ meta: [{ title: "Rendimiento · Distribuidor — Milpa" }] }),
+  component: Rendimiento,
 });
 
-type Merma = {
-  id: string;
-  cantidad: string;
-  motivo: string;
-  photo?: string;
-  fecha: Date;
-};
-
-function Analytics() {
-  const [cantidad, setCantidad] = useState("");
-  const [motivo, setMotivo] = useState("");
-  const [photo, setPhoto] = useState<string | undefined>();
-  const [registros, setRegistros] = useState<Merma[]>([
-    { id: "m1", cantidad: "1.2", motivo: "Golpe en transporte", fecha: new Date(Date.now() - 86400000) },
-  ]);
-  const fileRef = useRef<HTMLInputElement>(null);
-
-  const totalKg = registros.reduce((s, r) => s + (parseFloat(r.cantidad) || 0), 0);
-
-  function onPhoto(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0];
-    if (f) setPhoto(URL.createObjectURL(f));
-    e.target.value = "";
-  }
-
-  function save() {
-    if (!cantidad || !motivo) return;
-    setRegistros((prev) => [
-      { id: `${Date.now()}`, cantidad, motivo, photo, fecha: new Date() },
-      ...prev,
-    ]);
-    setCantidad("");
-    setMotivo("");
-    setPhoto(undefined);
-  }
-
+function Rendimiento() {
+  const orders = useOrders();
+  const k = kpis(orders);
+  const mermas = orders.filter((o) => o.merma);
+  const problemas = orders.filter((o) => o.problema);
   return (
-    <AppShell tabs={distribuidorTabs} tone="miel" eyebrow="Mayo · 2025" title="Rendimiento">
-      <div className="space-y-4 px-5">
-        <div className="grid grid-cols-2 gap-3">
-          {[
-            { n: "98%", l: "Entregas a tiempo", c: "text-primary" },
-            { n: "2.1%", l: "Merma promedio", c: "text-primary" },
-            { n: "184", l: "Familias servidas", c: "text-foreground" },
-            { n: "4.7", l: "Calificación", c: "text-miel" },
-          ].map((k) => (
-            <div key={k.l} className="rounded-2xl border border-border bg-card p-4">
-              <div className={`serif text-3xl ${k.c}`}>{k.n}</div>
-              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{k.l}</div>
-            </div>
-          ))}
+    <AppShell
+      tabs={distribuidorTabs}
+      tone="miel"
+      eyebrow="Entregas y merma"
+      title="Rendimiento"
+      right={
+        <Link to="/distribuidor" aria-label="Volver al inicio" className="mt-1 flex h-9 w-9 items-center justify-center rounded-full bg-secondary">
+          <ChevronLeft className="h-5 w-5" />
+        </Link>
+      }
+    >
+      <div className="space-y-5 px-5">
+        <div className="grid grid-cols-3 gap-2 text-center">
+          <Kpi n={`${k.aTiempoPct}%`} l="Entregas a tiempo" />
+          <Kpi n={`${k.mermaPct}%`} l="Merma" alerta />
+          <Kpi n={String(k.entregas)} l="Entregas" />
         </div>
+        <p className="text-[11px] text-muted-foreground">
+          La merma se calcula sola: kilos perdidos entre kilos entregados. Incluye tu historial y lo que registras después de cada entrega.
+        </p>
 
-        <div className="rounded-2xl border border-border bg-card p-4">
-          <div className="eyebrow">Merma por tramo · semana</div>
-          <div className="mt-4 flex items-end gap-2 h-32">
-            {[20, 32, 18, 24, 12, 28, 16].map((h, i) => (
-              <div key={i} className="flex-1 rounded-t bg-miel/70" style={{ height: `${h * 2}px` }} />
+        <section>
+          <div className="eyebrow flex items-center gap-1.5"><AlertTriangle className="h-3 w-3" /> Registro de merma</div>
+          <div className="mt-3 space-y-2">
+            {mermas.length === 0 && <p className="rounded-2xl border border-border bg-card p-4 text-sm text-muted-foreground">Sin merma registrada en tus entregas recientes.</p>}
+            {mermas.map((o) => (
+              <div key={o.id} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3">
+                {o.merma!.foto && <img src={o.merma!.foto} alt="Evidencia" className="h-12 w-12 rounded-lg object-cover" />}
+                <div className="flex-1 text-sm">
+                  Lote {o.merma!.lote} · {o.merma!.motivo}
+                  <div className="text-[11px] text-muted-foreground">#{o.id} · {formatTime(o.merma!.at)}</div>
+                </div>
+                <div className="text-right">
+                  <div className="serif text-base text-destructive">{o.merma!.kg} kg</div>
+                  <div className="text-[10px] text-muted-foreground">{Math.round((o.merma!.kg / pesoPedido(o)) * 100)}% del pedido</div>
+                </div>
+              </div>
             ))}
           </div>
-          <div className="mt-2 flex justify-between text-[10px] text-muted-foreground">
-            {["L","M","M","J","V","S","D"].map((d, i) => <span key={i}>{d}</span>)}
-          </div>
-        </div>
-
-        {/* Registro de merma */}
-        <section className="rounded-2xl border border-border bg-card p-4">
-          <div className="flex items-baseline justify-between">
-            <div className="eyebrow flex items-center gap-1.5"><AlertTriangle className="h-3 w-3" /> Registro de merma</div>
-            <span className="text-[10px] text-muted-foreground">{totalKg.toFixed(1)} kg este mes</span>
-          </div>
-
-          <form
-            onSubmit={(e) => { e.preventDefault(); save(); }}
-            className="mt-4 space-y-3"
-          >
-            <div>
-              <label className="eyebrow mb-1 block">Cantidad perdida (kg)</label>
-              <input
-                type="number"
-                inputMode="decimal"
-                value={cantidad}
-                onChange={(e) => setCantidad(e.target.value)}
-                placeholder="0.0"
-                className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-              />
-            </div>
-            <div>
-              <label className="eyebrow mb-1 block">Motivo</label>
-              <textarea
-                value={motivo}
-                onChange={(e) => setMotivo(e.target.value)}
-                rows={2}
-                placeholder="Ej. Golpe en transporte, ruptura de cadena de frío…"
-                className="w-full resize-none rounded-xl border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-              />
-            </div>
-            <div>
-              <label className="eyebrow mb-1 block">Foto evidencia</label>
-              <input ref={fileRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={onPhoto} />
-              {photo ? (
-                <div className="relative inline-block">
-                  <img src={photo} alt="Evidencia" className="h-24 w-24 rounded-xl object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => setPhoto(undefined)}
-                    className="absolute -right-1.5 -top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-background border border-border"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => fileRef.current?.click()}
-                  className="flex h-24 w-24 flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-border text-[10px] text-muted-foreground"
-                >
-                  <Camera className="h-5 w-5" />
-                  Subir foto
-                </button>
-              )}
-            </div>
-            <button
-              type="submit"
-              disabled={!cantidad || !motivo}
-              className="w-full rounded-full bg-primary py-3 text-sm font-medium text-primary-foreground disabled:opacity-40"
-            >
-              Guardar merma
-            </button>
-          </form>
-
-          {registros.length > 0 && (
-            <ul className="mt-4 divide-y divide-border border-t border-border">
-              {registros.map((r) => (
-                <li key={r.id} className="flex items-center gap-3 py-2.5">
-                  {r.photo ? (
-                    <img src={r.photo} alt="" className="h-10 w-10 rounded-lg object-cover" />
-                  ) : (
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-muted-foreground">
-                      <AlertTriangle className="h-4 w-4" />
-                    </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm">{r.cantidad} kg · {r.motivo}</div>
-                    <div className="text-[10px] text-muted-foreground">
-                      {r.fecha.toLocaleDateString("es-MX", { day: "numeric", month: "short" })}
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
         </section>
 
-        <div className="rounded-2xl border-2 border-dashed border-primary/40 bg-primary/5 p-4 text-sm">
-          <div className="eyebrow text-primary">Win de la semana</div>
-          <p className="mt-2">2 entregas comunitarias en Col. Roma redujeron 18 km de ruta. ¡Sigue así!</p>
-        </div>
+        <section>
+          <div className="eyebrow">Problemas reportados en recolección</div>
+          <div className="mt-3 space-y-2">
+            {problemas.length === 0 && <p className="rounded-2xl border border-border bg-card p-4 text-sm text-muted-foreground">Sin problemas reportados.</p>}
+            {problemas.map((o) => (
+              <div key={o.id} className="rounded-2xl border border-border bg-card p-3 text-sm">
+                #{o.id} · {o.problema!.motivo}
+                <div className="text-[11px] text-muted-foreground">{o.problema!.detalle} · {formatTime(o.problema!.at)}</div>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
     </AppShell>
+  );
+}
+
+function Kpi({ n, l, alerta }: { n: string; l: string; alerta?: boolean }) {
+  return (
+    <div className={`rounded-xl border p-3 ${alerta ? "border-destructive/40 bg-destructive/5" : "border-border bg-card"}`}>
+      <div className={`serif text-2xl ${alerta ? "text-destructive" : ""}`}>{n}</div>
+      <div className="mt-0.5 text-[9px] uppercase leading-tight tracking-wider text-muted-foreground">{l}</div>
+    </div>
   );
 }

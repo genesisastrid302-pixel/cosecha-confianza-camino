@@ -54,13 +54,30 @@ export const DEMO_CONSUMER: ConsumerProfile = {
 
 export const DEMO_DISTRIBUTOR: DistributorProfile = {
   nombre: "Claudia Ramírez",
-  correo: "",
-  telefono: "",
+  correo: "claudia@rutamty.mx",
+  telefono: "8187654321",
   transporte: "Vehículo propio",
   vehiculo: "Camioneta",
   refrigerado: true,
   paqueteria: "",
   zonas: ["Monterrey", "San Pedro Garza García"],
+  cobro: "CLABE",
+  clabe: "072580009876543210",
+  banco: "Banorte",
+  titular: "Claudia Ramírez",
+  codi: "",
+};
+
+/** Formulario de registro en blanco */
+export const EMPTY_DISTRIBUTOR: DistributorProfile = {
+  nombre: "",
+  correo: "",
+  telefono: "",
+  transporte: "",
+  vehiculo: "",
+  refrigerado: true,
+  paqueteria: "",
+  zonas: [],
   cobro: "",
   clabe: "",
   banco: "",

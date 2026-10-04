@@ -4,6 +4,7 @@ import { distribuidorTabs } from "@/components/tabs";
 import { LogOut, Truck, Package, Snowflake, MapPin, Landmark } from "lucide-react";
 import { nombreCorto, useDistributor } from "@/lib/accounts";
 import { cobroDistribuidorCompleto } from "@/components/DistribuidorForm";
+import { tipoCuenta } from "@/lib/producer-store";
 
 export const Route = createFileRoute("/distribuidor/perfil")({
   head: () => ({ meta: [{ title: "Perfil · Distribuidor — Milpa" }] }),
@@ -14,7 +15,7 @@ function Perfil() {
   const d = useDistributor();
   const cobro = cobroDistribuidorCompleto(d)
     ? d.cobro === "CLABE"
-      ? `CLABE ${d.banco} ···${d.clabe.slice(-4)}`
+      ? `${tipoCuenta(d.clabe)} ${d.banco} ···${d.clabe.slice(-4)}`
       : `CoDi ···${d.codi.slice(-4)}`
     : "Sin cuenta de cobro";
   return (

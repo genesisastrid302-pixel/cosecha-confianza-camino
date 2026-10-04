@@ -1,6 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { ChevronLeft, Truck, Package } from "lucide-react";
+import { ChevronLeft, Truck, Package, Landmark, Smartphone } from "lucide-react";
 import {
   EMPTY_DISTRIBUTOR,
   MUNICIPIOS,
@@ -8,10 +8,11 @@ import {
   validarAcceso,
   type DistributorProfile,
 } from "@/lib/accounts";
+import { tipoCuenta } from "@/lib/producer-store";
 
 /** ¿La cuenta de cobro del distribuidor está completa? */
 export function cobroDistribuidorCompleto(d: DistributorProfile) {
-  if (d.cobro === "CLABE") return /^\d{18}$/.test(d.clabe) && d.banco.trim().length > 1 && d.titular.trim().length > 2;
+  if (d.cobro === "CLABE") return !!tipoCuenta(d.clabe) && d.banco.trim().length > 1 && d.titular.trim().length > 2;
   if (d.cobro === "CoDi") return /^\d{10}$/.test(d.codi);
   return false;
 }
@@ -28,13 +29,15 @@ export function DistribuidorForm({ onBack }: { onBack: () => void }) {
   const toggleZona = (z: string) => setD({ ...d, zonas: d.zonas.includes(z) ? d.zonas.filter((x) => x !== z) : [...d.zonas, z] });
 
   if (paso === 3) {
+    const cuenta = tipoCuenta(d.clabe);
     return (
       <form
         className="flex min-h-full flex-col px-5 pb-8 pt-5"
         onSubmit={(e) => {
           e.preventDefault();
           if (!d.cobro) return setError("Elige cómo quieres recibir tus pagos.");
-          if (!cobroDistribuidorCompleto(d)) return setError(d.cobro === "CLABE" ? "Completa CLABE (18 dígitos), banco y titular." : "El celular de CoDi debe tener 10 dígitos.");
+          if (!cobroDistribuidorCompleto(d))
+            return setError(d.cobro === "CLABE" ? "Completa la CLABE (18 dígitos) o tarjeta (16), el banco y el titular." : "El celular de CoDi debe tener 10 dígitos.");
           const err = validarAcceso(d.telefono, password, password2);
           if (err) return setError(err);
           saveDistributor({ ...d, nombre: d.nombre.trim() });
@@ -48,29 +51,52 @@ export function DistribuidorForm({ onBack }: { onBack: () => void }) {
         <h1 className="display mt-2 text-3xl">Cobro y acceso</h1>
 
         <div className="mt-6 space-y-4">
-          <div>
-            <span className="text-xs text-muted-foreground">¿Dónde recibes lo de logística?</span>
-            <div className="mt-1.5 flex gap-2">
-              {(["CLABE", "CoDi"] as const).map((m) => (
-                <button type="button" key={m} className={pill(d.cobro === m)} onClick={() => setD({ ...d, cobro: m })}>{m}</button>
+          <section className="rounded-2xl border border-border bg-card p-4">
+            <h2 className="serif text-lg">Cuenta de cobro</h2>
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              Aquí recibes la parte de logística y cadena de frío de cada pedido que entregas. Si un consumidor paga en efectivo, lo cobras tú al entregar.
+            </p>
+            <div className="mt-3 grid grid-cols-2 gap-2" role="group" aria-label="Forma de cobro">
+              {([
+                { m: "CLABE", label: "Transferencia", icon: Landmark },
+                { m: "CoDi", label: "CoDi", icon: Smartphone },
+              ] as const).map(({ m, label, icon: Icon }) => (
+                <button type="button" key={m} aria-pressed={d.cobro === m} className={pill(d.cobro === m)} onClick={() => setD({ ...d, cobro: m })}>
+                  <Icon className="mr-1.5 inline h-4 w-4" /> {label}
+                </button>
               ))}
             </div>
             {d.cobro === "CLABE" && (
-              <div className="mt-2 space-y-2">
-                <input inputMode="numeric" maxLength={18} value={d.clabe} onChange={(e) => setD({ ...d, clabe: e.target.value.replace(/\D/g, "") })} className={input} placeholder="CLABE · 18 dígitos" aria-label="CLABE" />
-                <div className="grid grid-cols-2 gap-2">
-                  <input maxLength={40} value={d.banco} onChange={(e) => setD({ ...d, banco: e.target.value })} className={input} placeholder="Banco" aria-label="Banco" />
-                  <input maxLength={100} value={d.titular} onChange={(e) => setD({ ...d, titular: e.target.value })} className={input} placeholder="Titular" aria-label="Titular" />
-                </div>
+              <div className="mt-3 space-y-3">
+                <label className="block">
+                  <span className="text-xs text-muted-foreground">CLABE o tarjeta de débito</span>
+                  <input inputMode="numeric" maxLength={18} value={d.clabe} onChange={(e) => setD({ ...d, clabe: e.target.value.replace(/\D/g, "").slice(0, 18) })} className={input} placeholder="18 dígitos (CLABE) o 16 (tarjeta)" />
+                  <Estado ok={!!cuenta}>
+                    {cuenta ? `${cuenta} completa` : `Llevas ${d.clabe.length} dígitos: la CLABE lleva 18 y la tarjeta 16`}
+                  </Estado>
+                </label>
+                <label className="block">
+                  <span className="text-xs text-muted-foreground">Banco</span>
+                  <input maxLength={40} value={d.banco} onChange={(e) => setD({ ...d, banco: e.target.value })} className={input} placeholder="BBVA, Banorte, Santander…" />
+                </label>
+                <label className="block">
+                  <span className="text-xs text-muted-foreground">Titular de la cuenta</span>
+                  <input maxLength={100} value={d.titular} onChange={(e) => setD({ ...d, titular: e.target.value })} className={input} placeholder="Como aparece en el banco" />
+                </label>
               </div>
             )}
             {d.cobro === "CoDi" && (
-              <input inputMode="numeric" maxLength={10} value={d.codi} onChange={(e) => setD({ ...d, codi: e.target.value.replace(/\D/g, "") })} className={input} placeholder="Celular ligado a CoDi" aria-label="Celular CoDi" />
+              <label className="mt-3 block">
+                <span className="text-xs text-muted-foreground">Celular ligado a CoDi</span>
+                <input inputMode="numeric" maxLength={10} value={d.codi} onChange={(e) => setD({ ...d, codi: e.target.value.replace(/\D/g, "").slice(0, 10) })} className={input} placeholder="10 dígitos" />
+                <Estado ok={/^\d{10}$/.test(d.codi)}>
+                  {/^\d{10}$/.test(d.codi) ? "Celular completo" : `Llevas ${d.codi.length} de 10 dígitos`}
+                </Estado>
+              </label>
             )}
-            <p className="mt-1.5 text-[11px] text-muted-foreground">
-              Recibes la parte de logística y cadena de frío de cada pedido que entregas. Si un consumidor paga en efectivo, lo cobras tú al entregar.
-            </p>
-          </div>
+          </section>
+
+          <h2 className="serif pt-2 text-lg">Acceso</h2>
           <label className="block">
             <span className="text-xs text-muted-foreground">Contraseña</span>
             <input required type="password" minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} className={input} placeholder="Mínimo 8 caracteres" autoComplete="new-password" />
@@ -99,6 +125,13 @@ export function DistribuidorForm({ onBack }: { onBack: () => void }) {
         if (d.transporte === "Paquetería" && d.paqueteria.trim().length < 2) return setError("Escribe qué paquetería usas.");
         if (d.zonas.length === 0) return setError("Elige al menos un municipio donde entregas.");
         setError("");
+        // Se propone transferencia y los datos que ya escribió; puede cambiarlos
+        setD({
+          ...d,
+          cobro: d.cobro || "CLABE",
+          titular: d.titular || d.nombre.trim(),
+          codi: d.codi || d.telefono,
+        });
         setPaso(3);
       }}
     >
@@ -170,4 +203,8 @@ export function DistribuidorForm({ onBack }: { onBack: () => void }) {
       </button>
     </form>
   );
+}
+
+function Estado({ ok, children }: { ok: boolean; children: React.ReactNode }) {
+  return <span className={`mt-1 block text-[11px] ${ok ? "text-primary" : "text-muted-foreground"}`}>{ok ? "✓ " : ""}{children}</span>;
 }

@@ -30,7 +30,7 @@ function CosechaCompartida() {
   const [productor, setProductor] = useState("santiago");
   const [plan, setPlan] = useState("milpa");
   const [listo, setListo] = useState(false);
-  const elegido = planes.find((p) => p.id === plan)!;
+  const elegido = planes.find((p) => p.id === plan) ?? planes[0];
   const prod = producers[productor];
 
   if (listo) {

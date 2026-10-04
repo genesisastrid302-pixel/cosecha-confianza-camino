@@ -42,9 +42,6 @@ function Login() {
         >
           <Field label="Teléfono o correo" placeholder="+52 81 1234 5678" />
           <Field label="Contraseña" placeholder="••••••••" type="password" />
-          <div className="text-right">
-            <a className="text-xs text-muted-foreground underline">¿Olvidaste tu contraseña?</a>
-          </div>
         </form>
 
         <div className="mt-auto space-y-3 pt-8">

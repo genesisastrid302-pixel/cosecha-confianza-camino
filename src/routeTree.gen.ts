@@ -35,6 +35,7 @@ import { Route as ConsumidorPedidosRouteImport } from './routes/consumidor/pedid
 import { Route as ConsumidorCosechaRouteImport } from './routes/consumidor/cosecha'
 import { Route as ConsumidorCarritoRouteImport } from './routes/consumidor/carrito'
 import { Route as ConsumidorProductorSlugRouteImport } from './routes/consumidor/productor.$slug'
+import { Route as ConsumidorProductoIdRouteImport } from './routes/consumidor/producto.$id'
 
 const RegistroRoute = RegistroRouteImport.update({
   id: '/registro',
@@ -167,6 +168,11 @@ const ConsumidorProductorSlugRoute = ConsumidorProductorSlugRouteImport.update({
   path: '/consumidor/productor/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConsumidorProductoIdRoute = ConsumidorProductoIdRouteImport.update({
+  id: '/consumidor/producto/$id',
+  path: '/consumidor/producto/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -194,6 +200,7 @@ export interface FileRoutesByFullPath {
   '/consumidor/': typeof ConsumidorIndexRoute
   '/distribuidor/': typeof DistribuidorIndexRoute
   '/productor/': typeof ProductorIndexRoute
+  '/consumidor/producto/$id': typeof ConsumidorProductoIdRoute
   '/consumidor/productor/$slug': typeof ConsumidorProductorSlugRoute
 }
 export interface FileRoutesByTo {
@@ -222,6 +229,7 @@ export interface FileRoutesByTo {
   '/consumidor': typeof ConsumidorIndexRoute
   '/distribuidor': typeof DistribuidorIndexRoute
   '/productor': typeof ProductorIndexRoute
+  '/consumidor/producto/$id': typeof ConsumidorProductoIdRoute
   '/consumidor/productor/$slug': typeof ConsumidorProductorSlugRoute
 }
 export interface FileRoutesById {
@@ -251,6 +259,7 @@ export interface FileRoutesById {
   '/consumidor/': typeof ConsumidorIndexRoute
   '/distribuidor/': typeof DistribuidorIndexRoute
   '/productor/': typeof ProductorIndexRoute
+  '/consumidor/producto/$id': typeof ConsumidorProductoIdRoute
   '/consumidor/productor/$slug': typeof ConsumidorProductorSlugRoute
 }
 export interface FileRouteTypes {
@@ -281,6 +290,7 @@ export interface FileRouteTypes {
     | '/consumidor/'
     | '/distribuidor/'
     | '/productor/'
+    | '/consumidor/producto/$id'
     | '/consumidor/productor/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -309,6 +319,7 @@ export interface FileRouteTypes {
     | '/consumidor'
     | '/distribuidor'
     | '/productor'
+    | '/consumidor/producto/$id'
     | '/consumidor/productor/$slug'
   id:
     | '__root__'
@@ -337,6 +348,7 @@ export interface FileRouteTypes {
     | '/consumidor/'
     | '/distribuidor/'
     | '/productor/'
+    | '/consumidor/producto/$id'
     | '/consumidor/productor/$slug'
   fileRoutesById: FileRoutesById
 }
@@ -366,6 +378,7 @@ export interface RootRouteChildren {
   ConsumidorIndexRoute: typeof ConsumidorIndexRoute
   DistribuidorIndexRoute: typeof DistribuidorIndexRoute
   ProductorIndexRoute: typeof ProductorIndexRoute
+  ConsumidorProductoIdRoute: typeof ConsumidorProductoIdRoute
   ConsumidorProductorSlugRoute: typeof ConsumidorProductorSlugRoute
 }
 
@@ -553,6 +566,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConsumidorProductorSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/consumidor/producto/$id': {
+      id: '/consumidor/producto/$id'
+      path: '/consumidor/producto/$id'
+      fullPath: '/consumidor/producto/$id'
+      preLoaderRoute: typeof ConsumidorProductoIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -582,6 +602,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConsumidorIndexRoute: ConsumidorIndexRoute,
   DistribuidorIndexRoute: DistribuidorIndexRoute,
   ProductorIndexRoute: ProductorIndexRoute,
+  ConsumidorProductoIdRoute: ConsumidorProductoIdRoute,
   ConsumidorProductorSlugRoute: ConsumidorProductorSlugRoute,
 }
 export const routeTree = rootRouteImport

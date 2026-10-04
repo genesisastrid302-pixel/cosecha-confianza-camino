@@ -1,13 +1,25 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ChevronLeft } from "lucide-react";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { ChevronLeft, Sprout, Truck, Home } from "lucide-react";
+import type { Role } from "@/components/RoleOption";
+
+const ROLES: Role[] = ["productor", "distribuidor", "consumidor"];
+const COPY: Record<Role, { sub: string; icon: typeof Sprout; to: "/productor" | "/distribuidor" | "/consumidor" }> = {
+  consumidor: { sub: "El campo te espera con la cosecha de la semana.", icon: Home, to: "/consumidor" },
+  productor: { sub: "Tus pedidos y tu cosecha te esperan.", icon: Sprout, to: "/productor" },
+  distribuidor: { sub: "Tu ruta del día está lista.", icon: Truck, to: "/distribuidor" },
+};
 import illustration from "@/assets/login-illustration.png";
 
-export const Route = createFileRoute("/login")({
+export const Route = createFileRoute("/login/")({
   head: () => ({ meta: [{ title: "Iniciar sesión — Milpa" }] }),
   component: Login,
 });
 
 function Login() {
+  const { rol } = Route.useSearch();
+  const role = rol ?? "consumidor";
+  const c = COPY[role];
+  const Icon = c.icon;
   return (
     <div className="relative h-full overflow-hidden">
       <img
@@ -20,7 +32,7 @@ function Login() {
 
       <div className="relative z-10 flex h-full flex-col px-5 pb-6 pt-5">
         <Link
-          to="/"
+          to="/login/rol"
           className="flex h-9 w-9 items-center justify-center rounded-full bg-background/70 backdrop-blur text-foreground"
         >
           <ChevronLeft className="h-5 w-5" />
@@ -29,9 +41,16 @@ function Login() {
         <div className="mt-24">
           <span className="eyebrow">Bienvenido de vuelta</span>
           <h1 className="display mt-2 text-4xl">Hola otra vez.</h1>
-          <p className="mt-3 text-sm text-muted-foreground">
-            El campo te espera con la cosecha de la semana.
-          </p>
+          <div className="mt-3 flex items-center gap-2 text-xs">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1 text-foreground">
+              <Icon className="h-3.5 w-3.5" />
+              Entrando como {role}
+            </span>
+            <Link to="/login/rol" className="text-muted-foreground underline">
+              Cambiar
+            </Link>
+          </div>
+          <p className="mt-3 text-sm text-muted-foreground">{c.sub}</p>
         </div>
 
         <form
@@ -46,7 +65,7 @@ function Login() {
 
         <div className="mt-auto space-y-3 pt-8">
           <Link
-            to="/consumidor"
+            to={c.to}
             className="block w-full rounded-full bg-foreground py-4 text-center text-sm font-medium text-background"
           >
             Entrar

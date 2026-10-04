@@ -12,15 +12,20 @@ export type ProducerProfile = {
   telefono: string;
   story: string;
   zona: Zona | "";
-  /** Cómo recibe sus pagos */
-  pago: Pago | "";
+  /** Métodos para recibir pagos (puede elegir varios) */
+  pagos: Pago[];
   clabe: string;
   banco: string;
   titular: string;
   /** Celular ligado a CoDi */
   codi: string;
   photos: string[];
+  /** Aceptó ser socio de Milpa y aportar un % de sus ventas */
+  socio: boolean;
 };
+
+/** Porcentaje de cada venta que el productor socio aporta a Milpa (ajustable) */
+export const APORTACION_SOCIO = 10;
 
 export const EMPTY_PROFILE: ProducerProfile = {
   name: "",
@@ -28,27 +33,35 @@ export const EMPTY_PROFILE: ProducerProfile = {
   telefono: "",
   story: "",
   zona: "",
-  pago: "",
+  pagos: [],
   clabe: "",
   banco: "",
   titular: "",
   codi: "",
   photos: [],
+  socio: false,
 };
 
-/** ¿El método de cobro tiene todos sus datos? */
+/** ¿Cada método de cobro elegido tiene sus datos? */
 export function cobroCompleto(p: ProducerProfile) {
-  if (p.pago === "CLABE") return /^\d{18}$/.test(p.clabe) && p.banco.trim().length > 1 && p.titular.trim().length > 2;
-  if (p.pago === "CoDi") return /^\d{10}$/.test(p.codi);
-  return p.pago === "Efectivo";
+  if (p.pagos.length === 0) return false;
+  return p.pagos.every((m) => {
+    if (m === "CLABE") return /^\d{18}$/.test(p.clabe) && p.banco.trim().length > 1 && p.titular.trim().length > 2;
+    if (m === "CoDi") return /^\d{10}$/.test(p.codi);
+    return true;
+  });
 }
 
-/** Texto corto del método de cobro, con la cuenta enmascarada */
+/** Texto corto de los métodos de cobro, con las cuentas enmascaradas */
 export function cobroResumen(p: ProducerProfile) {
-  if (p.pago === "CLABE") return p.clabe ? `CLABE ${p.banco} ···${p.clabe.slice(-4)}` : "CLABE sin capturar";
-  if (p.pago === "CoDi") return p.codi ? `CoDi ···${p.codi.slice(-4)}` : "CoDi sin celular";
-  if (p.pago === "Efectivo") return "Efectivo al recolectar";
-  return "Sin definir";
+  if (p.pagos.length === 0) return "Sin definir";
+  return p.pagos
+    .map((m) => {
+      if (m === "CLABE") return p.clabe ? `CLABE ${p.banco} ···${p.clabe.slice(-4)}` : "CLABE sin capturar";
+      if (m === "CoDi") return p.codi ? `CoDi ···${p.codi.slice(-4)}` : "CoDi sin celular";
+      return "Efectivo";
+    })
+    .join(" · ");
 }
 
 export type Crop = {
@@ -117,7 +130,10 @@ export function readProducer(): ProducerState {
     const parsed = JSON.parse(raw);
     const base = seed();
     // Perfiles guardados antes de agregar correo, teléfono y cuenta de cobro
-    return { ...base, ...parsed, profile: { ...EMPTY_PROFILE, ...parsed.profile } };
+    const profile = { ...EMPTY_PROFILE, ...parsed.profile };
+    // Antes se guardaba un solo método en "pago"
+    if (parsed.profile?.pago && !parsed.profile?.pagos) profile.pagos = [parsed.profile.pago];
+    return { ...base, ...parsed, profile };
   } catch {
     return seed();
   }
@@ -161,6 +177,7 @@ export function profileCompleteness(p: ProducerProfile) {
     { label: "Historia de tu rancho", ok: p.story.trim().length >= 40 },
     { label: "Ubicación del campo", ok: !!p.zona },
     { label: "Cuenta para recibir pagos", ok: cobroCompleto(p) },
+    { label: "Acuerdo de socio", ok: p.socio },
     { label: "Fotos del campo (mín. 3)", ok: p.photos.length >= 3 },
   ];
   const pct = Math.round((checks.filter((c) => c.ok).length / checks.length) * 100);

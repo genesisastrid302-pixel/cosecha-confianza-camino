@@ -163,7 +163,7 @@ function EditarCobro({ p, onDone }: { p: ProducerProfile; onDone: () => void }) 
         type="button"
         disabled={!ok}
         onClick={() => {
-          updateProducer((s) => ({ ...s, profile: { ...s.profile, pago: d.pago, clabe: d.clabe, banco: d.banco, titular: d.titular, codi: d.codi } }));
+          updateProducer((s) => ({ ...s, profile: { ...s.profile, pagos: d.pagos, clabe: d.clabe, banco: d.banco, titular: d.titular, codi: d.codi } }));
           onDone();
         }}
         className="flex w-full items-center justify-center gap-2 rounded-full bg-foreground py-2.5 text-sm text-background disabled:bg-secondary disabled:text-muted-foreground"

@@ -1,8 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ChevronLeft, Camera, X, CheckCircle2, Circle } from "lucide-react";
+import { Handshake } from "lucide-react";
 import {
+  APORTACION_SOCIO,
   cobroCompleto,
+  cobroResumen,
   EMPTY_PROFILE,
   fileToDataUrl,
   profileCompleteness,
@@ -39,7 +42,11 @@ export function ProductorForm({ onBack }: { onBack: () => void }) {
       <div className="flex min-h-full flex-col px-5 pb-8 pt-5">
         <span className="eyebrow mt-10">Paso 3 de 3</span>
         <h1 className="display mt-2 text-3xl">Bienvenido, {p.name.split(" ")[0]}.</h1>
-        <p className="mt-3 text-sm text-muted-foreground">Tu perfil es la primera razón por la que una familia confía en ti.</p>
+        <p className="mt-3 text-sm text-muted-foreground">Ya eres socio de Milpa. Tu perfil es la primera razón por la que una familia confía en ti.</p>
+        <div className="mt-6 space-y-2 rounded-2xl border border-border bg-card p-4 text-sm">
+          <div className="flex justify-between gap-3"><span className="text-muted-foreground">Recibes tus pagos en</span><span className="text-right">{cobroResumen(p)}</span></div>
+          <div className="flex justify-between gap-3"><span className="text-muted-foreground">Tu aportación como socio</span><span>{APORTACION_SOCIO}% por venta</span></div>
+        </div>
         <CompletenessCard pct={pct} checks={checks} />
         <Link to="/productor" className="mt-auto block w-full rounded-full bg-foreground py-4 text-center text-sm font-medium text-background">
           Ir a mi inicio
@@ -56,8 +63,9 @@ export function ProductorForm({ onBack }: { onBack: () => void }) {
         if (!/^\d{10}$/.test(p.telefono)) return setError("El teléfono debe tener 10 dígitos.");
         if (password.length < 8) return setError("La contraseña debe tener al menos 8 caracteres.");
         if (password !== password2) return setError("Las contraseñas no coinciden.");
-        if (!p.pago) return setError("Elige cómo quieres recibir tus pagos.");
-        if (!cobroCompleto(p)) return setError(p.pago === "CLABE" ? "Completa CLABE (18 dígitos), banco y titular." : "El celular de CoDi debe tener 10 dígitos.");
+        if (p.pagos.length === 0) return setError("Elige al menos una forma de recibir tus pagos.");
+        if (!cobroCompleto(p)) return setError("Completa los datos de cada forma de cobro que elegiste.");
+        if (!p.socio) return setError("Para vender en Milpa necesitas aceptar el acuerdo de socio.");
         setError("");
         const s = readProducer();
         writeProducer({ ...s, profile: { ...p, name: p.name.trim(), story: p.story.trim() } });
@@ -106,6 +114,7 @@ export function ProductorForm({ onBack }: { onBack: () => void }) {
           </div>
         </div>
         <CobroFields p={p} onChange={setP} />
+        <SocioCard checked={p.socio} onChange={(socio) => setP({ ...p, socio })} />
         <div>
           <span className="text-xs text-muted-foreground">Fotos de tu campo</span>
           <div className="mt-1.5 grid grid-cols-3 gap-2">
@@ -158,37 +167,67 @@ export function CompletenessCard({ pct, checks }: { pct: number; checks: { label
   );
 }
 
-/** Datos para recibir pagos; cambian según el método elegido */
+/** Datos para recibir pagos; puede elegir varios métodos y cada uno pide sus datos */
 export function CobroFields({ p, onChange }: { p: ProducerProfile; onChange: (p: ProducerProfile) => void }) {
   const input = "mt-1.5 w-full rounded-xl border border-input bg-card px-4 py-3.5 text-sm placeholder:text-muted-foreground/60 focus:border-foreground focus:outline-none";
   const pill = (on: boolean) => `flex-1 rounded-xl border py-3 text-sm ${on ? "border-foreground bg-foreground text-background" : "border-border bg-card"}`;
+  const toggle = (m: Pago) => onChange({ ...p, pagos: p.pagos.includes(m) ? p.pagos.filter((x) => x !== m) : [...p.pagos, m] });
   return (
     <div>
-      <span className="text-xs text-muted-foreground">¿Cómo quieres recibir tus pagos?</span>
+      <span className="text-xs text-muted-foreground">¿Cómo quieres recibir tus pagos? Puedes elegir varias</span>
       <div className="mt-1.5 flex gap-2">
         {pagos.map((m) => (
-          <button type="button" key={m} className={pill(p.pago === m)} onClick={() => onChange({ ...p, pago: m })}>{m}</button>
+          <button type="button" key={m} aria-pressed={p.pagos.includes(m)} className={pill(p.pagos.includes(m))} onClick={() => toggle(m)}>{m}</button>
         ))}
       </div>
-      {p.pago === "CLABE" && (
-        <div className="mt-2 space-y-2">
+      {p.pagos.includes("CLABE") && (
+        <div className="mt-3 space-y-2 rounded-xl border border-border p-3">
+          <div className="text-xs font-medium">Transferencia (CLABE)</div>
           <input inputMode="numeric" maxLength={18} value={p.clabe} onChange={(e) => onChange({ ...p, clabe: e.target.value.replace(/\D/g, "") })} className={input} placeholder="CLABE · 18 dígitos" aria-label="CLABE" />
           <div className="grid grid-cols-2 gap-2">
             <input maxLength={40} value={p.banco} onChange={(e) => onChange({ ...p, banco: e.target.value })} className={input} placeholder="Banco" aria-label="Banco" />
             <input maxLength={100} value={p.titular} onChange={(e) => onChange({ ...p, titular: e.target.value })} className={input} placeholder="Titular" aria-label="Titular de la cuenta" />
           </div>
-          <p className="text-[11px] text-muted-foreground">Recibes por transferencia cuando el consumidor confirma su canasta.</p>
         </div>
       )}
-      {p.pago === "CoDi" && (
-        <div className="mt-2">
+      {p.pagos.includes("CoDi") && (
+        <div className="mt-3 rounded-xl border border-border p-3">
+          <div className="text-xs font-medium">CoDi</div>
           <input inputMode="numeric" maxLength={10} value={p.codi} onChange={(e) => onChange({ ...p, codi: e.target.value.replace(/\D/g, "") })} className={input} placeholder="Celular ligado a CoDi · 10 dígitos" aria-label="Celular CoDi" />
-          <p className="mt-1.5 text-[11px] text-muted-foreground">Cobras con QR de CoDi, sin necesidad de compartir tu cuenta.</p>
         </div>
       )}
-      {p.pago === "Efectivo" && (
-        <p className="mt-2 text-[11px] text-muted-foreground">El distribuidor te paga en mano al recolectar tu producto.</p>
+      {p.pagos.includes("Efectivo") && (
+        <p className="mt-3 rounded-xl border border-border p-3 text-[11px] text-muted-foreground">
+          <span className="block text-xs font-medium text-foreground">Efectivo</span>
+          El distribuidor te paga en mano al recolectar tu producto.
+        </p>
       )}
+    </div>
+  );
+}
+
+/** Acuerdo de socio: el productor aporta un % de cada venta a Milpa */
+export function SocioCard({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <div className="rounded-2xl border-2 border-primary/30 bg-primary/5 p-4">
+      <div className="flex items-center gap-2">
+        <Handshake className="h-5 w-5 text-primary" />
+        <span className="serif text-lg">Eres socio de Milpa</span>
+      </div>
+      <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+        Milpa no compra tu cosecha: tú vendes directo a las familias y la app trabaja contigo. Como socio aportas el{" "}
+        <strong className="text-foreground">{APORTACION_SOCIO}% de cada venta</strong> para sostener la plataforma, tu
+        score, el QR de trazabilidad y la cosecha compartida.
+      </p>
+      <ul className="mt-3 space-y-1.5 text-xs">
+        <li>· Se descuenta en automático de cada pago; nunca pagas por adelantado ni hay cuota fija.</li>
+        <li>· Si una venta se cobra en efectivo, tu aportación se descuenta de tu siguiente pago digital.</li>
+        <li>· Ejemplo: vendes $1,000 → recibes ${(1000 * (100 - APORTACION_SOCIO)) / 100} y aportas ${(1000 * APORTACION_SOCIO) / 100}.</li>
+      </ul>
+      <label className="mt-4 flex cursor-pointer items-start gap-3 text-sm">
+        <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="mt-0.5 h-5 w-5 accent-[var(--primary)]" />
+        <span>Acepto ser socio y aportar el {APORTACION_SOCIO}% de mis ventas a Milpa.</span>
+      </label>
     </div>
   );
 }

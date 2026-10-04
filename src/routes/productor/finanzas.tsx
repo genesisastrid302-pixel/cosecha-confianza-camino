@@ -38,7 +38,7 @@ function Finanzas() {
           <div className="flex-1">
             <div className="text-sm">{cobroCompleto(p) ? "Tus pagos llegan a" : "Completa tu cuenta de cobro"}</div>
             <div className="text-[11px] text-muted-foreground">
-              {cobroCompleto(p) ? `${cobroResumen(p)}${p.pago === "CLABE" ? ` · ${p.titular}` : ""}` : "Sin ella no podemos enviarte lo que vendes."}
+              {cobroCompleto(p) ? `${cobroResumen(p)}${p.pagos.includes("CLABE") ? ` · ${p.titular}` : ""}` : "Sin ella no podemos enviarte lo que vendes."}
             </div>
           </div>
         </Link>

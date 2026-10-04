@@ -1,7 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { consumidorTabs } from "@/components/tabs";
-import { products } from "@/lib/data";
+import { products, unitLabel } from "@/lib/data";
+import { LOGISTICA, PLATAFORMA, shareToProducers } from "@/lib/orders";
 import { useEffect, useState } from "react";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -40,7 +41,7 @@ function Carrito() {
             <img src={p.photo} alt={p.name} className="h-16 w-16 rounded-lg object-cover" />
             <div className="flex-1">
               <div className="serif text-base">{p.name}</div>
-              <div className="text-[11px] text-muted-foreground">${p.price} / {p.unit}</div>
+              <div className="text-[11px] text-muted-foreground">${p.price} / {unitLabel(p.unit)}</div>
               <div className="mt-2 inline-flex items-center gap-1 border border-border text-xs">
                 <Button variant="ghost" size="icon" className="h-7 w-7" aria-label={`Reducir ${p.name}`} onClick={() => updateQuantity(p.id, p.quantity - 1)}><Minus /></Button>
                 <span className="w-5 text-center">{p.quantity}</span>
@@ -56,18 +57,18 @@ function Carrito() {
 
         {items.length > 0 && <><div className="space-y-2 rounded-2xl border border-border bg-card p-4 text-sm">
           <Row l="Subtotal" v={`$${subtotal}`} />
-          <Row l="Logística + cadena de frío" v="$18" />
-          <Row l="Plataforma Milpa" v="$10" />
+          <Row l="Logística + cadena de frío" v={`$${LOGISTICA}`} />
+          <Row l="Plataforma Milpa" v={`$${PLATAFORMA}`} />
           <div className="my-2 h-px bg-border" />
-          <Row l="Total" v={`$${subtotal + 28}`} bold />
+          <Row l="Total" v={`$${subtotal + LOGISTICA + PLATAFORMA}`} bold />
           <p className="pt-1 text-[11px] text-muted-foreground">
-            <span className="text-primary font-medium">72%</span> va directo a los productores.
+            <span className="text-primary font-medium">{shareToProducers(subtotal)}%</span> de tu pago va directo a los productores.
           </p>
         </div>
 
-        <Button className="h-13 w-full rounded-full bg-foreground text-sm font-medium text-background" disabled title="La confirmación de pedidos aún no está disponible">
+        <Link to="/consumidor/checkout" className="block w-full rounded-full bg-foreground py-4 text-center text-sm font-medium text-background transition active:scale-[0.98]">
           Confirmar pedido →
-        </Button></>}
+        </Link></>}
       </div>
     </AppShell>
   );

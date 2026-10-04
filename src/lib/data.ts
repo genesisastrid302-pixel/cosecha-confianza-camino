@@ -179,7 +179,7 @@ export const producerDetails: Record<string, ProducerDetail> = {
     story:
       "Ezequiel heredó Seis Tierras de su abuelo. Recuperó semillas criollas que la familia guardaba en frascos y hoy siembra sin químicos, rotando cultivos como se hacía antes.",
     practices: ["Semilla criolla propia", "Composta y abono verde", "Riego por goteo con agua de lluvia", "Rotación y asociación de cultivos"],
-    coldChain: "Cosecha al amanecer, cámara a 8 °C en el rancho y hielera térmica hasta tu puerta. Menos de 24 h del surco a tu mesa.",
+    coldChain: "Cosecha al amanecer, cámara a 4–7 °C en el rancho y hielera térmica hasta tu puerta. Menos de 24 h del surco a tu mesa.",
     gallery: [seedlings, planting, harvest, landscape],
     components: { rating: 96, profile: 95, onTime: 92, waste: 88 },
   },
@@ -203,4 +203,9 @@ export function scoreTone(score: number) {
   if (score >= 8) return "bg-primary text-primary-foreground";
   if (score >= 6) return "bg-miel text-ink";
   return "bg-destructive text-destructive-foreground";
+}
+
+/** Unidad corta para mostrar precios: "kilo" → "kg" */
+export function unitLabel(unit: string) {
+  return unit === "kilo" ? "kg" : unit;
 }

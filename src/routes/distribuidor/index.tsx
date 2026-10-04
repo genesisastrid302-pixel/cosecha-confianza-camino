@@ -25,7 +25,7 @@ export const Route = createFileRoute("/distribuidor/")({
           <Mini n="4" l="Paradas" />
           <Mini n="2" l="Pickups" />
           <Mini n="2" l="Entregas" />
-          <Mini n="8°C" l="Cámara" />
+          <Mini n="6 °C" l="Cámara" />
         </div>
 
         <div className="rounded-2xl border-2 border-dashed border-terracota/40 bg-terracota/5 p-3 text-xs flex items-center gap-2">

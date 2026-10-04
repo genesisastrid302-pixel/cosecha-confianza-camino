@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { productorTabs } from "@/components/tabs";
 import { Bell, TrendingDown, CheckCircle2, Clock, AlertTriangle } from "lucide-react";
-import { profileCompleteness, trustScore, updateProducer, useProducer } from "@/lib/producer-store";
+import { esNuevo, profileCompleteness, RESENAS_PARA_SCORE, trustScore, updateProducer, useProducer } from "@/lib/producer-store";
+import { NuevoStamp } from "@/components/NuevoStamp";
 import { CompletenessCard } from "@/components/ProductorForm";
 import { useEffect } from "react";
 import { useOrders, updateOrder } from "@/lib/orders";
@@ -127,10 +128,40 @@ function ScoreCard() {
   const last = state.lastScore !== null && state.lastScore <= 10 ? state.lastScore : null;
   const dropped = last !== null && total < last;
 
+  const nuevo = esNuevo(state);
+
   useEffect(() => {
-    if (!ready) return;
+    if (!ready || nuevo) return;
     if (last === null || total > last) updateProducer((s) => ({ ...s, lastScore: total }));
-  }, [ready, total, last]);
+  }, [ready, total, last, nuevo]);
+
+  if (nuevo) {
+    const faltan = RESENAS_PARA_SCORE - state.resenas;
+    return (
+      <div className="space-y-3">
+        <div className="relative rounded-2xl bg-primary p-5 pt-6 text-primary-foreground shadow-paper">
+          <NuevoStamp size={60} className="absolute right-2 -top-6" />
+          <div className="text-[11px] tracking-widest uppercase opacity-80">Score de confianza</div>
+          <div className="serif mt-2 text-2xl leading-tight">Tu score se genera con tus primeras reseñas</div>
+          <p className="mt-2 text-xs opacity-80">
+            Cada familia que recibe tu canasta y te califica suma. Al llegar a {RESENAS_PARA_SCORE} reseñas dejas de ser
+            nuevo y las familias ven tu score.
+          </p>
+          <div className="mt-4">
+            <div className="flex justify-between text-xs">
+              <span>Reseñas</span>
+              <span>{state.resenas} / {RESENAS_PARA_SCORE}</span>
+            </div>
+            <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-paper/20">
+              <div className="h-full rounded-full bg-paper" style={{ width: `${(state.resenas / RESENAS_PARA_SCORE) * 100}%` }} />
+            </div>
+            <div className="mt-2 text-[11px] opacity-80">{faltan === 1 ? "Te falta 1 reseña" : `Te faltan ${faltan} reseñas`}</div>
+          </div>
+        </div>
+        {pct < 100 && <CompletenessCard pct={pct} checks={checks} />}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">

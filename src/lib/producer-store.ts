@@ -92,7 +92,24 @@ export type ProducerState = {
   crops: Crop[];
   cosechas: Cosecha[];
   lastScore: number | null;
+  /** Reseñas de consumidores recibidas; con menos de RESENAS_PARA_SCORE es "Nuevo" */
+  resenas: number;
 };
+
+/** Reseñas necesarias para dejar de ser "Nuevo" y mostrar el score */
+export const RESENAS_PARA_SCORE = 10;
+/** Fotos del campo que se piden mientras el productor es nuevo */
+export const FOTOS_MIN = 5;
+export const FOTOS_MAX = 15;
+
+export function esNuevo(s: ProducerState) {
+  return s.resenas < RESENAS_PARA_SCORE;
+}
+
+/** Suma una reseña cuando un consumidor envía su feedback */
+export function addResena() {
+  updateProducer((s) => ({ ...s, resenas: s.resenas + 1 }));
+}
 
 const KEY = "milpa-productor";
 const EVENT = "milpa-productor-change";
@@ -119,6 +136,8 @@ function seed(): ProducerState {
     })),
     cosechas: [],
     lastScore: null,
+    // El productor de ejemplo ya tiene historial; uno recién registrado empieza en 0
+    resenas: 24,
   };
 }
 
@@ -178,7 +197,7 @@ export function profileCompleteness(p: ProducerProfile) {
     { label: "Ubicación del campo", ok: !!p.zona },
     { label: "Cuenta para recibir pagos", ok: cobroCompleto(p) },
     { label: "Acuerdo de socio", ok: p.socio },
-    { label: "Fotos del campo (mín. 3)", ok: p.photos.length >= 3 },
+    { label: `Fotos del campo (mín. ${FOTOS_MIN})`, ok: p.photos.length >= FOTOS_MIN },
   ];
   const pct = Math.round((checks.filter((c) => c.ok).length / checks.length) * 100);
   return { pct, checks };

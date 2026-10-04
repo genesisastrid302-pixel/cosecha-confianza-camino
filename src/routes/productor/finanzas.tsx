@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Landmark, Clock3, CheckCircle2, AlertTriangle } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { productorTabs } from "@/components/tabs";
-import { cobroCompleto, cobroResumen, useProducer } from "@/lib/producer-store";
+import { APORTACION_SOCIO, cobroCompleto, cobroResumen, useProducer } from "@/lib/producer-store";
 import { useOrders, formatTime, type Order } from "@/lib/orders";
 
 export const Route = createFileRoute("/productor/finanzas")({
@@ -19,15 +19,27 @@ function Finanzas() {
   const [state] = useProducer();
   const orders = useOrders().filter((o) => o.status !== "rechazado");
   const p = state.profile;
-  const pagado = orders.filter((o) => PAGADO.includes(o.status)).reduce((n, o) => n + o.subtotal, 0);
-  const porCobrar = orders.filter((o) => !PAGADO.includes(o.status)).reduce((n, o) => n + o.subtotal, 0);
+  const vendido = orders.reduce((n, o) => n + o.subtotal, 0);
+  const aportacion = Math.round(vendido * APORTACION_SOCIO) / 100;
+  const recibes = vendido - aportacion;
+  const neto = (o: Order) => o.subtotal - Math.round(o.subtotal * APORTACION_SOCIO) / 100;
+  const pagado = orders.filter((o) => PAGADO.includes(o.status)).reduce((n, o) => n + neto(o), 0);
+  const porCobrar = recibes - pagado;
 
   return (
     <AppShell tabs={productorTabs} tone="milpa" eyebrow="Tus ingresos" title="Finanzas">
       <div className="space-y-5 px-5">
+        <section className="space-y-2 rounded-2xl border border-border bg-card p-4 text-sm">
+          <div className="eyebrow mb-1">Este mes</div>
+          <Linea l="Vendido" v={vendido} />
+          <Linea l={`Aportación de socio · ${APORTACION_SOCIO}%`} v={aportacion} resta />
+          <div className="h-px bg-border" />
+          <Linea l="Recibes" v={recibes} bold />
+        </section>
+
         <div className="grid grid-cols-2 gap-3">
-          <Kpi label="Por cobrar" value={`$${porCobrar}`} />
-          <Kpi label="Cobrado" value={`$${pagado}`} />
+          <Kpi label="Por cobrar" value={money(porCobrar)} />
+          <Kpi label="Cobrado" value={money(pagado)} />
         </div>
 
         <Link
@@ -44,8 +56,9 @@ function Finanzas() {
         </Link>
 
         <div className="rounded-2xl bg-primary/10 p-4 text-xs leading-relaxed">
-          Recibes el <strong>100% del precio de tus productos</strong>. La logística, la cadena de frío y la plataforma
-          las paga el consumidor aparte. El pago se reparte en automático cuando el consumidor confirma que recibió su canasta.
+          Como socio, tu aportación del <strong>{APORTACION_SOCIO}%</strong> se descuenta en automático de cada venta. La
+          logística y la cadena de frío las paga el consumidor aparte. Tu pago llega cuando el consumidor confirma que recibió
+          su canasta; de las ventas en efectivo, la aportación se descuenta de tu siguiente pago digital.
         </div>
 
         <section>
@@ -63,7 +76,10 @@ function Finanzas() {
                       {formatTime(o.createdAt)} · {ok ? "Pagado" : "Se paga al confirmar la entrega"}
                     </div>
                   </div>
-                  <div className="serif text-base">${o.subtotal}</div>
+                  <div className="text-right">
+                    <div className="serif text-base">{money(neto(o))}</div>
+                    <div className="text-[10px] text-muted-foreground">de ${o.subtotal}</div>
+                  </div>
                 </div>
               );
             })}
@@ -79,6 +95,20 @@ function Kpi({ label, value }: { label: string; value: string }) {
     <div className="rounded-2xl border border-border bg-card p-4">
       <div className="serif text-2xl">{value}</div>
       <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</div>
+    </div>
+  );
+}
+
+function money(n: number) {
+  const decimales = Number.isInteger(n) ? 0 : 2;
+  return `$${n.toLocaleString("es-MX", { minimumFractionDigits: decimales, maximumFractionDigits: 2 })}`;
+}
+
+function Linea({ l, v, bold, resta }: { l: string; v: number; bold?: boolean; resta?: boolean }) {
+  return (
+    <div className={`flex justify-between ${bold ? "font-medium" : "text-muted-foreground"}`}>
+      <span>{l}</span>
+      <span>{resta ? `−${money(v)}` : money(v)}</span>
     </div>
   );
 }

@@ -4,10 +4,13 @@ import { ChevronDown, LogOut, Mail, Phone, Landmark } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { productorTabs } from "@/components/tabs";
 import { CobroFields } from "@/components/ProductorForm";
+import { NuevoStamp } from "@/components/NuevoStamp";
 import santiago from "@/assets/producer-santiago.jpg";
 import {
   cobroCompleto,
   cobroResumen,
+  esNuevo,
+  RESENAS_PARA_SCORE,
   trustScore,
   updateProducer,
   useProducer,
@@ -40,13 +43,22 @@ function Perfil() {
     <AppShell tabs={productorTabs} tone="milpa" eyebrow="Tu perfil" title={p.name || "Productor"}>
       <div className="space-y-6 px-5">
         <div className="flex items-center gap-4">
-          <img src={foto} alt={p.name} className="h-20 w-20 rounded-full object-cover" />
+          <div className="relative shrink-0">
+            <img src={foto} alt={p.name} className="h-20 w-20 rounded-full object-cover" />
+            {esNuevo(state) && <NuevoStamp size={48} className="absolute -right-4 -top-3" />}
+          </div>
           <div>
             <div className="text-sm">{p.zona ? `${p.zona}, Coahuila` : "Ubicación sin capturar"}</div>
             <div className="text-xs text-muted-foreground">{state.crops.length} cultivos en tu catálogo</div>
-            <div className={`mt-1 inline-flex items-center rounded-full px-2.5 py-1 text-[11px] ${scoreTone(total)}`}>
-              Score {formatScore(total)}
-            </div>
+            {esNuevo(state) ? (
+              <div className="mt-1 inline-flex items-center rounded-full bg-secondary px-2.5 py-1 text-[11px]">
+                {state.resenas}/{RESENAS_PARA_SCORE} reseñas para tu score
+              </div>
+            ) : (
+              <div className={`mt-1 inline-flex items-center rounded-full px-2.5 py-1 text-[11px] ${scoreTone(total)}`}>
+                Score {formatScore(total)}
+              </div>
+            )}
           </div>
         </div>
 

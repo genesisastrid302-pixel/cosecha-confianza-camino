@@ -35,7 +35,8 @@ La marca el distribuidor (`entregado`) y el consumidor la confirma (`recibido`).
 
 Validación por sistema en 3 capas, como en el modelo de negocio (`src/lib/score.ts`):
 
-- **Calificación de consumidores · 40 %**: promedio de las últimas 20 reseñas, incluida la merma que reporta el consumidor. Con menos de 5 reseñas el productor muestra "Nuevo".
+- **Calificación de consumidores · 40 %**: promedio de las últimas 20 reseñas, incluida la merma que reporta el consumidor.
+- **Productor nuevo**: mientras tenga menos de 10 reseñas no muestra score; lleva una estampa roja "Nuevo" sobre su foto y ve su avance (x/10 reseñas). Al registrarse como nuevo debe subir entre 5 y 15 fotos de su campo.
 - **Consistencia de datos · 30 %**: perfil completo, fotos con fecha y ubicación, temporadas reales.
 - **Registro del distribuidor · 30 %**: entregas a tiempo y estado del producto al recolectar.
 - Colores: verde ≥ 8, amarillo ≥ 5, rojo < 5. Siempre se muestra como `9.4/10`. El mercado muestra primero a los productores con mejor score.

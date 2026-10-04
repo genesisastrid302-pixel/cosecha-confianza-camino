@@ -1,3 +1,4 @@
+import { addResena } from "@/lib/producer-store";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { AppShell } from "@/components/AppShell";
@@ -312,7 +313,10 @@ function Recibir() {
 
             <Button
               disabled={overall === 0}
-              onClick={() => setStep("thanks")}
+              onClick={() => {
+                addResena();
+                setStep("thanks");
+              }}
               className="h-14 w-full rounded-2xl bg-foreground text-base text-background disabled:opacity-40"
             >
               Enviar al productor

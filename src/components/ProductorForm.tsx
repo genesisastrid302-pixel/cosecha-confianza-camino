@@ -4,6 +4,8 @@ import { ChevronLeft, Camera, X, CheckCircle2, Circle } from "lucide-react";
 import { Handshake } from "lucide-react";
 import {
   APORTACION_SOCIO,
+  FOTOS_MAX,
+  FOTOS_MIN,
   cobroCompleto,
   cobroResumen,
   EMPTY_PROFILE,
@@ -33,7 +35,7 @@ export function ProductorForm({ onBack }: { onBack: () => void }) {
 
   async function addPhotos(files: FileList | null) {
     if (!files) return;
-    const urls = await Promise.all(Array.from(files).slice(0, 6 - p.photos.length).map((f) => fileToDataUrl(f)));
+    const urls = await Promise.all(Array.from(files).slice(0, FOTOS_MAX - p.photos.length).map((f) => fileToDataUrl(f)));
     setP((s) => ({ ...s, photos: [...s.photos, ...urls] }));
   }
 
@@ -65,10 +67,12 @@ export function ProductorForm({ onBack }: { onBack: () => void }) {
         if (password !== password2) return setError("Las contraseñas no coinciden.");
         if (p.pagos.length === 0) return setError("Elige al menos una forma de recibir tus pagos.");
         if (!cobroCompleto(p)) return setError("Completa los datos de cada forma de cobro que elegiste.");
+        if (p.photos.length < FOTOS_MIN) return setError(`Como productor nuevo, sube al menos ${FOTOS_MIN} fotos de tu campo.`);
         if (!p.socio) return setError("Para vender en Milpa necesitas aceptar el acuerdo de socio.");
         setError("");
         const s = readProducer();
-        writeProducer({ ...s, profile: { ...p, name: p.name.trim(), story: p.story.trim() } });
+        // Cuenta nueva: sin reseñas, el score se genera con el feedback de los consumidores
+        writeProducer({ ...s, resenas: 0, lastScore: null, profile: { ...p, name: p.name.trim(), story: p.story.trim() } });
         setDone(true);
       }}
     >
@@ -116,7 +120,11 @@ export function ProductorForm({ onBack }: { onBack: () => void }) {
         <CobroFields p={p} onChange={setP} />
         <SocioCard checked={p.socio} onChange={(socio) => setP({ ...p, socio })} />
         <div>
-          <span className="text-xs text-muted-foreground">Fotos de tu campo</span>
+          <span className="flex justify-between text-xs text-muted-foreground">
+            <span>Fotos de tu campo · mínimo {FOTOS_MIN}</span>
+            <span className={p.photos.length >= FOTOS_MIN ? "text-primary" : ""}>{p.photos.length}/{FOTOS_MAX}</span>
+          </span>
+          <p className="mt-1 text-[11px] text-muted-foreground">Como eres nuevo, las familias aún no te conocen: tus fotos son tu carta de presentación mientras juntas tus primeras reseñas.</p>
           <div className="mt-1.5 grid grid-cols-3 gap-2">
             {p.photos.map((src, i) => (
               <div key={i} className="relative aspect-square overflow-hidden rounded-xl">
@@ -126,7 +134,7 @@ export function ProductorForm({ onBack }: { onBack: () => void }) {
                 </button>
               </div>
             ))}
-            {p.photos.length < 6 && (
+            {p.photos.length < FOTOS_MAX && (
               <label className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-border text-[11px] text-muted-foreground">
                 <Camera className="h-5 w-5" /> Agregar
                 <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => addPhotos(e.target.files)} />

@@ -38,6 +38,7 @@ import { Route as ProductorPerfilRouteImport } from './routes/productor/perfil'
 import { Route as ProductorTransparenciaRouteImport } from './routes/productor/transparencia'
 import { Route as ConsumidorProductoIdRouteImport } from './routes/consumidor/producto.$id'
 import { Route as ConsumidorProductorSlugRouteImport } from './routes/consumidor/productor.$slug'
+import { Route as ProductorPedidoIdRouteImport } from './routes/productor/pedido.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -185,6 +186,11 @@ const ConsumidorProductorSlugRoute = ConsumidorProductorSlugRouteImport.update({
   path: '/consumidor/productor/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProductorPedidoIdRoute = ProductorPedidoIdRouteImport.update({
+  id: '/productor/pedido/$id',
+  path: '/productor/pedido/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -216,6 +222,7 @@ export interface FileRoutesByFullPath {
   '/productor/': typeof ProductorIndexRoute
   '/consumidor/producto/$id': typeof ConsumidorProductoIdRoute
   '/consumidor/productor/$slug': typeof ConsumidorProductorSlugRoute
+  '/productor/pedido/$id': typeof ProductorPedidoIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -247,6 +254,7 @@ export interface FileRoutesByTo {
   '/productor': typeof ProductorIndexRoute
   '/consumidor/producto/$id': typeof ConsumidorProductoIdRoute
   '/consumidor/productor/$slug': typeof ConsumidorProductorSlugRoute
+  '/productor/pedido/$id': typeof ProductorPedidoIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -279,6 +287,7 @@ export interface FileRoutesById {
   '/productor/': typeof ProductorIndexRoute
   '/consumidor/producto/$id': typeof ConsumidorProductoIdRoute
   '/consumidor/productor/$slug': typeof ConsumidorProductorSlugRoute
+  '/productor/pedido/$id': typeof ProductorPedidoIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -312,6 +321,7 @@ export interface FileRouteTypes {
     | '/productor/'
     | '/consumidor/producto/$id'
     | '/consumidor/productor/$slug'
+    | '/productor/pedido/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -343,6 +353,7 @@ export interface FileRouteTypes {
     | '/productor'
     | '/consumidor/producto/$id'
     | '/consumidor/productor/$slug'
+    | '/productor/pedido/$id'
   id:
     | '__root__'
     | '/'
@@ -374,6 +385,7 @@ export interface FileRouteTypes {
     | '/productor/'
     | '/consumidor/producto/$id'
     | '/consumidor/productor/$slug'
+    | '/productor/pedido/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -406,6 +418,7 @@ export interface RootRouteChildren {
   ProductorIndexRoute: typeof ProductorIndexRoute
   ConsumidorProductoIdRoute: typeof ConsumidorProductoIdRoute
   ConsumidorProductorSlugRoute: typeof ConsumidorProductorSlugRoute
+  ProductorPedidoIdRoute: typeof ProductorPedidoIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -613,6 +626,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConsumidorProductorSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/productor/pedido/$id': {
+      id: '/productor/pedido/$id'
+      path: '/productor/pedido/$id'
+      fullPath: '/productor/pedido/$id'
+      preLoaderRoute: typeof ProductorPedidoIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -646,6 +666,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProductorIndexRoute: ProductorIndexRoute,
   ConsumidorProductoIdRoute: ConsumidorProductoIdRoute,
   ConsumidorProductorSlugRoute: ConsumidorProductorSlugRoute,
+  ProductorPedidoIdRoute: ProductorPedidoIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

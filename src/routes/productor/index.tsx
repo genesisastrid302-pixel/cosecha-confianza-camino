@@ -5,6 +5,8 @@ import { Bell, TrendingDown, CheckCircle2, Clock, AlertTriangle } from "lucide-r
 import { profileCompleteness, trustScore, updateProducer, useProducer } from "@/lib/producer-store";
 import { CompletenessCard } from "@/components/ProductorForm";
 import { useEffect } from "react";
+import { useOrders, updateOrder } from "@/lib/orders";
+import { unitLabel } from "@/lib/data";
 
 export const Route = createFileRoute("/productor/")({
   head: () => ({ meta: [{ title: "Inicio · Productor — Milpa" }] }),
@@ -13,6 +15,10 @@ export const Route = createFileRoute("/productor/")({
 
 function ProductorHome() {
   const [state] = useProducer();
+  const orders = useOrders();
+  const nuevos = orders.filter((o) => o.status === "nuevo");
+  const activos = orders.filter((o) => ["aceptado", "empacado", "en_recoleccion", "en_ruta", "con_problema"].includes(o.status));
+  const pendiente = nuevos[0];
   const kgSold = 312 + state.crops.reduce((n, c) => n + Math.max(0, c.kgEstimated - c.kgAvailable), 0);
   return (
     <AppShell
@@ -31,7 +37,7 @@ function ProductorHome() {
         <ScoreCard />
 
         <div className="grid grid-cols-2 gap-3">
-          <Kpi icon={Bell} label="Pedidos activos" value="3" tone="terracota" />
+          <Kpi icon={Bell} label="Pedidos activos" value={String(activos.length + nuevos.length)} tone="terracota" />
           <Kpi icon={CheckCircle2} label="Kg vendidos" value={`${kgSold} kg`} tone="primary" />
           <Kpi icon={TrendingDown} label="Merma del mes" value="↓ 8%" tone="primary" />
           <Kpi icon={Clock} label="Próxima cosecha" value="3 días" tone="miel" />
@@ -43,37 +49,48 @@ function ProductorHome() {
           <div className="mt-3 grid grid-cols-2 gap-3">
             <ActionCard to="/productor/transparencia" title="Subir evidencia" subtitle="Foto del cultivo" />
             <ActionCard to="/productor/catalogo" title="Nueva temporada" subtitle="Agregar cultivo" />
-            <ActionCard to="/productor/pedidos" title="Confirmar pedido" subtitle="2 pendientes" highlight />
+            <ActionCard to="/productor/pedidos" title="Confirmar pedido" subtitle={nuevos.length ? `${nuevos.length} pendiente${nuevos.length > 1 ? "s" : ""}` : "Sin pendientes"} highlight={nuevos.length > 0} />
             <ActionCard to="/productor/perfil" title="Ver analítica" subtitle="Merma y entregas" />
           </div>
         </section>
 
-        {/* Pedido pendiente activación */}
-        <section>
-          <div className="eyebrow">Esperando tu confirmación</div>
-          <div className="mt-3 rounded-2xl border-2 border-dashed border-terracota/40 bg-terracota/5 p-4">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <div className="serif text-lg">Pedido #MLP-0518</div>
-                <div className="text-xs text-muted-foreground">Adriana M. · Col. Roma · 2 kg jitomate, 1 manojo cilantro</div>
+        {/* Pedido pendiente de confirmar */}
+        {pendiente && (
+          <section>
+            <div className="eyebrow">Esperando tu confirmación</div>
+            <div className="mt-3 rounded-2xl border-2 border-dashed border-terracota/40 bg-terracota/5 p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="serif text-lg">Pedido #{pendiente.id}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {pendiente.cliente} · {pendiente.items.map((i) => `${i.quantity} ${unitLabel(i.unit)} ${i.name.toLowerCase()}`).join(", ")}
+                  </div>
+                </div>
+                <div className="serif text-xl text-terracota">${pendiente.subtotal}</div>
               </div>
-              <div className="text-right">
-                <div className="serif text-xl text-terracota">$158</div>
+              <div className="mt-3 flex gap-2">
+                <Link
+                  to="/productor/pedido/$id"
+                  params={{ id: pendiente.id }}
+                  onClick={() => updateOrder(pendiente.id, { status: "aceptado" })}
+                  className="flex-1 rounded-full bg-primary py-2.5 text-center text-sm text-primary-foreground"
+                >
+                  Puedo entregar
+                </Link>
+                <Link
+                  to="/productor/pedido/$id"
+                  params={{ id: pendiente.id }}
+                  className="rounded-full border border-border px-4 py-2.5 text-sm text-muted-foreground"
+                >
+                  Detalle
+                </Link>
               </div>
+              <p className="mt-3 text-[11px] italic text-muted-foreground">
+                Después empacas, registras la cadena de frío y generas el QR.
+              </p>
             </div>
-            <div className="mt-3 flex gap-2">
-              <button className="flex-1 rounded-full bg-primary py-2.5 text-sm text-primary-foreground">
-                Puedo entregar
-              </button>
-              <button className="rounded-full border border-border px-4 text-sm text-muted-foreground">
-                Detalle
-              </button>
-            </div>
-            <p className="mt-3 text-[11px] italic text-muted-foreground">
-              Al confirmar, el distribuidor recibe la asignación de recolección.
-            </p>
-          </div>
-        </section>
+          </section>
+        )}
       </div>
     </AppShell>
   );

@@ -27,8 +27,21 @@ export type OrderItem = {
   quantity: number;
 };
 
+export type Empaque = {
+  temperatura: number; // °C al entregar
+  tipo: "Bolsa" | "Caja" | "Contenedor refrigerado";
+  refrigeracion: boolean;
+  condiciones: string;
+  hora: string; // HH:mm
+  foto?: string; // data URL de la foto del empaque
+  registradoEn: string;
+};
+
+export type Traslado = "productor_lleva" | "distribuidor_recoge";
+
 export type Order = {
   id: string; // MLP-0601
+  cliente: string;
   createdAt: string; // ISO
   items: OrderItem[];
   /** Un lote por productor que participa en el pedido */
@@ -42,6 +55,9 @@ export type Order = {
   total: number;
   status: OrderStatus;
   history: { status: OrderStatus; at: string }[];
+  empaque?: Empaque;
+  traslado?: Traslado;
+  qrGeneradoEn?: string;
 };
 
 export const LOGISTICA = 18;
@@ -120,6 +136,7 @@ export function createOrder(input: {
   const now = new Date().toISOString();
   const order: Order = {
     id: `MLP-${n}`,
+    cliente: "Adriana M.",
     createdAt: now,
     items,
     lots,
@@ -143,6 +160,27 @@ export function setOrderStatus(id: string, status: OrderStatus) {
     readOrders().map((o) => (o.id === id ? { ...o, status, history: [...o.history, { status, at: now }] } : o)),
   );
 }
+
+/** Actualiza campos de un pedido; si trae status, lo agrega al historial */
+export function updateOrder(id: string, patch: Partial<Omit<Order, "id" | "history">>) {
+  const now = new Date().toISOString();
+  writeOrders(
+    readOrders().map((o) => {
+      if (o.id !== id) return o;
+      const history = patch.status && patch.status !== o.status ? [...o.history, { status: patch.status, at: now }] : o.history;
+      return { ...o, ...patch, history };
+    }),
+  );
+}
+
+export function getOrder(id: string) {
+  return readOrders().find((o) => o.id === id);
+}
+
+export const TRASLADO_LABEL: Record<Traslado, string> = {
+  productor_lleva: "El productor lo lleva al local del distribuidor",
+  distribuidor_recoge: "El distribuidor recoge en el campo",
+};
 
 export function subscribeOrders(listener: () => void) {
   window.addEventListener(EVENT, listener);

@@ -1,4 +1,3 @@
-import { addResena } from "@/lib/producer-store";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { AppShell } from "@/components/AppShell";
@@ -135,13 +134,13 @@ function Recibir() {
                   <div className="flex items-center gap-2 border-b border-primary/20 bg-primary/10 px-4 py-2.5">
                     <ShieldCheck className="h-4 w-4 text-primary" />
                     <span className="text-[11px] font-medium uppercase tracking-widest text-primary">
-                      Pedido MLP-0518 · Lote LT-0518 · Verificado
+                      Lote MLP-0518 · Verificado
                     </span>
                   </div>
                   <div className="divide-y divide-border">
                     <CultivoRow icon={Sprout} label="Cultivo" value="Jitomate heirloom · variedad criolla" />
                     <CultivoRow icon={MapPin} label="Origen" value="Rancho Seis Tierras · Ramos Arizpe, Coah." />
-                    <CultivoRow icon={CalendarDays} label="Cosechado" value="Ayer, 6:40 a.m." />
+                    <CultivoRow icon={CalendarDays} label="Cosechado" value="Hoy, 5:40 a.m." />
                     <CultivoRow icon={Snowflake} label="Cadena de frío" value="4–7 °C constantes · sin rupturas" />
                     <CultivoRow icon={Truck} label="Trayecto" value="98 km · 1 parada · 3 h 12 min" />
                     <CultivoRow icon={Leaf} label="Prácticas" value="Agroecológico · agua de lluvia captada" />
@@ -313,10 +312,7 @@ function Recibir() {
 
             <Button
               disabled={overall === 0}
-              onClick={() => {
-                addResena();
-                setStep("thanks");
-              }}
+              onClick={() => setStep("thanks")}
               className="h-14 w-full rounded-2xl bg-foreground text-base text-background disabled:opacity-40"
             >
               Enviar al productor

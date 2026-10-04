@@ -1,6 +1,5 @@
 import { createFileRoute, Link, redirect, useSearch } from "@tanstack/react-router";
-import { ChevronLeft, Sprout, Truck, Home, Handshake } from "lucide-react";
-import { APORTACION_SOCIO } from "@/lib/producer-store";
+import { ChevronLeft, Sprout, Truck, Home } from "lucide-react";
 import type { Role } from "@/components/RoleOption";
 
 const ROLES: Role[] = ["productor", "distribuidor", "consumidor"];
@@ -65,15 +64,6 @@ function Login() {
             </Link>
           </div>
           <p className="mt-3 text-sm text-muted-foreground">{c.sub}</p>
-          {role === "productor" && (
-            <div className="mt-4 flex items-start gap-3 rounded-2xl border border-primary/30 bg-primary/5 p-3 text-xs leading-relaxed">
-              <Handshake className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-              <span>
-                Entras como <strong>socio de Milpa</strong>: aportas el {APORTACION_SOCIO}% de cada venta y se descuenta en
-                automático de tus pagos, sin cuotas fijas.
-              </span>
-            </div>
-          )}
         </div>
 
         <form

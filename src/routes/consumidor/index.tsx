@@ -28,10 +28,7 @@ function ConsumidorHome() {
   const [q, setQ] = useState("");
 
   const list = useMemo(() => {
-    // Por defecto, primero los productores con mejor score (verde antes que amarillo)
-    let l = products
-      .filter((p) => p.name.toLowerCase().includes(q.toLowerCase()))
-      .sort((a, b) => trustScore10(b.producerSlug) - trustScore10(a.producerSlug));
+    let l = products.filter((p) => p.name.toLowerCase().includes(q.toLowerCase()));
     if (filter === "Por temporada") l = l.filter((p) => p.badge === "temporada");
     if (filter === "Por producto") l = [...l].sort((a, b) => a.name.localeCompare(b.name));
     if (filter === "Por disponibilidad") l = [...l].sort((a, b) => a.harvestIn - b.harvestIn);

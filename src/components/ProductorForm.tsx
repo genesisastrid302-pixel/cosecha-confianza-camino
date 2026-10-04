@@ -1,14 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ChevronLeft, Camera, X, CheckCircle2, Circle } from "lucide-react";
-import { Handshake } from "lucide-react";
 import {
-  APORTACION_SOCIO,
-  FOTOS_MAX,
-  FOTOS_MIN,
-  cobroCompleto,
-  cobroResumen,
-  EMPTY_PROFILE,
   fileToDataUrl,
   profileCompleteness,
   readProducer,
@@ -22,12 +15,10 @@ const zonas: Zona[] = ["Galeana", "Allende", "Ramos Arizpe"];
 const pagos: Pago[] = ["CLABE", "CoDi", "Efectivo"];
 
 export function ProductorForm({ onBack }: { onBack: () => void }) {
-  const [p, setP] = useState<ProducerProfile>(EMPTY_PROFILE);
-  const [password, setPassword] = useState("");
-  const [password2, setPassword2] = useState("");
+  const [p, setP] = useState<ProducerProfile>({ name: "", story: "", zona: "", pago: "", clabe: "", photos: [] });
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
-  useEffect(() => setP({ ...EMPTY_PROFILE, zona: readProducer().profile.zona }), []);
+  useEffect(() => setP({ ...readProducer().profile, name: "", story: "", photos: [] }), []);
 
   const input = "mt-1.5 w-full rounded-xl border border-input bg-card px-4 py-3.5 text-sm placeholder:text-muted-foreground/60 focus:border-foreground focus:outline-none";
   const pill = (on: boolean) => `flex-1 rounded-xl border py-3 text-sm ${on ? "border-foreground bg-foreground text-background" : "border-border bg-card"}`;
@@ -35,7 +26,7 @@ export function ProductorForm({ onBack }: { onBack: () => void }) {
 
   async function addPhotos(files: FileList | null) {
     if (!files) return;
-    const urls = await Promise.all(Array.from(files).slice(0, FOTOS_MAX - p.photos.length).map((f) => fileToDataUrl(f)));
+    const urls = await Promise.all(Array.from(files).slice(0, 6 - p.photos.length).map((f) => fileToDataUrl(f)));
     setP((s) => ({ ...s, photos: [...s.photos, ...urls] }));
   }
 
@@ -44,11 +35,7 @@ export function ProductorForm({ onBack }: { onBack: () => void }) {
       <div className="flex min-h-full flex-col px-5 pb-8 pt-5">
         <span className="eyebrow mt-10">Paso 3 de 3</span>
         <h1 className="display mt-2 text-3xl">Bienvenido, {p.name.split(" ")[0]}.</h1>
-        <p className="mt-3 text-sm text-muted-foreground">Ya eres socio de Milpa. Tu perfil es la primera razón por la que una familia confía en ti.</p>
-        <div className="mt-6 space-y-2 rounded-2xl border border-border bg-card p-4 text-sm">
-          <div className="flex justify-between gap-3"><span className="text-muted-foreground">Recibes tus pagos en</span><span className="text-right">{cobroResumen(p)}</span></div>
-          <div className="flex justify-between gap-3"><span className="text-muted-foreground">Tu aportación como socio</span><span>{APORTACION_SOCIO}% por venta</span></div>
-        </div>
+        <p className="mt-3 text-sm text-muted-foreground">Tu perfil es la primera razón por la que una familia confía en ti.</p>
         <CompletenessCard pct={pct} checks={checks} />
         <Link to="/productor" className="mt-auto block w-full rounded-full bg-foreground py-4 text-center text-sm font-medium text-background">
           Ir a mi inicio
@@ -62,17 +49,10 @@ export function ProductorForm({ onBack }: { onBack: () => void }) {
       className="flex min-h-full flex-col px-5 pb-8 pt-5"
       onSubmit={(e) => {
         e.preventDefault();
-        if (!/^\d{10}$/.test(p.telefono)) return setError("El teléfono debe tener 10 dígitos.");
-        if (password.length < 8) return setError("La contraseña debe tener al menos 8 caracteres.");
-        if (password !== password2) return setError("Las contraseñas no coinciden.");
-        if (p.pagos.length === 0) return setError("Elige al menos una forma de recibir tus pagos.");
-        if (!cobroCompleto(p)) return setError("Completa los datos de cada forma de cobro que elegiste.");
-        if (p.photos.length < FOTOS_MIN) return setError(`Como productor nuevo, sube al menos ${FOTOS_MIN} fotos de tu campo.`);
-        if (!p.socio) return setError("Para vender en Milpa necesitas aceptar el acuerdo de socio.");
+        if (p.pago === "CLABE" && !/^\d{18}$/.test(p.clabe)) return setError("La CLABE debe tener 18 dígitos.");
         setError("");
         const s = readProducer();
-        // Cuenta nueva: sin reseñas, el score se genera con el feedback de los consumidores
-        writeProducer({ ...s, resenas: 0, lastScore: null, profile: { ...p, name: p.name.trim(), story: p.story.trim() } });
+        writeProducer({ ...s, profile: { ...p, name: p.name.trim(), story: p.story.trim() } });
         setDone(true);
       }}
     >
@@ -88,24 +68,6 @@ export function ProductorForm({ onBack }: { onBack: () => void }) {
           <input required maxLength={100} value={p.name} onChange={(e) => setP({ ...p, name: e.target.value })} className={input} placeholder="Ezequiel Martínez" />
         </label>
         <label className="block">
-          <span className="text-xs text-muted-foreground">Correo</span>
-          <input required type="email" maxLength={255} value={p.correo} onChange={(e) => setP({ ...p, correo: e.target.value })} className={input} placeholder="ezequiel@correo.com" />
-        </label>
-        <label className="block">
-          <span className="text-xs text-muted-foreground">Teléfono celular</span>
-          <input required inputMode="numeric" maxLength={10} value={p.telefono} onChange={(e) => setP({ ...p, telefono: e.target.value.replace(/\D/g, "") })} className={input} placeholder="81 1234 5678" />
-        </label>
-        <div className="grid grid-cols-2 gap-2">
-          <label className="block">
-            <span className="text-xs text-muted-foreground">Contraseña</span>
-            <input required type="password" minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} className={input} placeholder="8+ caracteres" autoComplete="new-password" />
-          </label>
-          <label className="block">
-            <span className="text-xs text-muted-foreground">Repetir</span>
-            <input required type="password" value={password2} onChange={(e) => setPassword2(e.target.value)} className={input} autoComplete="new-password" />
-          </label>
-        </div>
-        <label className="block">
           <span className="text-xs text-muted-foreground">Historia de tu rancho</span>
           <textarea rows={4} maxLength={800} value={p.story} onChange={(e) => setP({ ...p, story: e.target.value })} className={input} placeholder="¿Desde cuándo siembras? ¿Quién trabaja contigo? ¿Cómo cuidas la tierra?" />
         </label>
@@ -117,14 +79,19 @@ export function ProductorForm({ onBack }: { onBack: () => void }) {
             ))}
           </div>
         </div>
-        <CobroFields p={p} onChange={setP} />
-        <SocioCard checked={p.socio} onChange={(socio) => setP({ ...p, socio })} />
         <div>
-          <span className="flex justify-between text-xs text-muted-foreground">
-            <span>Fotos de tu campo · mínimo {FOTOS_MIN}</span>
-            <span className={p.photos.length >= FOTOS_MIN ? "text-primary" : ""}>{p.photos.length}/{FOTOS_MAX}</span>
-          </span>
-          <p className="mt-1 text-[11px] text-muted-foreground">Como eres nuevo, las familias aún no te conocen: tus fotos son tu carta de presentación mientras juntas tus primeras reseñas.</p>
+          <span className="text-xs text-muted-foreground">¿Cómo quieres recibir tus pagos?</span>
+          <div className="mt-1.5 flex gap-2">
+            {pagos.map((m) => (
+              <button type="button" key={m} className={pill(p.pago === m)} onClick={() => setP({ ...p, pago: m })}>{m}</button>
+            ))}
+          </div>
+          {p.pago === "CLABE" && (
+            <input inputMode="numeric" maxLength={18} value={p.clabe} onChange={(e) => setP({ ...p, clabe: e.target.value.replace(/\D/g, "") })} className={input} placeholder="18 dígitos" />
+          )}
+        </div>
+        <div>
+          <span className="text-xs text-muted-foreground">Fotos de tu campo</span>
           <div className="mt-1.5 grid grid-cols-3 gap-2">
             {p.photos.map((src, i) => (
               <div key={i} className="relative aspect-square overflow-hidden rounded-xl">
@@ -134,7 +101,7 @@ export function ProductorForm({ onBack }: { onBack: () => void }) {
                 </button>
               </div>
             ))}
-            {p.photos.length < FOTOS_MAX && (
+            {p.photos.length < 6 && (
               <label className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-border text-[11px] text-muted-foreground">
                 <Camera className="h-5 w-5" /> Agregar
                 <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => addPhotos(e.target.files)} />
@@ -171,71 +138,6 @@ export function CompletenessCard({ pct, checks }: { pct: number; checks: { label
           </li>
         ))}
       </ul>
-    </div>
-  );
-}
-
-/** Datos para recibir pagos; puede elegir varios métodos y cada uno pide sus datos */
-export function CobroFields({ p, onChange }: { p: ProducerProfile; onChange: (p: ProducerProfile) => void }) {
-  const input = "mt-1.5 w-full rounded-xl border border-input bg-card px-4 py-3.5 text-sm placeholder:text-muted-foreground/60 focus:border-foreground focus:outline-none";
-  const pill = (on: boolean) => `flex-1 rounded-xl border py-3 text-sm ${on ? "border-foreground bg-foreground text-background" : "border-border bg-card"}`;
-  const toggle = (m: Pago) => onChange({ ...p, pagos: p.pagos.includes(m) ? p.pagos.filter((x) => x !== m) : [...p.pagos, m] });
-  return (
-    <div>
-      <span className="text-xs text-muted-foreground">¿Cómo quieres recibir tus pagos? Puedes elegir varias</span>
-      <div className="mt-1.5 flex gap-2">
-        {pagos.map((m) => (
-          <button type="button" key={m} aria-pressed={p.pagos.includes(m)} className={pill(p.pagos.includes(m))} onClick={() => toggle(m)}>{m}</button>
-        ))}
-      </div>
-      {p.pagos.includes("CLABE") && (
-        <div className="mt-3 space-y-2 rounded-xl border border-border p-3">
-          <div className="text-xs font-medium">Transferencia (CLABE)</div>
-          <input inputMode="numeric" maxLength={18} value={p.clabe} onChange={(e) => onChange({ ...p, clabe: e.target.value.replace(/\D/g, "") })} className={input} placeholder="CLABE · 18 dígitos" aria-label="CLABE" />
-          <div className="grid grid-cols-2 gap-2">
-            <input maxLength={40} value={p.banco} onChange={(e) => onChange({ ...p, banco: e.target.value })} className={input} placeholder="Banco" aria-label="Banco" />
-            <input maxLength={100} value={p.titular} onChange={(e) => onChange({ ...p, titular: e.target.value })} className={input} placeholder="Titular" aria-label="Titular de la cuenta" />
-          </div>
-        </div>
-      )}
-      {p.pagos.includes("CoDi") && (
-        <div className="mt-3 rounded-xl border border-border p-3">
-          <div className="text-xs font-medium">CoDi</div>
-          <input inputMode="numeric" maxLength={10} value={p.codi} onChange={(e) => onChange({ ...p, codi: e.target.value.replace(/\D/g, "") })} className={input} placeholder="Celular ligado a CoDi · 10 dígitos" aria-label="Celular CoDi" />
-        </div>
-      )}
-      {p.pagos.includes("Efectivo") && (
-        <p className="mt-3 rounded-xl border border-border p-3 text-[11px] text-muted-foreground">
-          <span className="block text-xs font-medium text-foreground">Efectivo</span>
-          El distribuidor te paga en mano al recolectar tu producto.
-        </p>
-      )}
-    </div>
-  );
-}
-
-/** Acuerdo de socio: el productor aporta un % de cada venta a Milpa */
-export function SocioCard({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <div className="rounded-2xl border-2 border-primary/30 bg-primary/5 p-4">
-      <div className="flex items-center gap-2">
-        <Handshake className="h-5 w-5 text-primary" />
-        <span className="serif text-lg">Eres socio de Milpa</span>
-      </div>
-      <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-        Milpa no compra tu cosecha: tú vendes directo a las familias y la app trabaja contigo. Como socio aportas el{" "}
-        <strong className="text-foreground">{APORTACION_SOCIO}% de cada venta</strong> para sostener la plataforma, tu
-        score, el QR de trazabilidad y la cosecha compartida.
-      </p>
-      <ul className="mt-3 space-y-1.5 text-xs">
-        <li>· Se descuenta en automático de cada pago; nunca pagas por adelantado ni hay cuota fija.</li>
-        <li>· Si una venta se cobra en efectivo, tu aportación se descuenta de tu siguiente pago digital.</li>
-        <li>· Ejemplo: vendes $1,000 → recibes ${(1000 * (100 - APORTACION_SOCIO)) / 100} y aportas ${(1000 * APORTACION_SOCIO) / 100}.</li>
-      </ul>
-      <label className="mt-4 flex cursor-pointer items-start gap-3 text-sm">
-        <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="mt-0.5 h-5 w-5 accent-[var(--primary)]" />
-        <span>Acepto ser socio y aportar el {APORTACION_SOCIO}% de mis ventas a Milpa.</span>
-      </label>
     </div>
   );
 }

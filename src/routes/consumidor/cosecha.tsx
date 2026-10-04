@@ -3,8 +3,6 @@ import { useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { consumidorTabs } from "@/components/tabs";
 import { producers, products } from "@/lib/data";
-import { formatScore } from "@/lib/score";
-import { trustScore10 } from "@/lib/data";
 import { Sprout, Check, CalendarDays, HandHeart } from "lucide-react";
 
 export const Route = createFileRoute("/consumidor/cosecha")({
@@ -26,8 +24,6 @@ type Plan = { id: string; nombre: string; semanas: number; kgSemana: string; pre
 const planes: Plan[] = [
   { id: "raiz", nombre: "Raíz", semanas: 8, kgSemana: "2–3 kg", precio: 1180, nota: "Para una o dos personas. Verdura de la semana." },
   { id: "milpa", nombre: "Milpa", semanas: 12, kgSemana: "4–5 kg", precio: 2340, nota: "Para familia. Verdura, cítricos y hierbas." },
-  // Mismo precio por semana que Milpa: la cosecha compartida no lleva descuento, se paga lo justo al productor
-  { id: "temporada", nombre: "Temporada completa", semanas: 24, kgSemana: "4–5 kg", precio: 4680, nota: "Acompañas al productor de la siembra a la última cosecha." },
 ];
 
 function CosechaCompartida() {
@@ -94,7 +90,7 @@ function CosechaCompartida() {
                     <div className="serif text-base leading-tight">{p.name}</div>
                     <div className="truncate text-[11px] text-muted-foreground">{p.practice}</div>
                     <div className="mt-1 text-[10px] uppercase tracking-wider text-muted-foreground">
-                      Score {formatScore(trustScore10(p.slug))} · {p.years} años
+                      Score {p.score} · {p.years} años
                     </div>
                   </div>
                   {activo && <Check className="h-5 w-5 shrink-0 text-primary" />}

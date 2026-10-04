@@ -24,7 +24,7 @@ export const Route = createFileRoute("/distribuidor/recoleccion")({
 
         <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
           <div className="eyebrow">Registro de condiciones</div>
-          <Field label="Temperatura cámara" value="6 °C" />
+          <Field label="Temperatura cámara" value="8 °C" />
           <Field label="Estado visual" value="Óptimo" />
           <Field label="Merma en tramo" value="0 kg" />
         </div>

@@ -1,5 +1,5 @@
-- [ ] Simplificar la pantalla de acceso quitando los tres botones de demostración.
-- [ ] Añadir ficha individual de cultivo, selector de cantidad y carrito funcional.
-- [ ] Ampliar el catálogo con cuatro cultivos y filtro por precio.
-- [ ] Renombrar la pantalla de Cosecha sin alterar los planes existentes.
-- [ ] Verificar las pantallas y metadatos de las rutas.
+- [x] Simplificar la pantalla de acceso quitando los tres botones de demostración.
+- [x] Añadir ficha individual de cultivo, selector de cantidad y carrito funcional.
+- [x] Ampliar el catálogo con cuatro cultivos y filtro por precio.
+- [x] Renombrar la pantalla de Cosecha sin alterar los planes existentes.
+- [x] Verificar las pantallas y metadatos de las rutas.

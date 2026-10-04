@@ -1,3 +1,4 @@
+import { score10, type ScoreLayers } from "@/lib/score";
 import santiago from "@/assets/producer-santiago.jpg";
 import rosa from "@/assets/producer-rosa.jpg";
 import tomato from "@/assets/product-tomato.jpg";
@@ -28,12 +29,12 @@ export const producers: Record<string, Producer> = {
     region: "Rancho Seis Tierras · Ramos Arizpe, Coahuila",
     practice: "Verduras agroecológicas de semilla ancestral",
     photo: santiago,
-    score: 94,
+    score: 9.4,
     years: 12,
     note: "Esta semana el jitomate salió más chico porque llovió menos, pero está más dulce. Cosecho lo que ustedes piden — ni un kilo más.",
     metrics: [
       { label: "Cultivos activos", value: "7" },
-      { label: "Score de confianza", value: "94 / 100" },
+      { label: "Score de confianza", value: "9.4/10" },
       { label: "Familias servidas", value: "184" },
       { label: "Distancia a tu mesa", value: "98 km" },
     ],
@@ -44,12 +45,12 @@ export const producers: Record<string, Producer> = {
     region: "Galeana, Nuevo León",
     practice: "Cítricos y hortalizas de temporada",
     photo: rosa,
-    score: 91,
+    score: 9.1,
     years: 18,
     note: "El limón este año salió con cáscara más gruesa por el frío de marzo, pero el jugo está más perfumado. Corto en la mañana, llega a tu casa el mismo día.",
     metrics: [
       { label: "Cultivos activos", value: "5" },
-      { label: "Score de confianza", value: "91 / 100" },
+      { label: "Score de confianza", value: "9.1/10" },
       { label: "Familias servidas", value: "127" },
       { label: "Distancia a tu mesa", value: "182 km" },
     ],
@@ -170,8 +171,8 @@ export type ProducerDetail = {
   practices: string[];
   coldChain: string;
   gallery: string[];
-  // each 0-100
-  components: { rating: number; profile: number; onTime: number; waste: number };
+  /** Capas del score, cada una 0–100 (ver src/lib/score.ts) */
+  components: ScoreLayers;
 };
 
 export const producerDetails: Record<string, ProducerDetail> = {
@@ -181,7 +182,7 @@ export const producerDetails: Record<string, ProducerDetail> = {
     practices: ["Semilla criolla propia", "Composta y abono verde", "Riego por goteo con agua de lluvia", "Rotación y asociación de cultivos"],
     coldChain: "Cosecha al amanecer, cámara a 4–7 °C en el rancho y hielera térmica hasta tu puerta. Menos de 24 h del surco a tu mesa.",
     gallery: [seedlings, planting, harvest, landscape],
-    components: { rating: 96, profile: 95, onTime: 92, waste: 88 },
+    components: { calificacion: 95, consistencia: 95, distribuidor: 92 },
   },
   rosa: {
     story:
@@ -189,21 +190,16 @@ export const producerDetails: Record<string, ProducerDetail> = {
     practices: ["Poda manual", "Control biológico de plagas", "Coberturas vegetales", "Cosecha en punto de madurez"],
     coldChain: "Corte en la mañana, sombra y ventilación natural; traslado refrigerado el mismo día.",
     gallery: [harvest, landscape, seedlings, planting],
-    components: { rating: 93, profile: 90, onTime: 90, waste: 90 },
+    components: { calificacion: 92, consistencia: 90, distribuidor: 90 },
   },
 };
 
 export function trustScore10(slug: string) {
   const c = producerDetails[slug]?.components;
-  if (!c) return 0;
-  return Math.round((c.rating * 0.4 + c.profile * 0.3 + c.onTime * 0.2 + c.waste * 0.1) / 10 * 10) / 10;
+  return c ? score10(c) : 0;
 }
 
-export function scoreTone(score: number) {
-  if (score >= 8) return "bg-primary text-primary-foreground";
-  if (score >= 6) return "bg-miel text-ink";
-  return "bg-destructive text-destructive-foreground";
-}
+export { scoreTone } from "@/lib/score";
 
 /** Unidad corta para mostrar precios: "kilo" → "kg" */
 export function unitLabel(unit: string) {

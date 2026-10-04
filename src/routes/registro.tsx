@@ -3,6 +3,7 @@ import { useState } from "react";
 import { ChevronLeft, Sprout, Truck, Home } from "lucide-react";
 import { ConsumidorForm } from "@/components/ConsumidorForm";
 import { ProductorForm } from "@/components/ProductorForm";
+import { DistribuidorForm } from "@/components/DistribuidorForm";
 import { RoleOption } from "@/components/RoleOption";
 
 export const Route = createFileRoute("/registro")({
@@ -17,6 +18,7 @@ function Registro() {
   const [step, setStep] = useState<1 | 2>(1);
 
   if (step === 2 && role === "productor") return <ProductorForm onBack={() => setStep(1)} />;
+  if (step === 2 && role === "distribuidor") return <DistribuidorForm onBack={() => setStep(1)} />;
   if (step === 2) return <ConsumidorForm onBack={() => setStep(1)} />;
 
   return (
@@ -64,20 +66,13 @@ function Registro() {
       </div>
 
       <div className="mt-auto pt-8">
-        {role === "consumidor" || role === "productor" ? (
+        {role ? (
           <button
             onClick={() => setStep(2)}
             className="block w-full rounded-full bg-foreground py-4 text-center text-sm font-medium text-background transition active:scale-[0.98]"
           >
             Continuar como {role}
           </button>
-        ) : role ? (
-          <Link
-            to={`/${role}` as "/productor" | "/distribuidor"}
-            className="block w-full rounded-full bg-foreground py-4 text-center text-sm font-medium text-background transition active:scale-[0.98]"
-          >
-            Continuar como {role}
-          </Link>
         ) : (
           <button
             disabled

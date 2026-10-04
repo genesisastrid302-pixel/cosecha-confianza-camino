@@ -2,6 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { consumidorTabs } from "@/components/tabs";
 import { getProducer, producerDetails, trustScore10, scoreTone } from "@/lib/data";
+import { SCORE_LAYERS } from "@/lib/score";
 import { ChevronLeft, MapPin, Snowflake, Leaf } from "lucide-react";
 
 export const Route = createFileRoute("/consumidor/productor/$slug")({
@@ -25,12 +26,7 @@ function ProducerProfile() {
   const p = getProducer(slug);
   const d = producerDetails[slug];
   const s = trustScore10(slug);
-  const comps = [
-    { l: "Calificación de consumidores", w: "40%", v: d.components.rating },
-    { l: "Perfil completo", w: "30%", v: d.components.profile },
-    { l: "Entregas a tiempo", w: "20%", v: d.components.onTime },
-    { l: "Merma registrada", w: "10%", v: d.components.waste },
-  ];
+  const comps = SCORE_LAYERS.map((l) => ({ l: l.label, w: `${l.weight}%`, v: d.components[l.key] }));
 
   return (
     <AppShell tabs={consumidorTabs} tone="terracota">

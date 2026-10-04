@@ -4,6 +4,7 @@ import { ChevronLeft, MapPin, Store, CreditCard, QrCode, Banknote, ShieldCheck }
 import { AppShell } from "@/components/AppShell";
 import { products, getProducer, unitLabel } from "@/lib/data";
 import { readCart, subscribeCart, writeCart, type CartLine } from "@/lib/cart";
+import { readConsumer } from "@/lib/accounts";
 import { createOrder, LOGISTICA, PLATAFORMA, shareToProducers, type Entrega, type MetodoPago } from "@/lib/orders";
 
 export const Route = createFileRoute("/consumidor/checkout")({
@@ -35,6 +36,9 @@ function Checkout() {
   const [pago, setPago] = useState<MetodoPago>("Tarjeta");
 
   useEffect(() => {
+    const c = readConsumer();
+    setEntrega(c.entrega);
+    setPago(c.pago);
     const update = () => {
       setLines(readCart());
       setReady(true);
@@ -153,8 +157,8 @@ function Checkout() {
               <div className="my-2 h-px bg-border" />
               <Row l="Total" v={total} bold />
               <p className="pt-1 text-[11px] text-muted-foreground">
-                <span className="font-medium text-primary">{shareToProducers(subtotal)}%</span> va directo a{" "}
-                {productores.join(" y ")}.
+                Tu pago se reparte en automático: <span className="font-medium text-primary">${subtotal} ({shareToProducers(subtotal)}%)</span> a{" "}
+                {productores.join(" y ")}, ${LOGISTICA} al distribuidor y ${PLATAFORMA} a Milpa.
               </p>
             </section>
 
@@ -168,7 +172,7 @@ function Checkout() {
                 {pago === "Efectivo" ? `Confirmar pedido · $${total}` : `Pagar $${total}`}
               </button>
               <p className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
-                <ShieldCheck className="h-3.5 w-3.5" /> Prototipo: no se realiza ningún cobro.
+                <ShieldCheck className="h-3.5 w-3.5" /> Pago seguro con Conekta · prototipo, no se cobra
               </p>
             </div>
           </>

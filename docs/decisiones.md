@@ -33,11 +33,25 @@ La marca el distribuidor (`entregado`) y el consumidor la confirma (`recibido`).
 
 ## Score de confianza (sobre 10)
 
-- Calificación de consumidores 40 %: promedio de las últimas 20 reseñas. Con menos de 5 reseñas el productor muestra "Nuevo".
-- Perfil completo 30 %, entregas a tiempo 20 %, merma 10 %.
-- Para la merma solo cuenta la que **reporta el consumidor** al recibir.
-- Colores: verde ≥ 8, amarillo ≥ 5, rojo < 5. Siempre se muestra como `9.4/10`.
+Validación por sistema en 3 capas, como en el modelo de negocio (`src/lib/score.ts`):
+
+- **Calificación de consumidores · 40 %**: promedio de las últimas 20 reseñas, incluida la merma que reporta el consumidor. Con menos de 5 reseñas el productor muestra "Nuevo".
+- **Consistencia de datos · 30 %**: perfil completo, fotos con fecha y ubicación, temporadas reales.
+- **Registro del distribuidor · 30 %**: entregas a tiempo y estado del producto al recolectar.
+- Colores: verde ≥ 8, amarillo ≥ 5, rojo < 5. Siempre se muestra como `9.4/10`. El mercado muestra primero a los productores con mejor score.
 - Solo califica quien compró, y solo dentro de la app.
+
+## Pagos
+
+- El consumidor paga producto + logística ($18) + plataforma ($10). El pago se reparte en automático (Conekta, split payment).
+- El productor recibe el 100 % del precio de sus productos, a su CLABE (con banco y titular), a CoDi o en efectivo al recolectar.
+- El distribuidor recibe la logística a su CLABE o CoDi; si el consumidor paga en efectivo, lo cobra al entregar.
+- Al productor se le paga cuando el consumidor confirma que recibió (o pasan 24 h).
+- Cosecha compartida: planes de 8, 12 y 24 semanas, sin descuento.
+
+## Cuentas
+
+Los tres roles registran nombre, correo, teléfono y contraseña. La contraseña no se guarda en el prototipo.
 
 ## Demo
 

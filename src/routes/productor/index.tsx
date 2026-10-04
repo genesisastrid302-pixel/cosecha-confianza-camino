@@ -123,12 +123,14 @@ function ScoreCard() {
   const [state, ready] = useProducer();
   const { total, components } = trustScore(state);
   const { pct, checks } = profileCompleteness(state.profile);
-  const dropped = state.lastScore !== null && total < state.lastScore;
+  // lastScore guardado antes en escala de 100 se ignora
+  const last = state.lastScore !== null && state.lastScore <= 10 ? state.lastScore : null;
+  const dropped = last !== null && total < last;
 
   useEffect(() => {
     if (!ready) return;
-    if (state.lastScore === null || total > state.lastScore) updateProducer((s) => ({ ...s, lastScore: total }));
-  }, [ready, total, state.lastScore]);
+    if (last === null || total > last) updateProducer((s) => ({ ...s, lastScore: total }));
+  }, [ready, total, last]);
 
   return (
     <div className="space-y-3">
@@ -136,7 +138,7 @@ function ScoreCard() {
         <div className="flex items-start gap-3 rounded-2xl border border-terracota/40 bg-terracota/10 p-4">
           <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-terracota" />
           <div className="flex-1 text-sm">
-            <div className="font-medium">Tu Score bajó de {state.lastScore} a {total}</div>
+            <div className="font-medium">Tu Score bajó de {last?.toFixed(1)} a {total.toFixed(1)}</div>
             <p className="mt-1 text-xs text-muted-foreground">Revisa los componentes de abajo para saber qué mejorar.</p>
             <button onClick={() => updateProducer((s) => ({ ...s, lastScore: total }))} className="mt-2 text-xs underline">Entendido</button>
           </div>
@@ -145,8 +147,8 @@ function ScoreCard() {
       <div className="rounded-2xl bg-primary p-5 text-primary-foreground shadow-paper">
         <div className="text-[11px] tracking-widest uppercase opacity-80">Score de confianza</div>
         <div className="mt-2 flex items-baseline gap-2">
-          <span className="display text-6xl">{total}</span>
-          <span className="text-lg opacity-80">/ 100</span>
+          <span className="display text-6xl">{total.toFixed(1)}</span>
+          <span className="text-lg opacity-80">/ 10</span>
         </div>
         <p className="mt-1 text-xs opacity-80">Lo calcula el sistema. Es lo que ven las familias antes de comprarte.</p>
         <div className="mt-4 space-y-2.5">
@@ -154,7 +156,7 @@ function ScoreCard() {
             <div key={c.label}>
               <div className="flex justify-between text-xs">
                 <span>{c.label} <span className="opacity-70">· {c.weight}%</span></span>
-                <span>{c.value}</span>
+                <span>{(c.value / 10).toFixed(1)}</span>
               </div>
               <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-paper/20">
                 <div className="h-full rounded-full bg-paper" style={{ width: `${c.value}%` }} />

@@ -2,14 +2,22 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { consumidorTabs } from "@/components/tabs";
 import { ChevronRight, LogOut } from "lucide-react";
+import { nombreCorto, useConsumer } from "@/lib/accounts";
+import { useOrders } from "@/lib/orders";
 
 export const Route = createFileRoute("/consumidor/perfil")({
   head: () => ({ meta: [{ title: "Perfil · Consumidor — Milpa" }] }),
-  component: () => (
-    <AppShell tabs={consumidorTabs} tone="terracota" eyebrow="Tu perfil" title="Adriana M.">
+  component: Perfil,
+});
+
+function Perfil() {
+  const c = useConsumer();
+  const orders = useOrders();
+  return (
+    <AppShell tabs={consumidorTabs} tone="terracota" eyebrow="Tu perfil" title={nombreCorto(c.nombre)}>
       <div className="space-y-5 px-5">
         <div className="grid grid-cols-3 gap-3 text-center">
-          <Tile n="8" l="Pedidos / mes" />
+          <Tile n={String(orders.length)} l="Pedidos" />
           <Tile n="6.4 kg" l="Merma evitada" />
           <Tile n="45 km" l="Promedio" />
         </div>
@@ -22,8 +30,9 @@ export const Route = createFileRoute("/consumidor/perfil")({
         </div>
 
         <div className="divide-y divide-border rounded-2xl border border-border bg-card">
-          <Row l="Direcciones de entrega" d="2 guardadas" />
-          <Row l="Método de pago" d="Tarjeta · CoDi" />
+          <Row l="Datos de contacto" d={c.correo || c.telefono || "Sin capturar"} />
+          <Row l="Entrega preferida" d={`${c.entrega === "domicilio" ? "A domicilio" : "Recoger"} · ${c.municipio}`} />
+          <Row l="Método de pago" d={c.pago} />
           <Row l="Preferencias" d="Verduras y cítricos" />
           <Row l="Mis suscripciones" d="Canasta Seis Tierras" />
         </div>
@@ -33,8 +42,8 @@ export const Route = createFileRoute("/consumidor/perfil")({
         </Link>
       </div>
     </AppShell>
-  ),
-});
+  );
+}
 
 function Tile({ n, l }: { n: string; l: string }) {
   return <div className="rounded-2xl border border-border bg-card p-3"><div className="serif text-2xl">{n}</div><div className="text-[10px] uppercase tracking-wider text-muted-foreground">{l}</div></div>;

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { products } from "@/lib/data";
 import type { CartLine } from "@/lib/cart";
+import { nombreCorto, readConsumer } from "@/lib/accounts";
 
 // Estados acordados en docs/decisiones.md
 export type OrderStatus =
@@ -136,7 +137,7 @@ export function createOrder(input: {
   const now = new Date().toISOString();
   const order: Order = {
     id: `MLP-${n}`,
-    cliente: "Adriana M.",
+    cliente: nombreCorto(readConsumer().nombre),
     createdAt: now,
     items,
     lots,

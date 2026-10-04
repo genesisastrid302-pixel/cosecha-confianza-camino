@@ -1,14 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CheckCircle2, ChevronRight, Clock3, MapPin, Navigation, Store, Truck } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
+import { MapaRuta } from "@/components/MapaRuta";
 import { distribuidorTabs } from "@/components/tabs";
 import { useOrders, updateOrder, crearPedidoEjemplo } from "@/lib/orders";
 import {
   entregasPendientes,
   fueEntregado,
   paradasRecoleccion,
+  puntosMapa,
   setRutaIniciada,
   tiempoEstimado,
+  urlNavegacion,
   useRutaIniciada,
 } from "@/lib/distribucion";
 
@@ -27,13 +30,7 @@ function Ruta() {
   const porSalir = entregas.filter((o) => o.status === "en_recoleccion");
   const hechas = orders.filter(fueEntregado);
   const paradas = recolecciones.length + entregas.length;
-  const destinos = [...recolecciones.filter((r) => !r.enLocal).map((r) => r.lugar), ...entregas.map((o) => o.direccion)];
-  const mapsUrl =
-    destinos.length > 0
-      ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destinos[destinos.length - 1])}${
-          destinos.length > 1 ? `&waypoints=${encodeURIComponent(destinos.slice(0, -1).join("|"))}` : ""
-        }`
-      : "";
+  const mapsUrl = urlNavegacion(recolecciones, entregas);
 
   return (
     <AppShell tabs={distribuidorTabs} tone="miel" eyebrow="Ruta del día" title="Ruta">
@@ -55,30 +52,7 @@ function Ruta() {
           </div>
         ) : (
           <>
-            {/* Mapa ilustrativo de la ruta */}
-            <div className="relative h-36 overflow-hidden rounded-2xl border border-border bg-secondary">
-              <svg viewBox="0 0 350 144" className="absolute inset-0 h-full w-full" aria-hidden>
-                {(() => {
-                  const n = Math.min(paradas, 6);
-                  const pts = Array.from({ length: n }).map((_, i) => {
-                    const t = n === 1 ? 0.5 : i / (n - 1);
-                    return { x: 30 + t * 290, y: 66 - Math.sin(t * Math.PI * 1.6) * 34 };
-                  });
-                  return (
-                    <>
-                      <polyline points={pts.map((q) => `${q.x},${q.y}`).join(" ")} fill="none" stroke="var(--miel)" strokeWidth="3" strokeDasharray="6 6" strokeLinejoin="round" />
-                      {pts.map((q, i) => (
-                        <g key={i}>
-                          <circle cx={q.x} cy={q.y} r="11" fill="var(--foreground)" />
-                          <text x={q.x} y={q.y + 4} textAnchor="middle" fontSize="11" fill="var(--background)">{i + 1}</text>
-                        </g>
-                      ))}
-                    </>
-                  );
-                })()}
-              </svg>
-              <span className="absolute bottom-2 left-3 text-[10px] uppercase tracking-widest text-muted-foreground">Mapa ilustrativo</span>
-            </div>
+            <MapaRuta puntos={puntosMapa(recolecciones, entregas)} />
 
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5"><Clock3 className="h-3.5 w-3.5" /> {tiempoEstimado(recolecciones, entregas)} estimados</span>

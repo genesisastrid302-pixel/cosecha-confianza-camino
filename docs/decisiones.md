@@ -56,6 +56,8 @@ Todo sale de los pedidos (`src/lib/orders.ts` y `src/lib/distribucion.ts`); no h
 5. Después de cada entrega: "¿Hubo merma?" con kg, motivo, lote y foto. El % de merma del distribuidor se calcula solo (kg perdidos / kg entregados).
 6. El consumidor confirma, escanea el QR (ve lote, empaque y temperaturas reales) y califica. Esa calificación suma una reseña al productor y libera su pago.
 
+Mapa de la ruta: mapa real de OpenStreetMap (Leaflet) con la ruta por calles de OSRM; si OSRM no responde se dibuja un trazo aproximado. Los pines llevan el número y color de la lista (verde recolección, terracota entrega) y la línea sale del local. Las coordenadas viven en `src/lib/data.ts` (campos de productores) y `src/lib/distribucion.ts` (direcciones del demo). "Abrir en navegación" manda esas mismas coordenadas a Google Maps.
+
 Finanzas del distribuidor: gana la logística ($18) por pedido entregado; del efectivo que cobra liquida el resto a productores y Milpa.
 
 ## Score de confianza (sobre 10)

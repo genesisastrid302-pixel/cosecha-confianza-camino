@@ -76,6 +76,53 @@ export function confirmarRecoleccion(o: Order, slug: string, temperatura?: numbe
   });
 }
 
+// --- Mapa y navegación de la ruta ---
+
+export type Coords = [number, number];
+
+/** Coordenadas aproximadas de las direcciones y puntos de entrega del demo */
+const UBICACIONES: Record<string, Coords> = {
+  [LOCAL_DISTRIBUIDOR]: [25.6751, -100.3406],
+  "Punto Milpa · Mercado Juárez, Centro": [25.6731, -100.3168],
+  "Calle Hidalgo 214, Col. Roma, Monterrey": [25.6565, -100.3567],
+  "Av. Vasconcelos 150, San Pedro Garza García": [25.6524, -100.3698],
+};
+
+export const coordsDe = (lugar: string): Coords | undefined => UBICACIONES[lugar];
+
+/** Parada en el mapa; `n` es el mismo número que tiene en la lista de la ruta */
+export type PuntoMapa = { n: number; tipo: "recoleccion" | "entrega"; titulo: string; coords: Coords };
+
+export function puntosMapa(recolecciones: ParadaRecoleccion[], entregas: Order[]): PuntoMapa[] {
+  const puntos: (PuntoMapa | null)[] = [
+    ...recolecciones.map((r, i) => {
+      const coords = r.enLocal ? coordsDe(LOCAL_DISTRIBUIDOR) : getProducer(r.slug)?.coords;
+      return coords ? { n: i + 1, tipo: "recoleccion" as const, titulo: r.nombre, coords } : null;
+    }),
+    ...entregas.map((o, i) => {
+      const coords = coordsDe(o.direccion);
+      return coords ? { n: recolecciones.length + i + 1, tipo: "entrega" as const, titulo: o.cliente, coords } : null;
+    }),
+  ];
+  return puntos.filter((p): p is PuntoMapa => p !== null);
+}
+
+/**
+ * Link de Google Maps con las paradas fuera del local, en orden.
+ * Usa coordenadas cuando las hay para que Google no adivine la dirección;
+ * sin origen, Google parte de la ubicación actual del teléfono.
+ */
+export function urlNavegacion(recolecciones: ParadaRecoleccion[], entregas: Order[]) {
+  const destinos = [
+    ...recolecciones.filter((r) => !r.enLocal).map((r) => getProducer(r.slug)?.coords ?? r.lugar),
+    ...entregas.map((o) => coordsDe(o.direccion) ?? o.direccion),
+  ].map((d) => (typeof d === "string" ? d : d.join(",")));
+  if (destinos.length === 0) return "";
+  const destino = encodeURIComponent(destinos[destinos.length - 1]);
+  const paradas = destinos.length > 1 ? `&waypoints=${encodeURIComponent(destinos.slice(0, -1).join("|"))}` : "";
+  return `https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=${destino}${paradas}`;
+}
+
 /** Historial previo del distribuidor de ejemplo, para que los indicadores no arranquen en cero */
 const HISTORIAL = { entregas: 48, aTiempo: 46, kg: 310, mermaKg: 6.5 };
 

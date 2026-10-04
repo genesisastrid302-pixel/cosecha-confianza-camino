@@ -14,6 +14,8 @@ export type Producer = {
   slug: string;
   name: string;
   region: string;
+  /** Ubicación aproximada del campo [lat, lng], para el mapa de ruta */
+  coords: [number, number];
   practice: string;
   photo: string;
   score: number;
@@ -27,6 +29,7 @@ export const producers: Record<string, Producer> = {
     slug: "santiago",
     name: "Ezequiel Martínez",
     region: "Rancho Seis Tierras · Ramos Arizpe, Coahuila",
+    coords: [25.5418, -100.9474],
     practice: "Verduras agroecológicas de semilla ancestral",
     photo: santiago,
     score: 9.6,
@@ -43,6 +46,7 @@ export const producers: Record<string, Producer> = {
     slug: "rosa",
     name: "Rosa María Lozano",
     region: "Galeana, Nuevo León",
+    coords: [24.8253, -100.075],
     practice: "Cítricos y hortalizas de temporada",
     photo: rosa,
     score: 9.1,

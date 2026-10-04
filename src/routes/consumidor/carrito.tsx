@@ -2,33 +2,59 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { consumidorTabs } from "@/components/tabs";
 import { products } from "@/lib/data";
+import { useEffect, useState } from "react";
+import { Minus, Plus, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { readCart, subscribeCart, writeCart, type CartLine } from "@/lib/cart";
 
 export const Route = createFileRoute("/consumidor/carrito")({
-  head: () => ({ meta: [{ title: "Carrito · Milpa" }] }),
+  head: () => ({ meta: [
+    { title: "Carrito · Milpa" }, { name: "description", content: "Revisa tu canasta de cultivos agroecológicos Milpa." },
+    { property: "og:title", content: "Carrito · Milpa" }, { property: "og:description", content: "Revisa tu canasta de cultivos agroecológicos Milpa." },
+    { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
+  ] }),
   component: Carrito,
 });
 
 function Carrito() {
-  const items = products.slice(0, 2);
-  const subtotal = items.reduce((s, p) => s + p.price, 0);
+  const [lines, setLines] = useState<CartLine[]>([]);
+  useEffect(() => {
+    const update = () => setLines(readCart());
+    update();
+    return subscribeCart(update);
+  }, []);
+  const items = lines.flatMap((line) => {
+    const product = products.find((p) => p.id === line.id);
+    return product ? [{ ...product, quantity: line.quantity }] : [];
+  });
+  const subtotal = items.reduce((s, p) => s + p.price * p.quantity, 0);
+  const updateQuantity = (id: string, quantity: number) => {
+    writeCart(lines.map((line) => line.id === id ? { ...line, quantity } : line).filter((line) => line.quantity > 0));
+  };
   return (
     <AppShell tabs={consumidorTabs} tone="terracota" eyebrow="Tu canasta" title="Carrito">
       <div className="space-y-5 px-5">
+        {items.length === 0 && <p className="py-10 text-center text-sm text-muted-foreground">Tu canasta está vacía. Explora los cultivos del Mercado.</p>}
         {items.map((p) => (
           <div key={p.id} className="flex gap-3 rounded-2xl border border-border bg-card p-3">
             <img src={p.photo} alt={p.name} className="h-16 w-16 rounded-lg object-cover" />
             <div className="flex-1">
               <div className="serif text-base">{p.name}</div>
               <div className="text-[11px] text-muted-foreground">${p.price} / {p.unit}</div>
-              <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-border px-2 text-xs">
-                <button className="px-1.5">−</button><span>1</span><button className="px-1.5">+</button>
+              <div className="mt-2 inline-flex items-center gap-1 border border-border text-xs">
+                <Button variant="ghost" size="icon" className="h-7 w-7" aria-label={`Reducir ${p.name}`} onClick={() => updateQuantity(p.id, p.quantity - 1)}><Minus /></Button>
+                <span className="w-5 text-center">{p.quantity}</span>
+                <Button variant="ghost" size="icon" className="h-7 w-7" aria-label={`Aumentar ${p.name}`} disabled={p.quantity >= p.unitsLeft} onClick={() => updateQuantity(p.id, p.quantity + 1)}><Plus /></Button>
               </div>
             </div>
-            <div className="serif text-base">${p.price}</div>
+            <div className="flex flex-col items-end justify-between">
+              <div className="serif text-base">${p.price * p.quantity}</div>
+              <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground" aria-label={`Quitar ${p.name}`} onClick={() => updateQuantity(p.id, 0)}><Trash2 /></Button>
+            </div>
           </div>
         ))}
 
-        <div className="space-y-2 rounded-2xl border border-border bg-card p-4 text-sm">
+        {items.length > 0 && <><div className="space-y-2 rounded-2xl border border-border bg-card p-4 text-sm">
           <Row l="Subtotal" v={`$${subtotal}`} />
           <Row l="Logística + cadena de frío" v="$18" />
           <Row l="Plataforma Milpa" v="$10" />
@@ -39,9 +65,9 @@ function Carrito() {
           </p>
         </div>
 
-        <button className="w-full rounded-full bg-foreground py-4 text-sm font-medium text-background">
+        <Button className="h-13 w-full rounded-full bg-foreground text-sm font-medium text-background">
           Confirmar pedido →
-        </button>
+        </Button></>}
       </div>
     </AppShell>
   );

@@ -65,7 +65,7 @@ function Carrito() {
           </p>
         </div>
 
-        <Button className="h-13 w-full rounded-full bg-foreground text-sm font-medium text-background">
+        <Button className="h-13 w-full rounded-full bg-foreground text-sm font-medium text-background" disabled title="La confirmación de pedidos aún no está disponible">
           Confirmar pedido →
         </Button></>}
       </div>

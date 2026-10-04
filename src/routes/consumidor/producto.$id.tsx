@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
 import { ChevronLeft, Minus, Plus, Leaf, CalendarDays, Sprout, ShoppingBasket } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
@@ -35,7 +35,6 @@ function ProductDetail() {
 
 function ProductDetailContent({ product }: { product: (typeof products)[number] }) {
   const [quantity, setQuantity] = useState(1);
-  const navigate = useNavigate();
   const producer = getProducer(product.producerSlug);
   const unit = product.unit === "kilo" ? "kg" : "pieza";
   const harvestDate = new Date();
@@ -45,8 +44,8 @@ function ProductDetailContent({ product }: { product: (typeof products)[number] 
     <AppShell tabs={consumidorTabs} tone="terracota">
       <div className="relative aspect-[5/4] bg-muted">
         <img src={product.photo} alt={product.name} className="h-full w-full object-cover" />
-        <Button variant="outline" size="icon" aria-label="Volver al Mercado" onClick={() => navigate({ to: "/consumidor" })} className="absolute left-4 top-4 rounded-full bg-background/90 backdrop-blur">
-          <ChevronLeft />
+        <Button asChild variant="outline" size="icon" className="absolute left-4 top-4 rounded-full bg-background/90 backdrop-blur">
+          <Link to="/consumidor" aria-label="Volver al Mercado"><ChevronLeft /></Link>
         </Button>
       </div>
       <div className="space-y-6 px-5 pb-4 pt-6">
@@ -86,8 +85,8 @@ function ProductDetailContent({ product }: { product: (typeof products)[number] 
             <Button variant="ghost" size="icon" aria-label="Aumentar cantidad" disabled={quantity >= product.unitsLeft} onClick={() => setQuantity((n) => n + 1)}><Plus /></Button>
           </div>
         </div>
-        <Button className="h-13 w-full rounded-full text-sm" onClick={() => { addToCart(product.id, quantity, product.unitsLeft); navigate({ to: "/consumidor/carrito" }); }}>
-          <ShoppingBasket /> Agregar al carrito · ${product.price * quantity}
+        <Button asChild className="h-13 w-full rounded-full text-sm">
+          <Link to="/consumidor/carrito" onClick={() => addToCart(product.id, quantity, product.unitsLeft)}><ShoppingBasket /> Agregar al carrito · ${product.price * quantity}</Link>
         </Button>
 
         {producer && <Link to="/consumidor/productor/$slug" params={{ slug: producer.slug }} className="flex items-center gap-2 border-t border-border pt-5 text-sm text-primary underline-offset-4 hover:underline">

@@ -6,6 +6,7 @@ import { CheckCircle2, PackageCheck, Clock3 } from "lucide-react";
 import { useOrders, FLOW, STATUS_LABEL, codigoDe, formatTime, type Order } from "@/lib/orders";
 import { nombreCorto, useDistributor } from "@/lib/accounts";
 import { getProducer, unitLabel } from "@/lib/data";
+import { LinkTrazabilidad } from "@/components/LinkTrazabilidad";
 
 const steps = [
   { t: "Cosechado", d: "Ayer · 6:40 AM", s: "done" as const },
@@ -103,6 +104,8 @@ function LiveOrder({ order }: { order: Order }) {
         })}
       </ol>
 
+      {order.empaque && <LinkTrazabilidad id={order.id} />}
+
       {order.status === "entregado" ? (
         <Link
           to="/consumidor/recibir"
@@ -168,6 +171,8 @@ function DemoOrder() {
             </li>
           ))}
         </ol>
+
+        <LinkTrazabilidad id="MLP-0518" />
 
         {/* CTA: marcar como recibido */}
         <Link

@@ -15,6 +15,7 @@ import { Route as ConsumidorIndexRouteImport } from './routes/consumidor/index'
 import { Route as ConsumidorCarritoRouteImport } from './routes/consumidor/carrito'
 import { Route as ConsumidorCheckoutRouteImport } from './routes/consumidor/checkout'
 import { Route as ConsumidorCosechaRouteImport } from './routes/consumidor/cosecha'
+import { Route as ConsumidorNotificacionesRouteImport } from './routes/consumidor/notificaciones'
 import { Route as ConsumidorPedidosRouteImport } from './routes/consumidor/pedidos'
 import { Route as ConsumidorPerfilRouteImport } from './routes/consumidor/perfil'
 import { Route as ConsumidorProductoresRouteImport } from './routes/consumidor/productores'
@@ -24,14 +25,17 @@ import { Route as DistribuidorIndexRouteImport } from './routes/distribuidor/ind
 import { Route as DistribuidorAnalyticsRouteImport } from './routes/distribuidor/analytics'
 import { Route as DistribuidorCatalogoRouteImport } from './routes/distribuidor/catalogo'
 import { Route as DistribuidorFinanzasRouteImport } from './routes/distribuidor/finanzas'
+import { Route as DistribuidorNotificacionesRouteImport } from './routes/distribuidor/notificaciones'
 import { Route as DistribuidorPerfilRouteImport } from './routes/distribuidor/perfil'
 import { Route as DistribuidorRutaRouteImport } from './routes/distribuidor/ruta'
 import { Route as DistribuidorTrazabilidadRouteImport } from './routes/distribuidor/trazabilidad'
 import { Route as LoginIndexRouteImport } from './routes/login.index'
 import { Route as LoginRolRouteImport } from './routes/login.rol'
+import { Route as LoteIdRouteImport } from './routes/lote.$id'
 import { Route as ProductorIndexRouteImport } from './routes/productor/index'
 import { Route as ProductorCatalogoRouteImport } from './routes/productor/catalogo'
 import { Route as ProductorFinanzasRouteImport } from './routes/productor/finanzas'
+import { Route as ProductorNotificacionesRouteImport } from './routes/productor/notificaciones'
 import { Route as ProductorPedidosRouteImport } from './routes/productor/pedidos'
 import { Route as ProductorPerfilRouteImport } from './routes/productor/perfil'
 import { Route as ProductorTransparenciaRouteImport } from './routes/productor/transparencia'
@@ -71,6 +75,12 @@ const ConsumidorCosechaRoute = ConsumidorCosechaRouteImport.update({
   path: '/consumidor/cosecha',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConsumidorNotificacionesRoute =
+  ConsumidorNotificacionesRouteImport.update({
+    id: '/consumidor/notificaciones',
+    path: '/consumidor/notificaciones',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ConsumidorPedidosRoute = ConsumidorPedidosRouteImport.update({
   id: '/consumidor/pedidos',
   path: '/consumidor/pedidos',
@@ -116,6 +126,12 @@ const DistribuidorFinanzasRoute = DistribuidorFinanzasRouteImport.update({
   path: '/distribuidor/finanzas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DistribuidorNotificacionesRoute =
+  DistribuidorNotificacionesRouteImport.update({
+    id: '/distribuidor/notificaciones',
+    path: '/distribuidor/notificaciones',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const DistribuidorPerfilRoute = DistribuidorPerfilRouteImport.update({
   id: '/distribuidor/perfil',
   path: '/distribuidor/perfil',
@@ -142,6 +158,11 @@ const LoginRolRoute = LoginRolRouteImport.update({
   path: '/login/rol',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoteIdRoute = LoteIdRouteImport.update({
+  id: '/lote/$id',
+  path: '/lote/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProductorIndexRoute = ProductorIndexRouteImport.update({
   id: '/productor/',
   path: '/productor/',
@@ -155,6 +176,11 @@ const ProductorCatalogoRoute = ProductorCatalogoRouteImport.update({
 const ProductorFinanzasRoute = ProductorFinanzasRouteImport.update({
   id: '/productor/finanzas',
   path: '/productor/finanzas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProductorNotificacionesRoute = ProductorNotificacionesRouteImport.update({
+  id: '/productor/notificaciones',
+  path: '/productor/notificaciones',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProductorPedidosRoute = ProductorPedidosRouteImport.update({
@@ -205,6 +231,7 @@ export interface FileRoutesByFullPath {
   '/consumidor/carrito': typeof ConsumidorCarritoRoute
   '/consumidor/checkout': typeof ConsumidorCheckoutRoute
   '/consumidor/cosecha': typeof ConsumidorCosechaRoute
+  '/consumidor/notificaciones': typeof ConsumidorNotificacionesRoute
   '/consumidor/pedidos': typeof ConsumidorPedidosRoute
   '/consumidor/perfil': typeof ConsumidorPerfilRoute
   '/consumidor/productores': typeof ConsumidorProductoresRoute
@@ -213,12 +240,15 @@ export interface FileRoutesByFullPath {
   '/distribuidor/analytics': typeof DistribuidorAnalyticsRoute
   '/distribuidor/catalogo': typeof DistribuidorCatalogoRoute
   '/distribuidor/finanzas': typeof DistribuidorFinanzasRoute
+  '/distribuidor/notificaciones': typeof DistribuidorNotificacionesRoute
   '/distribuidor/perfil': typeof DistribuidorPerfilRoute
   '/distribuidor/ruta': typeof DistribuidorRutaRoute
   '/distribuidor/trazabilidad': typeof DistribuidorTrazabilidadRoute
   '/login/rol': typeof LoginRolRoute
+  '/lote/$id': typeof LoteIdRoute
   '/productor/catalogo': typeof ProductorCatalogoRoute
   '/productor/finanzas': typeof ProductorFinanzasRoute
+  '/productor/notificaciones': typeof ProductorNotificacionesRoute
   '/productor/pedidos': typeof ProductorPedidosRoute
   '/productor/perfil': typeof ProductorPerfilRoute
   '/productor/transparencia': typeof ProductorTransparenciaRoute
@@ -238,6 +268,7 @@ export interface FileRoutesByTo {
   '/consumidor/carrito': typeof ConsumidorCarritoRoute
   '/consumidor/checkout': typeof ConsumidorCheckoutRoute
   '/consumidor/cosecha': typeof ConsumidorCosechaRoute
+  '/consumidor/notificaciones': typeof ConsumidorNotificacionesRoute
   '/consumidor/pedidos': typeof ConsumidorPedidosRoute
   '/consumidor/perfil': typeof ConsumidorPerfilRoute
   '/consumidor/productores': typeof ConsumidorProductoresRoute
@@ -246,12 +277,15 @@ export interface FileRoutesByTo {
   '/distribuidor/analytics': typeof DistribuidorAnalyticsRoute
   '/distribuidor/catalogo': typeof DistribuidorCatalogoRoute
   '/distribuidor/finanzas': typeof DistribuidorFinanzasRoute
+  '/distribuidor/notificaciones': typeof DistribuidorNotificacionesRoute
   '/distribuidor/perfil': typeof DistribuidorPerfilRoute
   '/distribuidor/ruta': typeof DistribuidorRutaRoute
   '/distribuidor/trazabilidad': typeof DistribuidorTrazabilidadRoute
   '/login/rol': typeof LoginRolRoute
+  '/lote/$id': typeof LoteIdRoute
   '/productor/catalogo': typeof ProductorCatalogoRoute
   '/productor/finanzas': typeof ProductorFinanzasRoute
+  '/productor/notificaciones': typeof ProductorNotificacionesRoute
   '/productor/pedidos': typeof ProductorPedidosRoute
   '/productor/perfil': typeof ProductorPerfilRoute
   '/productor/transparencia': typeof ProductorTransparenciaRoute
@@ -272,6 +306,7 @@ export interface FileRoutesById {
   '/consumidor/carrito': typeof ConsumidorCarritoRoute
   '/consumidor/checkout': typeof ConsumidorCheckoutRoute
   '/consumidor/cosecha': typeof ConsumidorCosechaRoute
+  '/consumidor/notificaciones': typeof ConsumidorNotificacionesRoute
   '/consumidor/pedidos': typeof ConsumidorPedidosRoute
   '/consumidor/perfil': typeof ConsumidorPerfilRoute
   '/consumidor/productores': typeof ConsumidorProductoresRoute
@@ -280,12 +315,15 @@ export interface FileRoutesById {
   '/distribuidor/analytics': typeof DistribuidorAnalyticsRoute
   '/distribuidor/catalogo': typeof DistribuidorCatalogoRoute
   '/distribuidor/finanzas': typeof DistribuidorFinanzasRoute
+  '/distribuidor/notificaciones': typeof DistribuidorNotificacionesRoute
   '/distribuidor/perfil': typeof DistribuidorPerfilRoute
   '/distribuidor/ruta': typeof DistribuidorRutaRoute
   '/distribuidor/trazabilidad': typeof DistribuidorTrazabilidadRoute
   '/login/rol': typeof LoginRolRoute
+  '/lote/$id': typeof LoteIdRoute
   '/productor/catalogo': typeof ProductorCatalogoRoute
   '/productor/finanzas': typeof ProductorFinanzasRoute
+  '/productor/notificaciones': typeof ProductorNotificacionesRoute
   '/productor/pedidos': typeof ProductorPedidosRoute
   '/productor/perfil': typeof ProductorPerfilRoute
   '/productor/transparencia': typeof ProductorTransparenciaRoute
@@ -307,6 +345,7 @@ export interface FileRouteTypes {
     | '/consumidor/carrito'
     | '/consumidor/checkout'
     | '/consumidor/cosecha'
+    | '/consumidor/notificaciones'
     | '/consumidor/pedidos'
     | '/consumidor/perfil'
     | '/consumidor/productores'
@@ -315,12 +354,15 @@ export interface FileRouteTypes {
     | '/distribuidor/analytics'
     | '/distribuidor/catalogo'
     | '/distribuidor/finanzas'
+    | '/distribuidor/notificaciones'
     | '/distribuidor/perfil'
     | '/distribuidor/ruta'
     | '/distribuidor/trazabilidad'
     | '/login/rol'
+    | '/lote/$id'
     | '/productor/catalogo'
     | '/productor/finanzas'
+    | '/productor/notificaciones'
     | '/productor/pedidos'
     | '/productor/perfil'
     | '/productor/transparencia'
@@ -340,6 +382,7 @@ export interface FileRouteTypes {
     | '/consumidor/carrito'
     | '/consumidor/checkout'
     | '/consumidor/cosecha'
+    | '/consumidor/notificaciones'
     | '/consumidor/pedidos'
     | '/consumidor/perfil'
     | '/consumidor/productores'
@@ -348,12 +391,15 @@ export interface FileRouteTypes {
     | '/distribuidor/analytics'
     | '/distribuidor/catalogo'
     | '/distribuidor/finanzas'
+    | '/distribuidor/notificaciones'
     | '/distribuidor/perfil'
     | '/distribuidor/ruta'
     | '/distribuidor/trazabilidad'
     | '/login/rol'
+    | '/lote/$id'
     | '/productor/catalogo'
     | '/productor/finanzas'
+    | '/productor/notificaciones'
     | '/productor/pedidos'
     | '/productor/perfil'
     | '/productor/transparencia'
@@ -373,6 +419,7 @@ export interface FileRouteTypes {
     | '/consumidor/carrito'
     | '/consumidor/checkout'
     | '/consumidor/cosecha'
+    | '/consumidor/notificaciones'
     | '/consumidor/pedidos'
     | '/consumidor/perfil'
     | '/consumidor/productores'
@@ -381,12 +428,15 @@ export interface FileRouteTypes {
     | '/distribuidor/analytics'
     | '/distribuidor/catalogo'
     | '/distribuidor/finanzas'
+    | '/distribuidor/notificaciones'
     | '/distribuidor/perfil'
     | '/distribuidor/ruta'
     | '/distribuidor/trazabilidad'
     | '/login/rol'
+    | '/lote/$id'
     | '/productor/catalogo'
     | '/productor/finanzas'
+    | '/productor/notificaciones'
     | '/productor/pedidos'
     | '/productor/perfil'
     | '/productor/transparencia'
@@ -407,6 +457,7 @@ export interface RootRouteChildren {
   ConsumidorCarritoRoute: typeof ConsumidorCarritoRoute
   ConsumidorCheckoutRoute: typeof ConsumidorCheckoutRoute
   ConsumidorCosechaRoute: typeof ConsumidorCosechaRoute
+  ConsumidorNotificacionesRoute: typeof ConsumidorNotificacionesRoute
   ConsumidorPedidosRoute: typeof ConsumidorPedidosRoute
   ConsumidorPerfilRoute: typeof ConsumidorPerfilRoute
   ConsumidorProductoresRoute: typeof ConsumidorProductoresRoute
@@ -415,12 +466,15 @@ export interface RootRouteChildren {
   DistribuidorAnalyticsRoute: typeof DistribuidorAnalyticsRoute
   DistribuidorCatalogoRoute: typeof DistribuidorCatalogoRoute
   DistribuidorFinanzasRoute: typeof DistribuidorFinanzasRoute
+  DistribuidorNotificacionesRoute: typeof DistribuidorNotificacionesRoute
   DistribuidorPerfilRoute: typeof DistribuidorPerfilRoute
   DistribuidorRutaRoute: typeof DistribuidorRutaRoute
   DistribuidorTrazabilidadRoute: typeof DistribuidorTrazabilidadRoute
   LoginRolRoute: typeof LoginRolRoute
+  LoteIdRoute: typeof LoteIdRoute
   ProductorCatalogoRoute: typeof ProductorCatalogoRoute
   ProductorFinanzasRoute: typeof ProductorFinanzasRoute
+  ProductorNotificacionesRoute: typeof ProductorNotificacionesRoute
   ProductorPedidosRoute: typeof ProductorPedidosRoute
   ProductorPerfilRoute: typeof ProductorPerfilRoute
   ProductorTransparenciaRoute: typeof ProductorTransparenciaRoute
@@ -477,6 +531,13 @@ declare module '@tanstack/react-router' {
       path: '/consumidor/cosecha'
       fullPath: '/consumidor/cosecha'
       preLoaderRoute: typeof ConsumidorCosechaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/consumidor/notificaciones': {
+      id: '/consumidor/notificaciones'
+      path: '/consumidor/notificaciones'
+      fullPath: '/consumidor/notificaciones'
+      preLoaderRoute: typeof ConsumidorNotificacionesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/consumidor/pedidos': {
@@ -542,6 +603,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DistribuidorFinanzasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/distribuidor/notificaciones': {
+      id: '/distribuidor/notificaciones'
+      path: '/distribuidor/notificaciones'
+      fullPath: '/distribuidor/notificaciones'
+      preLoaderRoute: typeof DistribuidorNotificacionesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/distribuidor/perfil': {
       id: '/distribuidor/perfil'
       path: '/distribuidor/perfil'
@@ -577,6 +645,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRolRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lote/$id': {
+      id: '/lote/$id'
+      path: '/lote/$id'
+      fullPath: '/lote/$id'
+      preLoaderRoute: typeof LoteIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/productor/': {
       id: '/productor/'
       path: '/productor'
@@ -596,6 +671,13 @@ declare module '@tanstack/react-router' {
       path: '/productor/finanzas'
       fullPath: '/productor/finanzas'
       preLoaderRoute: typeof ProductorFinanzasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/productor/notificaciones': {
+      id: '/productor/notificaciones'
+      path: '/productor/notificaciones'
+      fullPath: '/productor/notificaciones'
+      preLoaderRoute: typeof ProductorNotificacionesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/productor/pedidos': {
@@ -663,6 +745,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConsumidorCarritoRoute: ConsumidorCarritoRoute,
   ConsumidorCheckoutRoute: ConsumidorCheckoutRoute,
   ConsumidorCosechaRoute: ConsumidorCosechaRoute,
+  ConsumidorNotificacionesRoute: ConsumidorNotificacionesRoute,
   ConsumidorPedidosRoute: ConsumidorPedidosRoute,
   ConsumidorPerfilRoute: ConsumidorPerfilRoute,
   ConsumidorProductoresRoute: ConsumidorProductoresRoute,
@@ -671,12 +754,15 @@ const rootRouteChildren: RootRouteChildren = {
   DistribuidorAnalyticsRoute: DistribuidorAnalyticsRoute,
   DistribuidorCatalogoRoute: DistribuidorCatalogoRoute,
   DistribuidorFinanzasRoute: DistribuidorFinanzasRoute,
+  DistribuidorNotificacionesRoute: DistribuidorNotificacionesRoute,
   DistribuidorPerfilRoute: DistribuidorPerfilRoute,
   DistribuidorRutaRoute: DistribuidorRutaRoute,
   DistribuidorTrazabilidadRoute: DistribuidorTrazabilidadRoute,
   LoginRolRoute: LoginRolRoute,
+  LoteIdRoute: LoteIdRoute,
   ProductorCatalogoRoute: ProductorCatalogoRoute,
   ProductorFinanzasRoute: ProductorFinanzasRoute,
+  ProductorNotificacionesRoute: ProductorNotificacionesRoute,
   ProductorPedidosRoute: ProductorPedidosRoute,
   ProductorPerfilRoute: ProductorPerfilRoute,
   ProductorTransparenciaRoute: ProductorTransparenciaRoute,

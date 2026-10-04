@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { getProducer, products, unitLabel } from "@/lib/data";
 import { formatTime, updateOrder, useOrders } from "@/lib/orders";
 import { nombreCorto, useDistributor } from "@/lib/accounts";
+import { LinkTrazabilidad } from "@/components/LinkTrazabilidad";
 import { AppShell } from "@/components/AppShell";
 import { consumidorTabs } from "@/components/tabs";
 import santiago from "@/assets/producer-santiago.jpg";
@@ -37,11 +38,12 @@ function Recibir() {
   const [tipMerma, setTipMerma] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
 
-  // Pedido real: el que el distribuidor marcó como entregado (si no hay, se muestra el ejemplo)
+  // Pedido real: primero el que ya confirmó y le falta calificar; si no, el que el distribuidor
+  // marcó como entregado (si no hay ninguno, se muestra el ejemplo)
   const orders = useOrders();
   const [orderId, setOrderId] = useState<string | null>(null);
   const order =
-    orders.find((o) => o.id === orderId) ?? orders.find((o) => o.status === "entregado") ?? orders.find((o) => o.status === "recibido");
+    orders.find((o) => o.id === orderId) ?? orders.find((o) => o.status === "recibido") ?? orders.find((o) => o.status === "entregado");
   const distribuidor = nombreCorto(useDistributor().nombre).split(" ")[0];
   const productores = order ? [...new Set(order.items.map((i) => i.producerSlug))].map(getProducer) : [getProducer("santiago")];
   const primer = productores[0].name.split(" ")[0];
@@ -232,6 +234,8 @@ function Recibir() {
                     </p>
                   </div>
                 )}
+
+                <LinkTrazabilidad id={pedidoId} />
 
                 <Button
                   onClick={() => setStep("rate")}

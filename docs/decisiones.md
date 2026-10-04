@@ -27,6 +27,20 @@ El productor elige al empacar: "Yo lo llevo al local del distribuidor" o "El dis
 
 Un QR por **pedido** (`MLP-0518`). Dentro muestra cada **lote** que trae la canasta, uno por productor (`LT-0518`). La página pública `/lote/:id` es solo de consulta: trazabilidad y score, sin calificar.
 
+La página pública se titula **Trazabilidad del pedido** y muestra: pedido y lotes, quién cultivó cada lote (con su score de confianza y prácticas), cadena de frío (temperatura al empacar y al recolectar, tipo de empaque), el recorrido con sus horas y las incidencias (problema al recolectar, merma). No muestra quién compró ni la dirección de entrega. Se abre desde el QR del productor, la Trazabilidad del distribuidor y los Pedidos del consumidor. También acepta el número de lote (`/lote/LT-0601`). En el prototipo el QR es un dibujo, no se puede escanear con la cámara; el acceso es el enlace.
+
+## Notificaciones
+
+Los tres roles tienen una campanita en el encabezado con el número de avisos sin ver; lleva a la pantalla **Notificaciones**. Los avisos no se guardan aparte: se derivan del historial de cada pedido (`src/lib/notificaciones.ts`), así siempre coinciden con lo que pasó. Al abrir la pantalla se marcan como vistos.
+
+| Rol | Le avisa |
+|---|---|
+| Productor | pedido nuevo, problema en la recolección, pedido recolectado, entregado, pago liberado (ya con la aportación de socio descontada), calificación recibida (alerta si es de 2★ o menos o trae merma), nueva reserva de cosecha compartida |
+| Consumidor | pedido aceptado o rechazado, empacado, en revisión por un problema, en camino (con su código de entrega), entregado, nueva cosecha compartida si ya compró antes |
+| Distribuidor | pedido confirmado, recolección lista (campo o local), consumidor confirmó la entrega |
+
+Cada aviso lleva a la pantalla donde se atiende. Son avisos dentro de la app; push, WhatsApp o correo necesitan backend.
+
 ## Entrega
 
 La marca el distribuidor (`entregado`) y el consumidor la confirma (`recibido`). Si el consumidor no confirma en 24 h, se da por recibida. Pick up o domicilio viene del pedido; el distribuidor no lo elige.

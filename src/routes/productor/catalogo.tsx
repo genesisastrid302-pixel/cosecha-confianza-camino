@@ -231,6 +231,7 @@ function CosechaSheet({ cosecha, crops, onClose }: { cosecha: Cosecha | null; cr
       id: newId(), cropName: crops[0]?.name ?? "", harvestDate: "", expectedKg: 0,
       levels: [{ name: "Probadita", kg: 2, price: 0 }, { name: "Familiar", kg: 5, price: 0 }, { name: "Comunidad", kg: 10, price: 0 }],
       postales: [],
+      creadaEn: new Date().toISOString(),
     },
   );
   const [postal, setPostal] = useState({ photo: "", text: "" });

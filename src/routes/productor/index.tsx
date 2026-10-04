@@ -25,12 +25,6 @@ function ProductorHome() {
       tone="milpa"
       eyebrow="Buenos días"
       title={state.profile.name.split(" ")[0] || "Productor"}
-      right={
-        <button className="relative flex h-10 w-10 items-center justify-center rounded-full bg-secondary">
-          <Bell className="h-5 w-5" />
-          <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-terracota" />
-        </button>
-      }
     >
       <div className="space-y-6 px-5">
         <ScoreCard />

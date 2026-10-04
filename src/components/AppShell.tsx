@@ -1,5 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { type ComponentType } from "react";
+import { Campana } from "@/components/Campana";
+import type { Rol } from "@/lib/notificaciones";
 
 export type Tab = {
   to: string;
@@ -59,7 +61,8 @@ export function AppShell({
               {eyebrow && <div className="eyebrow">{eyebrow}</div>}
               {title && <h1 className="display mt-1 text-4xl">{title}</h1>}
             </div>
-            {right}
+            {/* Las pantallas principales de cada rol llevan la campanita; las que traen su propio botón, no */}
+            {right ?? (tabs ? <Campana rol={tabs[0].to.slice(1) as Rol} /> : null)}
           </div>
         </header>
       )}

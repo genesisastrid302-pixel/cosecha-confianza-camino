@@ -109,6 +109,8 @@ export type Cosecha = {
   expectedKg: number;
   levels: CosechaLevel[];
   postales: Postal[];
+  /** Cuándo se publicó; sirve para avisar a quienes ya le compraron */
+  creadaEn?: string;
 };
 
 export type ProducerState = {

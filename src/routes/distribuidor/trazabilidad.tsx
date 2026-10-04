@@ -3,6 +3,7 @@ import { ChevronLeft, Snowflake } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { distribuidorTabs } from "@/components/tabs";
 import { getProducer } from "@/lib/data";
+import { LinkTrazabilidad } from "@/components/LinkTrazabilidad";
 import { STATUS_LABEL, formatTime, useOrders } from "@/lib/orders";
 
 export const Route = createFileRoute("/distribuidor/trazabilidad")({
@@ -62,6 +63,7 @@ function Trazabilidad() {
                   )}
                   {o.merma && o.merma.lote === lote && <li className="flex justify-between text-destructive"><span>Merma</span><span>{o.merma.kg} kg · {o.merma.motivo}</span></li>}
                 </ul>
+                <LinkTrazabilidad id={o.id} className="mt-3 bg-background" />
               </div>
             );
           }),

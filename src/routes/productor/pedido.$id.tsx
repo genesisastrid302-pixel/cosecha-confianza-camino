@@ -4,6 +4,7 @@ import { AlertTriangle, ChevronLeft, Check, Camera, Printer, Star, Truck, Tracto
 import { LOCAL_DISTRIBUIDOR } from "@/lib/distribucion";
 import { AppShell } from "@/components/AppShell";
 import { QrCode } from "@/components/QrCode";
+import { LinkTrazabilidad } from "@/components/LinkTrazabilidad";
 import { getProducer, unitLabel } from "@/lib/data";
 import {
   useOrders,
@@ -28,6 +29,11 @@ function PedidoProductor() {
   const orders = useOrders();
   const order = orders.find((o) => o.id === id);
   const [paso, setPaso] = useState(0);
+  // Si ya registró la cadena de frío (p. ej. vuelve de ver la trazabilidad), retoma en el QR
+  const yaEmpaco = order?.status === "aceptado" && !!order.empaque;
+  useEffect(() => {
+    if (yaEmpaco) setPaso((p) => (p < 2 ? 2 : p));
+  }, [yaEmpaco]);
 
   return (
     <AppShell
@@ -330,6 +336,8 @@ function PasoQr({ order, onNext }: { order: Order; onNext: () => void }) {
         <div className="text-[11px] text-muted-foreground">Lotes: {Object.values(order.lots).join(", ")}</div>
         <div className="mt-1 text-[11px] text-muted-foreground">milpa.app/lote/{order.id}</div>
       </div>
+      <p className="text-center text-[11px] text-muted-foreground">Al escanearlo se abre la página pública del pedido, solo de consulta.</p>
+      <LinkTrazabilidad id={order.id} />
       <button
         type="button"
         onClick={() => window.print()}
@@ -455,6 +463,7 @@ function Listo({ order }: { order: Order }) {
           Lotes {Object.values(order.lots).join(", ")}
         </div>
       </div>
+      <LinkTrazabilidad id={order.id} />
     </section>
   );
 }

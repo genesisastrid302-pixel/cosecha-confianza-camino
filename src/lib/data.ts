@@ -189,7 +189,7 @@ export const producerDetails: Record<string, ProducerDetail> = {
     practices: ["Poda manual", "Control biológico de plagas", "Coberturas vegetales", "Cosecha en punto de madurez"],
     coldChain: "Corte en la mañana, sombra y ventilación natural; traslado refrigerado el mismo día.",
     gallery: [harvest, landscape, seedlings, planting],
-    components: { rating: 90, profile: 85, onTime: 80, waste: 70 },
+    components: { rating: 93, profile: 90, onTime: 90, waste: 90 },
   },
 };
 

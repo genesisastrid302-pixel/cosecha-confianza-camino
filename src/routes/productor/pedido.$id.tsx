@@ -1,16 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { AlertTriangle, ChevronLeft, Check, Camera, Printer, Star, Truck, Tractor, PackageCheck, Snowflake, QrCode as QrIcon } from "lucide-react";
-import { LOCAL_DISTRIBUIDOR } from "@/lib/distribucion";
+import { AlertTriangle, ChevronLeft, Check, Camera, Printer, Star, Truck, Tractor, Snowflake, QrCode as QrIcon } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { QrCode } from "@/components/QrCode";
 import { LinkTrazabilidad } from "@/components/LinkTrazabilidad";
+import { EstadoPedido } from "@/components/EstadoPedido";
 import { getProducer, unitLabel } from "@/lib/data";
 import {
   useOrders,
   updateOrder,
-  STATUS_LABEL,
-  TRASLADO_LABEL,
   formatTime,
   type Empaque,
   type Order,
@@ -83,7 +81,8 @@ function tituloPorEstado(o: Order) {
   if (o.status === "aceptado") return "Prepara el pedido";
   if (o.status === "rechazado") return "Pedido rechazado";
   if (o.status === "con_problema") return "Revisa este pedido";
-  if (o.status === "en_recoleccion" || o.status === "en_ruta") return "Pedido en camino";
+  if (o.status === "en_recoleccion") return "Pedido recolectado";
+  if (o.status === "en_ruta") return "Pedido en camino";
   if (["entregado", "recibido", "calificado"].includes(o.status)) return "Pedido entregado";
   return "Pedido listo";
 }
@@ -106,7 +105,7 @@ function Resumen({ order }: { order: Order }) {
         {Object.entries(bySlug).map(([slug, items]) => (
           <div key={slug}>
             <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
-              Lote {order.lots[slug]} · {getProducer(slug).name}
+              Lote {order.lots[slug]} · cultivado por {getProducer(slug).name}
             </div>
             <ul className="mt-1 space-y-1 text-sm">
               {items.map((i) => (
@@ -420,19 +419,7 @@ function Listo({ order }: { order: Order }) {
   const f = order.feedback;
   return (
     <section className="space-y-4">
-      {order.status !== "con_problema" && (
-        <div className="flex items-center gap-3 rounded-2xl bg-primary/10 p-4">
-          <PackageCheck className="h-6 w-6 shrink-0 text-primary" />
-          <div>
-            <div className="text-sm font-medium">{STATUS_LABEL[order.status]}</div>
-            <div className="text-[11px] text-muted-foreground">
-              {order.traslado ? TRASLADO_LABEL[order.traslado] : ""}
-              {order.status === "empacado" && order.traslado === "productor_lleva" ? ` · Llévalo a ${LOCAL_DISTRIBUIDOR}; el distribuidor confirma al recibirlo.` : ""}
-              {order.status === "empacado" && order.traslado === "distribuidor_recoge" ? " · Ya está en su ruta." : ""}
-            </div>
-          </div>
-        </div>
-      )}
+      {order.status !== "con_problema" && <EstadoPedido order={order} />}
       {f && (
         <div className="rounded-2xl border border-border bg-card p-4 text-sm">
           <div className="eyebrow">Calificación de {order.cliente}</div>

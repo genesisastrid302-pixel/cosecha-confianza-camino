@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { ChevronLeft, Leaf, MapPin, ShieldCheck, Snowflake, Sprout, Truck } from "lucide-react";
 import { QrCode } from "@/components/QrCode";
+import { EstadoPedido } from "@/components/EstadoPedido";
 import { getProducer, producerDetails, products, trustScore10, unitLabel } from "@/lib/data";
 import { formatScore, scoreTone } from "@/lib/score";
 import { FLOW, STATUS_LABEL, formatTime, useOrders, type Order, type OrderStatus } from "@/lib/orders";
@@ -124,11 +125,12 @@ function Detalle({ order, distribuidor, ejemplo }: { order: Order; distribuidor:
             <div className="mt-0.5 text-xs text-muted-foreground">
               {Object.keys(order.lots).length === 1 ? "Lote" : "Lotes"} {Object.values(order.lots).join(", ")}
             </div>
-            <div className="mt-1.5 inline-flex rounded-full bg-background px-2.5 py-1 text-[11px]">{STATUS_LABEL[order.status]}</div>
           </div>
         </div>
         {ejemplo && <p className="border-t border-primary/20 px-4 py-2 text-[11px] text-muted-foreground">Pedido de ejemplo para mostrar cómo se ve la trazabilidad.</p>}
       </section>
+
+      <EstadoPedido order={order} />
 
       <section>
         <div className="eyebrow">Quién lo cultivó</div>

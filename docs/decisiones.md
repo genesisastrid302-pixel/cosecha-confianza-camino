@@ -8,14 +8,18 @@ Una sola lista para consumidor, productor y distribuidor:
 
 | Estado | Quién lo provoca | Qué ve el consumidor |
 |---|---|---|
-| `nuevo` | Consumidor paga en el checkout | "Pedido recibido" |
+| `nuevo` | Consumidor paga en el checkout | "Pedido realizado" |
 | `aceptado` | Productor toca "Puedo entregar" | "Aceptado por el productor" |
-| `empacado` | Productor registra cadena de frío y genera el QR | "Empacando" |
+| `empacado` | Productor registra cadena de frío y genera el QR | "Empacado" |
 | `en_recoleccion` | Distribuidor confirma la recolección de todos los lotes del pedido (o los recibe en su local) | "Recolectado" |
 | `en_ruta` | Distribuidor termina las recolecciones y toca "Salir a entregar" | "En camino" |
 | `entregado` | Distribuidor confirma la entrega | "Entregado" |
 | `recibido` | Consumidor confirma "Sí, ya tengo mi canasta" (o pasan 24 h) | "Recibido" |
 | `calificado` | Consumidor envía feedback | "Calificado" |
+
+Los tres roles y la página de trazabilidad usan el mismo texto (`STATUS_LABEL`) y el mismo bloque **Estado del pedido** (`src/components/EstadoPedido.tsx`): estado actual, hora y "Sigue:" con el siguiente paso (`siguientePaso` en `src/lib/orders.ts`). Ninguna pantalla inventa su propio nombre para un estado; los títulos del productor siguen la tabla ("Pedido recolectado" en `en_recoleccion`, "Pedido en camino" solo en `en_ruta`). Las etiquetas de estado van en pasado: dicen lo que ya pasó, no lo que está pasando.
+
+Donde aparece el nombre del productor se dice su papel ("Cultivado por …").
 
 Desvíos: `rechazado` (productor toca "No esta vez") y `con_problema` (distribuidor reporta un problema en la recolección).
 

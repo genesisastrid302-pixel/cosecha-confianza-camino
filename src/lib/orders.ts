@@ -99,9 +99,9 @@ export const FLOW: OrderStatus[] = [
 ];
 
 export const STATUS_LABEL: Record<OrderStatus, string> = {
-  nuevo: "Pedido recibido",
+  nuevo: "Pedido realizado",
   aceptado: "Aceptado por el productor",
-  empacado: "Empacando",
+  empacado: "Empacado",
   en_recoleccion: "Recolectado",
   en_ruta: "En camino",
   entregado: "Entregado",
@@ -255,6 +255,37 @@ export function crearPedidoEjemplo() {
 
 export function getOrder(id: string) {
   return readOrders().find((o) => o.id === id);
+}
+
+/**
+ * Qué sigue después del estado actual, en las mismas palabras para los tres
+ * roles: así consumidor, productor y distribuidor leen la misma historia.
+ */
+export function siguientePaso(o: Order): string {
+  switch (o.status) {
+    case "nuevo":
+      return "El productor confirma si puede surtirlo.";
+    case "aceptado":
+      return "El productor lo empaca y registra la cadena de frío.";
+    case "empacado":
+      return o.traslado === "productor_lleva"
+        ? "El productor lo lleva al local del distribuidor."
+        : "El distribuidor lo recoge en el campo.";
+    case "en_recoleccion":
+      return "El distribuidor termina sus recolecciones y sale a entregar.";
+    case "en_ruta":
+      return o.entrega === "domicilio"
+        ? "El distribuidor lo entrega en el domicilio con el código de 4 dígitos."
+        : "El consumidor lo recoge en el punto de entrega con el código de 4 dígitos.";
+    case "entregado":
+      return "El consumidor confirma que lo recibió.";
+    case "recibido":
+      return "El consumidor califica su canasta.";
+    case "con_problema":
+      return "El productor revisa el problema y lo deja listo otra vez.";
+    default:
+      return "Pedido cerrado.";
+  }
 }
 
 export const TRASLADO_LABEL: Record<Traslado, string> = {

@@ -8,6 +8,7 @@ import { useOrders, FLOW, STATUS_LABEL, codigoDe, formatTime, muestraCodigo, ped
 import { nombreCorto, useDistributor } from "@/lib/accounts";
 import { getProducer, unitLabel } from "@/lib/data";
 import { LinkTrazabilidad } from "@/components/LinkTrazabilidad";
+import { EstadoPedido } from "@/components/EstadoPedido";
 
 const steps = [
   { t: "Cosechado", d: "Ayer · 6:40 AM", s: "done" as const },
@@ -85,7 +86,7 @@ function Pedidos() {
 }
 
 function LiveOrder({ order }: { order: Order }) {
-  const producerNames = [...new Set(order.items.map((i) => getProducer(i.producerSlug).name.split(" ")[0]))];
+  const producerNames = [...new Set(order.items.map((i) => getProducer(i.producerSlug).name))];
   const firstProducer = getProducer(order.items[0]?.producerSlug ?? "santiago");
   const distribuidor = nombreCorto(useDistributor().nombre);
   const reached = (s: (typeof FLOW)[number]) => order.history.find((h) => h.status === s);
@@ -97,7 +98,8 @@ function LiveOrder({ order }: { order: Order }) {
         <img src={firstProducer.photo} alt={firstProducer.name} className="h-32 w-full object-cover" />
         <div className="p-4">
           <div className="text-[10px] uppercase tracking-widest text-muted-foreground">#{order.id} · {order.entrega === "domicilio" ? "A domicilio" : "Para recoger"}</div>
-          <div className="serif mt-1 text-lg">De {producerNames.join(" y ")}</div>
+          <div className="mt-2 text-[11px] text-muted-foreground">Cultivado por</div>
+          <div className="serif text-lg leading-tight">{producerNames.join(" y ")}</div>
           <div className="text-[11px] text-muted-foreground">
             {order.items.map((i) => `${i.quantity} ${unitLabel(i.unit, i.quantity)} ${i.name.toLowerCase()}`).join(" · ")}
           </div>
@@ -118,11 +120,7 @@ function LiveOrder({ order }: { order: Order }) {
         </div>
       )}
 
-      {order.status === "con_problema" && (
-        <div className="rounded-2xl border-2 border-dashed border-terracota/40 bg-terracota/5 p-4 text-sm">
-          {STATUS_LABEL.con_problema}. Te avisamos en cuanto se resuelva.
-        </div>
-      )}
+      <EstadoPedido order={order} />
 
       <ol className="space-y-4">
         {steps.map((st, i) => {
@@ -141,7 +139,7 @@ function LiveOrder({ order }: { order: Order }) {
               <div className="flex-1">
                 <div className={`serif text-base leading-tight ${state === "todo" ? "text-muted-foreground" : ""}`}>{STATUS_LABEL[st]}</div>
                 <div className="text-[11px] text-muted-foreground">
-                  {hit ? formatTime(hit.at) : state === "active" && st === "aceptado" ? "El productor confirma antes de las 18:00" : "Pendiente"}
+                  {hit ? formatTime(hit.at) : state === "active" && st === "aceptado" ? "El productor confirma antes de las 18:00" : state === "active" ? "Sigue" : "Pendiente"}
                   {st === "empacado" && hit ? ` · Lote ${Object.values(order.lots).join(", ")}` : ""}
                   {st === "en_recoleccion" && hit ? ` · por ${distribuidor}${order.temperaturaRecoleccion !== undefined ? ` · ${order.temperaturaRecoleccion} °C` : ""}` : ""}
                   {st === "entregado" && hit ? ` · por ${distribuidor}` : ""}

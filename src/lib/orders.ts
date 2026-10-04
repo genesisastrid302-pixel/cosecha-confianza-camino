@@ -197,6 +197,19 @@ export function updateOrder(id: string, patch: Partial<Omit<Order, "id" | "histo
   );
 }
 
+/** El consumidor ve su código de entrega mientras el distribuidor tiene el pedido */
+export const muestraCodigo = (o: Order) => o.status === "en_recoleccion" || o.status === "en_ruta";
+
+/** Del que más pide atención del consumidor al que menos */
+const URGENCIA: OrderStatus[] = ["en_ruta", "entregado", "en_recoleccion", "recibido", "con_problema", "empacado", "aceptado", "nuevo"];
+
+/** Pedidos del consumidor que siguen abiertos, el más urgente primero (p. ej. el que va en camino) */
+export function pedidosEnCurso(orders: Order[]) {
+  return orders
+    .filter((o) => URGENCIA.includes(o.status))
+    .sort((a, b) => URGENCIA.indexOf(a.status) - URGENCIA.indexOf(b.status));
+}
+
 /** Código de entrega del pedido (los pedidos viejos lo derivan de su número) */
 export function codigoDe(o: Order) {
   return o.codigoEntrega ?? String(1000 + ((Number(o.id.replace(/\D/g, "")) * 7919) % 9000));

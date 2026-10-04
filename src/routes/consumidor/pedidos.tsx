@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { consumidorTabs } from "@/components/tabs";
 import santiago from "@/assets/producer-santiago.jpg";
 import { CheckCircle2, PackageCheck, Clock3 } from "lucide-react";
-import { useOrders, FLOW, STATUS_LABEL, codigoDe, formatTime, type Order } from "@/lib/orders";
+import { useOrders, FLOW, STATUS_LABEL, codigoDe, formatTime, muestraCodigo, pedidosEnCurso, type Order } from "@/lib/orders";
 import { nombreCorto, useDistributor } from "@/lib/accounts";
 import { getProducer, unitLabel } from "@/lib/data";
 import { LinkTrazabilidad } from "@/components/LinkTrazabilidad";
@@ -23,12 +24,46 @@ export const Route = createFileRoute("/consumidor/pedidos")({
 
 function Pedidos() {
   const orders = useOrders();
-  const active = orders.find((o) => o.status !== "calificado" && o.status !== "rechazado");
-  const past = orders.filter((o) => o !== active);
+  const [elegido, setElegido] = useState<string | null>(null);
+  // Arriba va el pedido que más necesita al consumidor (el que va en camino, con su código)
+  const enCurso = pedidosEnCurso(orders);
+  const active = enCurso.find((o) => o.id === elegido) ?? enCurso[0];
+  const otros = enCurso.filter((o) => o !== active);
+  const past = orders.filter((o) => !enCurso.includes(o));
   return (
     <AppShell tabs={consumidorTabs} tone="terracota" eyebrow="En curso" title="Pedidos">
       <div className="space-y-5 px-5">
         {active ? <LiveOrder order={active} /> : <DemoOrder />}
+        {otros.length > 0 && (
+          <section>
+            <div className="eyebrow">También en curso</div>
+            <div className="mt-2 space-y-2">
+              {otros.map((o) => (
+                <button
+                  key={o.id}
+                  type="button"
+                  onClick={() => {
+                    setElegido(o.id);
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                  className="flex w-full items-center gap-3 rounded-xl border border-border bg-card p-3 text-left"
+                >
+                  <Clock3 className="h-5 w-5 shrink-0 text-terracota" />
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm">#{o.id} · {o.items.map((i) => i.name).join(", ")}</div>
+                    <div className="text-[11px] text-muted-foreground">{STATUS_LABEL[o.status]} · Ver detalle</div>
+                  </div>
+                  {muestraCodigo(o) && (
+                    <div className="shrink-0 text-right">
+                      <div className="text-[9px] uppercase tracking-widest text-terracota">Código</div>
+                      <div className="text-base font-medium tracking-[0.2em]">{codigoDe(o)}</div>
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
         <section>
           <div className="eyebrow">Pedidos anteriores</div>
           <div className="mt-2 space-y-2">
@@ -69,6 +104,19 @@ function LiveOrder({ order }: { order: Order }) {
           <div className="mt-1 text-[11px] text-muted-foreground">{order.direccion} · ${order.total} · {order.pago}</div>
         </div>
       </div>
+
+      {/* El código va arriba: es lo primero que necesita cuando llega el distribuidor */}
+      {muestraCodigo(order) && (
+        <div className="rounded-2xl border-2 border-dashed border-terracota/40 bg-terracota/5 p-4 text-center">
+          <div className="eyebrow text-terracota">Código de entrega</div>
+          <div className="display mt-1 text-4xl tracking-[0.3em]">{codigoDe(order)}</div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            {order.entrega === "domicilio"
+              ? `Dáselo a ${distribuidor} cuando llegue a tu puerta.`
+              : `Dáselo a ${distribuidor} cuando pases a recoger tu canasta.`}
+          </p>
+        </div>
+      )}
 
       {order.status === "con_problema" && (
         <div className="rounded-2xl border-2 border-dashed border-terracota/40 bg-terracota/5 p-4 text-sm">
@@ -117,16 +165,6 @@ function LiveOrder({ order }: { order: Order }) {
           </div>
           <PackageCheck className="h-7 w-7" />
         </Link>
-      ) : order.status === "en_recoleccion" || order.status === "en_ruta" ? (
-        <div className="rounded-2xl border-2 border-dashed border-terracota/40 bg-terracota/5 p-4 text-center">
-          <div className="eyebrow text-terracota">Código de entrega</div>
-          <div className="display mt-1 text-4xl tracking-[0.3em]">{codigoDe(order)}</div>
-          <p className="mt-2 text-xs text-muted-foreground">
-            {order.entrega === "domicilio"
-              ? `Dáselo a ${distribuidor} cuando llegue a tu puerta.`
-              : `Dáselo a ${distribuidor} cuando pases a recoger tu canasta.`}
-          </p>
-        </div>
       ) : order.status === "recibido" ? (
         <Link to="/consumidor/recibir" className="block rounded-2xl border border-border bg-card p-4 text-center text-sm">
           Ya la recibiste. <span className="underline">Califica tu canasta</span>

@@ -54,17 +54,6 @@ function Login() {
           >
             Entrar
           </Link>
-          <div className="grid grid-cols-3 gap-2 text-[11px]">
-            <Link to="/productor" className="rounded-full border border-border bg-background/70 backdrop-blur py-3 text-center text-muted-foreground">
-              Demo productor
-            </Link>
-            <Link to="/distribuidor" className="rounded-full border border-border bg-background/70 backdrop-blur py-3 text-center text-muted-foreground">
-              Demo distribuidor
-            </Link>
-            <Link to="/consumidor" className="rounded-full border border-border bg-background/70 backdrop-blur py-3 text-center text-muted-foreground">
-              Demo consumidor
-            </Link>
-          </div>
           <Link to="/registro" className="block text-center text-sm text-muted-foreground">
             ¿Primera vez? <span className="text-foreground underline">Crear cuenta</span>
           </Link>

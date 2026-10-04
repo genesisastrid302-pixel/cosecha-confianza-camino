@@ -1,4 +1,4 @@
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useSearch } from "@tanstack/react-router";
 import { ChevronLeft, Sprout, Truck, Home } from "lucide-react";
 import type { Role } from "@/components/RoleOption";
 
@@ -16,7 +16,7 @@ export const Route = createFileRoute("/login/")({
 });
 
 function Login() {
-  const { rol } = Route.useSearch();
+  const { rol } = useSearch({ from: "/login/" }) as { rol?: Role };
   const role = rol ?? "consumidor";
   const c = COPY[role];
   const Icon = c.icon;

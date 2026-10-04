@@ -181,30 +181,107 @@ function seed(): ProducerState {
   };
 }
 
-export function readProducer(): ProducerState {
-  if (typeof window === "undefined") return seed();
+// --- Varias cuentas de productor en el mismo navegador ---
+// Cada cuenta vive en CUENTAS_KEY bajo un id estable; ACTIVA_KEY dice con cuál se entró.
+// La cuenta de ejemplo (Ezequiel) siempre existe con el id DEMO_ID.
+
+const CUENTAS_KEY = "milpa-productores";
+const ACTIVA_KEY = "milpa-productor-activo";
+export const DEMO_ID = "demo";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function normalizar(parsed: any): ProducerState {
+  // Perfiles guardados antes de agregar correo, teléfono y cuenta de cobro
+  const profile = { ...EMPTY_PROFILE, ...parsed.profile };
+  // Antes se guardaba un solo método en "pago"
+  if (parsed.profile?.pago && !parsed.profile?.pagos) profile.pagos = [parsed.profile.pago];
+  return { ...seed(), ...parsed, profile };
+}
+
+function readCuentas(): Record<string, ProducerState> {
   try {
-    const raw = window.localStorage.getItem(KEY);
-    if (!raw) return seed();
-    const parsed = JSON.parse(raw);
-    const base = seed();
-    // Perfiles guardados antes de agregar correo, teléfono y cuenta de cobro
-    const profile = { ...EMPTY_PROFILE, ...parsed.profile };
-    // Antes se guardaba un solo método en "pago"
-    if (parsed.profile?.pago && !parsed.profile?.pagos) profile.pagos = [parsed.profile.pago];
-    return { ...base, ...parsed, profile };
+    const raw = window.localStorage.getItem(CUENTAS_KEY);
+    const cuentas: Record<string, ProducerState> = {};
+    if (raw) for (const [id, st] of Object.entries(JSON.parse(raw))) cuentas[id] = normalizar(st);
+    // Versión anterior: una sola cuenta en KEY. Se conserva como cuenta propia.
+    const legado = window.localStorage.getItem(KEY);
+    if (legado) {
+      const st = normalizar(JSON.parse(legado));
+      if (st.profile.correo && st.profile.correo !== seed().profile.correo) {
+        const id = newId();
+        cuentas[id] = st;
+        window.localStorage.setItem(ACTIVA_KEY, id);
+      }
+      window.localStorage.removeItem(KEY);
+      window.localStorage.setItem(CUENTAS_KEY, JSON.stringify(cuentas));
+    }
+    return cuentas;
   } catch {
-    return seed();
+    return {};
   }
 }
 
-export function writeProducer(next: ProducerState) {
+function writeCuentas(cuentas: Record<string, ProducerState>) {
   try {
-    window.localStorage.setItem(KEY, JSON.stringify(next));
+    window.localStorage.setItem(CUENTAS_KEY, JSON.stringify(cuentas));
   } catch {
     alert("No hay espacio suficiente para guardar más fotos en este dispositivo.");
-    return;
+    return false;
   }
+  return true;
+}
+
+function activaId() {
+  return window.localStorage.getItem(ACTIVA_KEY) || DEMO_ID;
+}
+
+export function readProducer(): ProducerState {
+  if (typeof window === "undefined") return seed();
+  return readCuentas()[activaId()] ?? seed();
+}
+
+/** Guarda cambios en la cuenta con la que se entró */
+export function writeProducer(next: ProducerState) {
+  const cuentas = readCuentas();
+  const id = cuentas[activaId()] || activaId() === DEMO_ID ? activaId() : DEMO_ID;
+  if (!writeCuentas({ ...cuentas, [id]: next })) return;
+  window.dispatchEvent(new Event(EVENT));
+}
+
+/** Crea una cuenta nueva y entra con ella; las demás cuentas se conservan */
+export function registrarProductor(profile: ProducerProfile) {
+  const id = newId();
+  const nueva: ProducerState = { ...seed(), resenas: 0, lastScore: null, cosechas: [], profile };
+  if (!writeCuentas({ ...readCuentas(), [id]: nueva })) return;
+  window.localStorage.setItem(ACTIVA_KEY, id);
+  window.dispatchEvent(new Event(EVENT));
+}
+
+/** Cuentas de productor guardadas en este navegador; la de ejemplo va primero */
+export function listarCuentas(): { id: string; state: ProducerState; ejemplo: boolean }[] {
+  if (typeof window === "undefined") return [];
+  const cuentas = readCuentas();
+  const demo = cuentas[DEMO_ID] ?? seed();
+  return [
+    { id: DEMO_ID, state: demo, ejemplo: true },
+    ...Object.entries(cuentas)
+      .filter(([id]) => id !== DEMO_ID)
+      .map(([id, state]) => ({ id, state, ejemplo: false })),
+  ];
+}
+
+/** Busca una cuenta por correo o teléfono */
+export function buscarCuenta(identificador: string) {
+  const txt = identificador.trim().toLowerCase();
+  const digitos = identificador.replace(/\D/g, "").slice(-10);
+  if (!txt) return undefined;
+  return listarCuentas().find(
+    (c) => c.state.profile.correo.toLowerCase() === txt || (digitos.length === 10 && c.state.profile.telefono === digitos),
+  );
+}
+
+export function entrarComoProductor(id: string) {
+  window.localStorage.setItem(ACTIVA_KEY, id);
   window.dispatchEvent(new Event(EVENT));
 }
 

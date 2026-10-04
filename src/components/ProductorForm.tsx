@@ -12,8 +12,7 @@ import {
   EMPTY_PROFILE,
   fileToDataUrl,
   profileCompleteness,
-  readProducer,
-  writeProducer,
+  registrarProductor,
   type IdTipo,
   type Pago,
   type ProducerProfile,
@@ -33,7 +32,7 @@ export function ProductorForm({ onBack }: { onBack: () => void }) {
   // Las fotos de la identificación solo viven en esta pantalla; no se guardan en el navegador
   const [idFrente, setIdFrente] = useState("");
   const [idReverso, setIdReverso] = useState("");
-  useEffect(() => setP({ ...EMPTY_PROFILE, zona: readProducer().profile.zona }), []);
+  useEffect(() => setP(EMPTY_PROFILE), []);
 
   const input = "mt-1.5 w-full rounded-xl border border-input bg-card px-4 py-3.5 text-sm placeholder:text-muted-foreground/60 focus:border-foreground focus:outline-none";
   const pill = (on: boolean) => `flex-1 rounded-xl border py-3 text-sm ${on ? "border-foreground bg-foreground text-background" : "border-border bg-card"}`;
@@ -79,9 +78,9 @@ export function ProductorForm({ onBack }: { onBack: () => void }) {
         if (p.photos.length < FOTOS_MIN) return setError(`Como productor nuevo, sube al menos ${FOTOS_MIN} fotos de tu campo.`);
         if (!p.socio) return setError("Para vender en Milpa necesitas aceptar el acuerdo de socio.");
         setError("");
-        const s = readProducer();
-        // Cuenta nueva: sin reseñas, el score se genera con el feedback de los consumidores
-        writeProducer({ ...s, resenas: 0, lastScore: null, profile: { ...p, name: p.name.trim(), story: p.story.trim(), idEstado: "en_revision" } });
+        // Cuenta nueva: sin reseñas, el score se genera con el feedback de los consumidores.
+        // Las cuentas que ya existían en este dispositivo se conservan.
+        registrarProductor({ ...p, name: p.name.trim(), story: p.story.trim(), idEstado: "en_revision" });
         setDone(true);
       }}
     >

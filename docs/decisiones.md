@@ -70,6 +70,8 @@ Validación por sistema en 3 capas, como en el modelo de negocio (`src/lib/score
 
 Los tres roles registran nombre, correo, teléfono y contraseña. La contraseña no se guarda en el prototipo.
 
+Productores: puede haber varias cuentas en el mismo navegador (`milpa-productores`). Registrarse crea una cuenta nueva sin borrar las demás. El inicio de sesión identifica la cuenta por correo o teléfono, o eligiéndola de la lista "Cuentas en este dispositivo"; la contraseña no se verifica en el prototipo. La cuenta de ejemplo (Ezequiel Martínez, 24 reseñas, perfil al 100 %) siempre está disponible.
+
 El productor además sube una **identificación oficial** (INE, pasaporte o licencia) para verificar que es la persona correcta. En el prototipo solo se guarda el tipo y el estado ("en revisión"); la foto no se almacena en el navegador. Con backend, la verificación la hace Milpa antes de activar los pagos.
 
 Para transferencias se acepta CLABE (18 dígitos) o tarjeta de débito (16), con banco y titular.

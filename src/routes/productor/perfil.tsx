@@ -1,11 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { ChevronDown, LogOut, Mail, Phone, Landmark } from "lucide-react";
+import { ChevronDown, LogOut, Mail, Phone, Landmark, Sprout } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { productorTabs } from "@/components/tabs";
 import { CobroFields } from "@/components/ProductorForm";
 import { NuevoStamp } from "@/components/NuevoStamp";
-import santiago from "@/assets/producer-santiago.jpg";
 import {
   cobroCompleto,
   cobroResumen,
@@ -34,7 +33,7 @@ function Perfil() {
   const [abierta, setAbierta] = useState<Seccion>(null);
   const p = state.profile;
   const { total } = trustScore(state);
-  const foto = p.photos[0] ?? santiago;
+  const foto = p.photos[0];
   const familias = new Set(orders.map((o) => o.cliente)).size;
 
   const toggle = (s: Seccion) => setAbierta((a) => (a === s ? null : s));
@@ -44,7 +43,11 @@ function Perfil() {
       <div className="space-y-6 px-5">
         <div className="flex items-center gap-4 pt-3">
           <div className="relative shrink-0">
-            <img src={foto} alt={p.name} className="h-20 w-20 rounded-full object-cover" />
+            {foto ? (
+              <img src={foto} alt={p.name} className="h-20 w-20 rounded-full object-cover" />
+            ) : (
+              <span className="flex h-20 w-20 items-center justify-center rounded-full bg-secondary"><Sprout className="h-8 w-8 text-muted-foreground" /></span>
+            )}
             {esNuevo(state) && <NuevoStamp size={44} className="absolute -left-2 -top-2" />}
           </div>
           <div>

@@ -3,3 +3,4 @@
 - [x] Ampliar el catálogo con cuatro cultivos y filtro por precio.
 - [x] Renombrar la pantalla de Cosecha sin alterar los planes existentes.
 - [x] Verificar las pantallas y metadatos de las rutas.
+- [x] Productor: registro, Score en inicio, catálogo editable y cosecha compartida.

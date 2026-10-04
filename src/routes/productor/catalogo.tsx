@@ -52,8 +52,8 @@ function Catalogo() {
       eyebrow="Tu catálogo"
       title="Cultivos publicados"
       right={
-        <button onClick={() => setEditing("new")} className="flex h-10 items-center gap-1.5 rounded-full bg-foreground px-4 text-xs text-background">
-          <Plus className="h-4 w-4" /> Agregar cultivo
+        <button onClick={() => setEditing("new")} className="flex h-10 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full bg-foreground px-4 text-xs text-background">
+          <Plus className="h-4 w-4" /> Agregar
         </button>
       }
     >

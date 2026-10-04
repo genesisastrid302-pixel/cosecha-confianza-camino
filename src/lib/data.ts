@@ -4,6 +4,10 @@ import tomato from "@/assets/product-tomato.jpg";
 import limones from "@/assets/product-limones.jpg";
 import cilantro from "@/assets/product-cilantro.jpg";
 import chiles from "@/assets/product-chiles.jpg";
+import espinaca from "@/assets/product-espinaca.jpg";
+import calabaza from "@/assets/product-calabaza.jpg";
+import ejote from "@/assets/product-ejote.jpg";
+import lechuga from "@/assets/product-lechuga.jpg";
 
 export type Producer = {
   slug: string;
@@ -62,6 +66,8 @@ export type Product = {
   harvestIn: number; // days
   unitsLeft: number;
   story: string;
+  season: string;
+  cropPractice: string;
   badge?: "temporada" | "ultimos";
 };
 
@@ -76,6 +82,8 @@ export const products: Product[] = [
     harvestIn: 3,
     unitsLeft: 14,
     story: "Sembrado el 12 de marzo. Riego por goteo con agua de lluvia captada.",
+    season: "Primavera–verano",
+    cropPractice: "Semilla ancestral, composta y riego por goteo con agua de lluvia captada.",
     badge: "temporada",
   },
   {
@@ -88,6 +96,8 @@ export const products: Product[] = [
     harvestIn: 0,
     unitsLeft: 9,
     story: "Cortado al amanecer. Cáscara delgada, jugo perfumado.",
+    season: "Otoño–invierno",
+    cropPractice: "Poda manual y control biológico de plagas en la huerta.",
     badge: "ultimos",
   },
   {
@@ -100,6 +110,8 @@ export const products: Product[] = [
     harvestIn: 1,
     unitsLeft: 28,
     story: "Cortado la mañana de la entrega. Aroma intenso, hojas tiernas.",
+    season: "Todo el año",
+    cropPractice: "Asociación de cultivos y composta para nutrir la tierra.",
   },
   {
     id: "chiles",
@@ -111,7 +123,33 @@ export const products: Product[] = [
     harvestIn: 5,
     unitsLeft: 22,
     story: "Variedades criollas. Picor medio a alto, dependiendo del sol.",
+    season: "Primavera–verano",
+    cropPractice: "Semilla criolla y rotación de cultivos sin químicos.",
     badge: "temporada",
+  },
+  {
+    id: "espinaca", name: "Espinaca baby", producerSlug: "rosa", photo: espinaca,
+    price: 45, unit: "kilo", harvestIn: 2, unitsLeft: 17,
+    story: "Hojas tiernas cosechadas a mano.", season: "Otoño–invierno",
+    cropPractice: "Coberturas vegetales y control biológico de plagas.", badge: "temporada",
+  },
+  {
+    id: "calabaza", name: "Calabaza de castilla", producerSlug: "santiago", photo: calabaza,
+    price: 32, unit: "kilo", harvestIn: 4, unitsLeft: 36,
+    story: "Crecida entre surcos de tierra viva.", season: "Otoño",
+    cropPractice: "Asociación de cultivos y abono verde para cuidar el suelo.", badge: "temporada",
+  },
+  {
+    id: "ejote", name: "Ejote criollo", producerSlug: "rosa", photo: ejote,
+    price: 28, unit: "kilo", harvestIn: 1, unitsLeft: 21,
+    story: "Vainas frescas seleccionadas a mano.", season: "Primavera–otoño",
+    cropPractice: "Coberturas vegetales y cosecha manual en su punto de madurez.",
+  },
+  {
+    id: "lechuga", name: "Lechuga orejona", producerSlug: "santiago", photo: lechuga,
+    price: 18, unit: "pieza", harvestIn: 0, unitsLeft: 24,
+    story: "Hojas crujientes recién cortadas del surco.", season: "Otoño–primavera",
+    cropPractice: "Composta y rotación de cultivos para mantener la tierra fértil.",
   },
 ];
 
@@ -151,7 +189,7 @@ export const producerDetails: Record<string, ProducerDetail> = {
     practices: ["Poda manual", "Control biológico de plagas", "Coberturas vegetales", "Cosecha en punto de madurez"],
     coldChain: "Corte en la mañana, sombra y ventilación natural; traslado refrigerado el mismo día.",
     gallery: [harvest, landscape, seedlings, planting],
-    components: { rating: 90, profile: 85, onTime: 80, waste: 70 },
+    components: { rating: 93, profile: 90, onTime: 90, waste: 90 },
   },
 };
 

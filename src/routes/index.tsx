@@ -7,6 +7,10 @@ export const Route = createFileRoute("/")({
     meta: [
       { title: "Milpa — Del campo a tu mesa" },
       { name: "description", content: "App de trazabilidad agroecológica para cadenas cortas en Monterrey." },
+      { property: "og:title", content: "Milpa — Del campo a tu mesa" },
+      { property: "og:description", content: "App de trazabilidad agroecológica para cadenas cortas en Monterrey." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Apertura,

@@ -4,18 +4,23 @@ import { AppShell } from "@/components/AppShell";
 import { consumidorTabs } from "@/components/tabs";
 import { products, getProducer, trustScore10, scoreTone } from "@/lib/data";
 import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/consumidor/")({
   head: () => ({
     meta: [
       { title: "Mercado · Consumidor — Milpa" },
       { name: "description", content: "Cultivos agroecológicos disponibles cerca de Monterrey." },
+      { property: "og:title", content: "Mercado · Consumidor — Milpa" },
+      { property: "og:description", content: "Cultivos agroecológicos disponibles cerca de Monterrey." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: ConsumidorHome,
 });
 
-const filters = ["Por temporada", "Por producto", "Por disponibilidad"] as const;
+const filters = ["Por temporada", "Por producto", "Por disponibilidad", "Por precio"] as const;
 type Filter = (typeof filters)[number];
 
 function ConsumidorHome() {
@@ -27,6 +32,7 @@ function ConsumidorHome() {
     if (filter === "Por temporada") l = l.filter((p) => p.badge === "temporada");
     if (filter === "Por producto") l = [...l].sort((a, b) => a.name.localeCompare(b.name));
     if (filter === "Por disponibilidad") l = [...l].sort((a, b) => a.harvestIn - b.harvestIn);
+    if (filter === "Por precio") l = [...l].sort((a, b) => a.price - b.price);
     return l;
   }, [filter, q]);
 
@@ -40,15 +46,16 @@ function ConsumidorHome() {
 
         <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1">
           {filters.map((f) => (
-            <button
+            <Button
               key={f}
+              variant="outline"
               onClick={() => setFilter(filter === f ? null : f)}
-              className={`shrink-0 rounded-full border px-3.5 py-1.5 text-xs transition ${
+              className={`h-auto shrink-0 rounded-full px-3.5 py-1.5 text-xs transition ${
                 filter === f ? "border-foreground bg-foreground text-background" : "border-border bg-card text-foreground/70"
               }`}
             >
               {f}
-            </button>
+            </Button>
           ))}
         </div>
 
@@ -57,9 +64,9 @@ function ConsumidorHome() {
             const prod = getProducer(p.producerSlug);
             const s = trustScore10(p.producerSlug);
             return (
-              <Link to="/consumidor/productor/$slug" params={{ slug: p.producerSlug }} key={p.id} className="overflow-hidden rounded-2xl border border-border bg-card">
+              <Link to="/consumidor/producto/$id" params={{ id: p.id }} key={p.id} className="overflow-hidden rounded-lg border border-border bg-card">
                 <div className="relative aspect-square bg-muted">
-                  <img src={p.photo} alt={p.name} className="h-full w-full object-cover" />
+                  <img src={p.photo} alt={p.name} loading="lazy" width={816} height={816} className="h-full w-full object-cover" />
                   <span className={`absolute right-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-medium ${scoreTone(s)}`}>{s}/10</span>
                 </div>
                 <div className="p-2.5">

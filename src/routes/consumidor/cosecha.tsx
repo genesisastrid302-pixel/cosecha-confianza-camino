@@ -8,10 +8,10 @@ import { Sprout, Check, CalendarDays, HandHeart } from "lucide-react";
 export const Route = createFileRoute("/consumidor/cosecha")({
   head: () => ({
     meta: [
-      { title: "Farm Drop · Milpa" },
-      { name: "description", content: "Haz Farm Drop: reserva tu caja del cultivo antes de la siembra y acompaña al productor toda la temporada." },
-      { property: "og:title", content: "Farm Drop · Milpa" },
-      { property: "og:description", content: "Haz Farm Drop y recibe tu caja cada semana, directo del productor." },
+      { title: "Cosecha compartida · Milpa" },
+      { name: "description", content: "Reserva tu caja del cultivo antes de la siembra y acompaña al productor toda la temporada." },
+      { property: "og:title", content: "Cosecha compartida · Milpa" },
+      { property: "og:description", content: "Reserva tu cosecha y recibe tu caja cada semana, directo del productor." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -30,7 +30,7 @@ function CosechaCompartida() {
   const [productor, setProductor] = useState("santiago");
   const [plan, setPlan] = useState("milpa");
   const [listo, setListo] = useState(false);
-  const elegido = planes.find((p) => p.id === plan)!;
+  const elegido = planes.find((p) => p.id === plan) ?? planes[0];
   const prod = producers[productor];
 
   if (listo) {
@@ -63,7 +63,7 @@ function CosechaCompartida() {
   }
 
   return (
-    <AppShell tabs={consumidorTabs} tone="terracota" eyebrow="Antes de la siembra" title="Farm Drop">
+    <AppShell tabs={consumidorTabs} tone="terracota" eyebrow="Antes de la siembra" title="Cosecha compartida">
       <div className="space-y-5 px-5">
         <div className="rounded-2xl border-2 border-dashed border-primary/40 bg-primary/5 p-4">
           <div className="eyebrow flex items-center gap-1.5 text-primary"><HandHeart className="h-3 w-3" /> Farm Drop</div>
@@ -156,7 +156,7 @@ function CosechaCompartida() {
           onClick={() => setListo(true)}
           className="w-full rounded-full bg-primary py-4 text-sm font-medium text-primary-foreground"
         >
-          Hacer Farm Drop
+          Reservar mi cosecha
         </button>
       </div>
     </AppShell>

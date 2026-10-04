@@ -52,7 +52,7 @@ function Apertura() {
               Crear mi cuenta
             </Link>
             <Link
-              to="/login"
+              to="/login/rol"
               className="block w-full rounded-full border border-paper/30 py-4 text-center text-sm text-paper transition active:scale-[0.98]"
             >
               Ya tengo cuenta

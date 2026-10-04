@@ -1,0 +1,2 @@
+- Keep catalog crop facts in `src/lib/data.ts` so market, detail, and cart read the same product information.
+- Keep the temporary shopping basket in a client-only cart module so navigation preserves selections without requiring account storage.

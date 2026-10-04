@@ -1,18 +1,92 @@
 import { useEffect, useState } from "react";
-import { getProductsByProducer } from "@/lib/data";
+import { getProductsByProducer, producerDetails } from "@/lib/data";
+import { SCORE_LAYERS, score10 } from "@/lib/score";
 
 export type Zona = "Galeana" | "Allende" | "Ramos Arizpe";
 export type Pago = "CLABE" | "CoDi" | "Efectivo";
+export type IdTipo = "INE" | "Pasaporte" | "Licencia";
 export type CropStatus = "disponible" | "agotado" | "proximamente";
 
 export type ProducerProfile = {
   name: string;
+  correo: string;
+  telefono: string;
   story: string;
   zona: Zona | "";
-  pago: Pago | "";
+  /** Métodos para recibir pagos (puede elegir varios) */
+  pagos: Pago[];
   clabe: string;
+  banco: string;
+  titular: string;
+  /** Celular ligado a CoDi */
+  codi: string;
   photos: string[];
+  /** Aceptó ser socio de Milpa y aportar un % de sus ventas */
+  socio: boolean;
+  /** Identificación oficial para verificar que es la persona correcta.
+   *  Solo se guarda el tipo y el estado: la foto no se queda en el navegador. */
+  idTipo: IdTipo | "";
+  idEstado: "" | "en_revision" | "verificada";
 };
+
+/** Porcentaje de cada venta que el productor socio aporta a Milpa (ajustable) */
+export const APORTACION_SOCIO = 10;
+
+export const EMPTY_PROFILE: ProducerProfile = {
+  name: "",
+  correo: "",
+  telefono: "",
+  story: "",
+  zona: "",
+  pagos: [],
+  clabe: "",
+  banco: "",
+  titular: "",
+  codi: "",
+  photos: [],
+  socio: false,
+  idTipo: "",
+  idEstado: "",
+};
+
+/** La cuenta para transferencias puede ser CLABE (18 dígitos) o tarjeta de débito (16) */
+export function tipoCuenta(clabe: string): "CLABE" | "Tarjeta" | null {
+  if (/^\d{18}$/.test(clabe)) return "CLABE";
+  if (/^\d{16}$/.test(clabe)) return "Tarjeta";
+  return null;
+}
+
+/** Lista exacta de lo que falta en los métodos de cobro elegidos (vacía = completo) */
+export function cobroFaltantes(p: ProducerProfile): string[] {
+  const faltan: string[] = [];
+  if (p.pagos.length === 0) return ["Elige al menos una forma de recibir tus pagos."];
+  if (p.pagos.includes("CLABE")) {
+    if (!tipoCuenta(p.clabe)) faltan.push(`Transferencia: la CLABE lleva 18 dígitos (o 16 si es tarjeta); llevas ${p.clabe.length}.`);
+    if (p.banco.trim().length < 2) faltan.push("Transferencia: escribe el banco.");
+    if (p.titular.trim().length < 3) faltan.push("Transferencia: escribe el nombre del titular.");
+  }
+  if (p.pagos.includes("CoDi") && !/^\d{10}$/.test(p.codi)) {
+    faltan.push(`CoDi: el celular lleva 10 dígitos; llevas ${p.codi.length}.`);
+  }
+  return faltan;
+}
+
+/** ¿Cada método de cobro elegido tiene sus datos? */
+export function cobroCompleto(p: ProducerProfile) {
+  return cobroFaltantes(p).length === 0;
+}
+
+/** Texto corto de los métodos de cobro, con las cuentas enmascaradas */
+export function cobroResumen(p: ProducerProfile) {
+  if (p.pagos.length === 0) return "Sin definir";
+  return p.pagos
+    .map((m) => {
+      if (m === "CLABE") return tipoCuenta(p.clabe) ? `${tipoCuenta(p.clabe)} ${p.banco} ···${p.clabe.slice(-4)}` : "Transferencia sin capturar";
+      if (m === "CoDi") return p.codi ? `CoDi ···${p.codi.slice(-4)}` : "CoDi sin celular";
+      return "Efectivo";
+    })
+    .join(" · ");
+}
 
 export type Crop = {
   id: string;
@@ -42,7 +116,24 @@ export type ProducerState = {
   crops: Crop[];
   cosechas: Cosecha[];
   lastScore: number | null;
+  /** Reseñas de consumidores recibidas; con menos de RESENAS_PARA_SCORE es "Nuevo" */
+  resenas: number;
 };
+
+/** Reseñas necesarias para dejar de ser "Nuevo" y mostrar el score */
+export const RESENAS_PARA_SCORE = 10;
+/** Fotos del campo que se piden mientras el productor es nuevo */
+export const FOTOS_MIN = 5;
+export const FOTOS_MAX = 15;
+
+export function esNuevo(s: ProducerState) {
+  return s.resenas < RESENAS_PARA_SCORE;
+}
+
+/** Suma una reseña cuando un consumidor envía su feedback */
+export function addResena() {
+  updateProducer((s) => ({ ...s, resenas: s.resenas + 1 }));
+}
 
 const KEY = "milpa-productor";
 const EVENT = "milpa-productor-change";
@@ -55,14 +146,7 @@ function inDays(n: number) {
 
 function seed(): ProducerState {
   return {
-    profile: {
-      name: "Ezequiel Martínez",
-      story: "",
-      zona: "Ramos Arizpe",
-      pago: "",
-      clabe: "",
-      photos: [],
-    },
+    profile: { ...EMPTY_PROFILE, name: "Ezequiel Martínez", zona: "Ramos Arizpe" },
     crops: getProductsByProducer("santiago").map((p) => ({
       id: p.id,
       name: p.name,
@@ -76,6 +160,8 @@ function seed(): ProducerState {
     })),
     cosechas: [],
     lastScore: null,
+    // El productor de ejemplo ya tiene historial; uno recién registrado empieza en 0
+    resenas: 24,
   };
 }
 
@@ -84,7 +170,13 @@ export function readProducer(): ProducerState {
   try {
     const raw = window.localStorage.getItem(KEY);
     if (!raw) return seed();
-    return { ...seed(), ...JSON.parse(raw) };
+    const parsed = JSON.parse(raw);
+    const base = seed();
+    // Perfiles guardados antes de agregar correo, teléfono y cuenta de cobro
+    const profile = { ...EMPTY_PROFILE, ...parsed.profile };
+    // Antes se guardaba un solo método en "pago"
+    if (parsed.profile?.pago && !parsed.profile?.pagos) profile.pagos = [parsed.profile.pago];
+    return { ...base, ...parsed, profile };
   } catch {
     return seed();
   }
@@ -124,29 +216,34 @@ export function useProducer(): [ProducerState, boolean] {
 export function profileCompleteness(p: ProducerProfile) {
   const checks = [
     { label: "Nombre", ok: p.name.trim().length > 1 },
+    { label: "Identificación oficial", ok: !!p.idTipo && p.idEstado !== "" },
+    { label: "Correo y teléfono", ok: /\S+@\S+\.\S+/.test(p.correo) && /^\d{10}$/.test(p.telefono) },
     { label: "Historia de tu rancho", ok: p.story.trim().length >= 40 },
     { label: "Ubicación del campo", ok: !!p.zona },
-    { label: "Método de pago", ok: !!p.pago && (p.pago !== "CLABE" || /^\d{18}$/.test(p.clabe)) },
-    { label: "Fotos del campo (mín. 3)", ok: p.photos.length >= 3 },
+    { label: "Cuenta para recibir pagos", ok: cobroCompleto(p) },
+    { label: "Acuerdo de socio", ok: p.socio },
+    { label: `Fotos del campo (mín. ${FOTOS_MIN})`, ok: p.photos.length >= FOTOS_MIN },
   ];
   const pct = Math.round((checks.filter((c) => c.ok).length / checks.length) * 100);
   return { pct, checks };
 }
 
-/** Score de confianza: 4 componentes calculados por el sistema. */
+/**
+ * Score de confianza sobre 10, con las 3 capas del modelo (src/lib/score.ts).
+ * La capa de consistencia depende de lo que el productor captura; las otras dos
+ * vienen de consumidores y distribuidor (en la demo, datos de ejemplo).
+ */
 export function trustScore(s: ProducerState) {
   const perfil = profileCompleteness(s.profile).pct;
-  const transparencia = Math.min(100, 60 + s.cosechas.reduce((n, c) => n + c.postales.length, 0) * 10 + s.profile.photos.length * 4);
-  const entregas = 96;
-  const calificaciones = 92;
-  const components = [
-    { label: "Perfil completo", weight: 30, value: perfil },
-    { label: "Transparencia", weight: 25, value: transparencia },
-    { label: "Entregas a tiempo", weight: 25, value: entregas },
-    { label: "Calificaciones", weight: 20, value: calificaciones },
-  ];
-  const total = Math.round(components.reduce((n, c) => n + (c.value * c.weight) / 100, 0));
-  return { total, components };
+  const evidencia = Math.min(100, 60 + s.cosechas.reduce((n, c) => n + c.postales.length, 0) * 10 + s.profile.photos.length * 4);
+  const base = producerDetails.santiago.components;
+  const layers = {
+    consistencia: Math.round((perfil + evidencia) / 2),
+    calificacion: base.calificacion,
+    distribuidor: base.distribuidor,
+  };
+  const components = SCORE_LAYERS.map((l) => ({ label: l.label, weight: l.weight, value: layers[l.key], help: l.help }));
+  return { total: score10(layers), components };
 }
 
 export function newId() {

@@ -11,12 +11,25 @@ const COPY: Record<Role, { sub: string; icon: typeof Sprout; to: "/productor" | 
 import illustration from "@/assets/login-illustration.png";
 
 export const Route = createFileRoute("/login/")({
-  head: () => ({ meta: [{ title: "Iniciar sesión — Milpa" }] }),
+  validateSearch: (s: Record<string, unknown>): { rol?: Role } => ({
+    rol: ROLES.includes(s.rol as Role) ? (s.rol as Role) : undefined,
+  }),
+  beforeLoad: ({ search }) => {
+    if (!search.rol) throw redirect({ to: "/login/rol" });
+  },
+  head: () => ({
+    meta: [
+      { title: "Iniciar sesión — Milpa" },
+      { name: "description", content: "Entra a Milpa con tu rol en la cadena agroecológica." },
+      { property: "og:title", content: "Iniciar sesión — Milpa" },
+      { property: "og:description", content: "Entra a Milpa con tu rol en la cadena agroecológica." },
+    ],
+  }),
   component: Login,
 });
 
 function Login() {
-  const { rol } = useSearch({ from: "/login/" }) as { rol?: Role };
+  const { rol } = Route.useSearch();
   const role = rol ?? "consumidor";
   const c = COPY[role];
   const Icon = c.icon;

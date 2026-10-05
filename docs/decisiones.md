@@ -37,6 +37,8 @@ La página pública se titula **Trazabilidad del pedido** y muestra: pedido y lo
 
 Los tres roles tienen una campanita en el encabezado con el número de avisos sin ver; lleva a la pantalla **Notificaciones**. Los avisos no se guardan aparte: se derivan del historial de cada pedido (`src/lib/notificaciones.ts`), así siempre coinciden con lo que pasó. Al abrir la pantalla se marcan como vistos.
 
+La pantalla agrupa **por pedido, no por acción**: una sección por pedido (la de actividad más reciente arriba). La vista previa muestra el número de pedido, su estado actual (`STATUS_LABEL`), la última novedad y cuántas hay sin ver. Al abrirla aparecen "Sigue:", todas sus novedades (con el detalle, p. ej. dónde recoger) y **un solo botón** a la pantalla del pedido de ese rol, con el título de esa pantalla como etiqueta. Las secciones con novedades sin ver se abren solas. Los avisos que no son de un pedido (reservas, cosechas compartidas) van en "Otros avisos".
+
 | Rol | Le avisa |
 |---|---|
 | Productor | pedido nuevo, problema en la recolección, pedido recolectado, entregado, pago liberado (ya con la aportación de socio descontada), calificación recibida (alerta si es de 2★ o menos o trae merma), nueva reserva de cosecha compartida |
@@ -99,3 +101,7 @@ Para transferencias se acepta CLABE (18 dígitos) o tarjeta de débito (16), con
 ## Demo
 
 No hay backend. El estado (carrito, pedidos, productor) se guarda en el navegador y se comparte entre roles: lo que hace el consumidor aparece al entrar como productor o distribuidor en el mismo navegador.
+
+## Navegación
+
+El botón de regresar va siempre arriba a la izquierda, sobre el título (`back` en `AppShell`). La X de cerrar un flujo (p. ej. confirmar la llegada) es otra cosa y se queda a la derecha.

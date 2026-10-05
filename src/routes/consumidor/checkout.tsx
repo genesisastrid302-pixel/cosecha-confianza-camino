@@ -72,8 +72,8 @@ function Checkout() {
     <AppShell
       eyebrow="Tu canasta"
       title="Confirmar pedido"
-      right={
-        <Link to="/consumidor/carrito" aria-label="Volver al carrito" className="mt-1 flex h-9 w-9 items-center justify-center rounded-full bg-secondary">
+      back={
+        <Link to="/consumidor/carrito" aria-label="Volver al carrito" className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary">
           <ChevronLeft className="h-5 w-5" />
         </Link>
       }

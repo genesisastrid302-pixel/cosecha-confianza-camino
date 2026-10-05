@@ -80,20 +80,16 @@ function Lote() {
   return (
     <div className="flex min-h-full flex-col">
       <header className="sticky top-0 z-20 bg-background/85 px-5 pb-3 pt-4 backdrop-blur-xl">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <div className="eyebrow">Milpa · Del campo a tu mesa</div>
-            <h1 className="display mt-1 text-3xl leading-tight">Trazabilidad del pedido</h1>
-          </div>
-          <button
-            type="button"
-            onClick={() => router.history.back()}
-            aria-label="Volver"
-            className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => router.history.back()}
+          aria-label="Volver"
+          className="mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-secondary"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+        <div className="eyebrow">Milpa · Del campo a tu mesa</div>
+        <h1 className="display mt-1 text-3xl leading-tight">Trazabilidad del pedido</h1>
       </header>
 
       <main className="flex-1 space-y-5 px-5 pb-8">

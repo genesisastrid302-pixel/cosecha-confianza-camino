@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { getProducer, unitLabel } from "@/lib/data";
-import { codigoDe, useOrders, type Order, type OrderStatus } from "@/lib/orders";
-import { LOCAL_DISTRIBUIDOR, readReservas } from "@/lib/distribucion";
+import { codigoDe, tituloPedidoProductor, useOrders, type Order, type OrderStatus } from "@/lib/orders";
+import { LOCAL_DISTRIBUIDOR, fueEntregado, readReservas } from "@/lib/distribucion";
 import { APORTACION_SOCIO, listarCuentas } from "@/lib/producer-store";
 import { nombreCorto, readDistributor } from "@/lib/accounts";
 
@@ -152,7 +152,43 @@ export function avisosDe(rol: Rol, orders: Order[]): Aviso[] {
     );
   }
 
-  return out.sort((a, b) => b.at.localeCompare(a.at));
+  // Más reciente primero; si dos pasaron al mismo tiempo, primero el que va después en el historial
+  return out
+    .map((a, i) => ({ a, i }))
+    .sort((x, y) => y.a.at.localeCompare(x.a.at) || y.i - x.i)
+    .map(({ a }) => a);
+}
+
+// --- Avisos agrupados por pedido ---
+
+/** Pantalla del pedido para cada rol; la etiqueta es el título de esa pantalla */
+export function destinoPedido(rol: Rol, o: Order): { href: string; label: string } | undefined {
+  if (rol === "consumidor") return { href: "/consumidor/pedidos", label: "Pedidos" };
+  if (rol === "productor") return { href: `/productor/pedido/${o.id}`, label: tituloPedidoProductor(o) };
+  if (o.status === "empacado" || o.status === "en_recoleccion") return { href: "/distribuidor/ruta", label: "Ruta" };
+  if (o.status === "en_ruta") return { href: `/distribuidor/entrega/${o.id}`, label: o.cliente };
+  if (fueEntregado(o)) return { href: "/distribuidor/finanzas", label: "Finanzas" };
+  return undefined;
+}
+
+export type GrupoPedido = { order: Order; avisos: Aviso[]; at: string };
+
+/** Una sección por pedido (la más reciente arriba) y aparte los avisos que no son de un pedido */
+export function agruparPorPedido(avisos: Aviso[], orders: Order[]) {
+  const grupos = new Map<string, GrupoPedido>();
+  const sueltos: Aviso[] = [];
+  for (const a of avisos) {
+    const order = a.pedido ? orders.find((o) => o.id === a.pedido) : undefined;
+    if (!order) {
+      sueltos.push(a);
+      continue;
+    }
+    const g = grupos.get(order.id) ?? { order, avisos: [], at: a.at };
+    g.avisos.push(a);
+    if (a.at > g.at) g.at = a.at;
+    grupos.set(order.id, g);
+  }
+  return { grupos: [...grupos.values()].sort((a, b) => b.at.localeCompare(a.at)), sueltos };
 }
 
 // --- Hasta cuándo vio sus avisos cada rol ---

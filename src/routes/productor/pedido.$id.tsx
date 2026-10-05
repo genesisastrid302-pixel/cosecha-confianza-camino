@@ -10,6 +10,7 @@ import {
   useOrders,
   updateOrder,
   formatTime,
+  tituloPedidoProductor,
   type Empaque,
   type Order,
   type Traslado,
@@ -36,9 +37,9 @@ function PedidoProductor() {
   return (
     <AppShell
       eyebrow={order ? `#${order.id} · ${order.cliente}` : "Pedido"}
-      title={order ? tituloPorEstado(order) : "Pedido"}
-      right={
-        <Link to="/productor/pedidos" aria-label="Volver a pedidos" className="mt-1 flex h-9 w-9 items-center justify-center rounded-full bg-secondary">
+      title={order ? tituloPedidoProductor(order) : "Pedido"}
+      back={
+        <Link to="/productor/pedidos" aria-label="Volver a pedidos" className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary">
           <ChevronLeft className="h-5 w-5" />
         </Link>
       }
@@ -76,16 +77,6 @@ function PedidoProductor() {
   );
 }
 
-function tituloPorEstado(o: Order) {
-  if (o.status === "nuevo") return "Nuevo pedido";
-  if (o.status === "aceptado") return "Prepara el pedido";
-  if (o.status === "rechazado") return "Pedido rechazado";
-  if (o.status === "con_problema") return "Revisa este pedido";
-  if (o.status === "en_recoleccion") return "Pedido recolectado";
-  if (o.status === "en_ruta") return "Pedido en camino";
-  if (["entregado", "recibido", "calificado"].includes(o.status)) return "Pedido entregado";
-  return "Pedido listo";
-}
 
 function Resumen({ order }: { order: Order }) {
   const bySlug = order.items.reduce<Record<string, Order["items"]>>((acc, i) => {

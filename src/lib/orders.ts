@@ -288,6 +288,18 @@ export function siguientePaso(o: Order): string {
   }
 }
 
+/** Título de la pantalla del pedido del productor según su estado */
+export function tituloPedidoProductor(o: Order) {
+  if (o.status === "nuevo") return "Nuevo pedido";
+  if (o.status === "aceptado") return "Prepara el pedido";
+  if (o.status === "rechazado") return "Pedido rechazado";
+  if (o.status === "con_problema") return "Revisa este pedido";
+  if (o.status === "en_recoleccion") return "Pedido recolectado";
+  if (o.status === "en_ruta") return "Pedido en camino";
+  if (["entregado", "recibido", "calificado"].includes(o.status)) return "Pedido entregado";
+  return "Pedido listo";
+}
+
 export const TRASLADO_LABEL: Record<Traslado, string> = {
   productor_lleva: "El productor lo lleva al local del distribuidor",
   distribuidor_recoge: "El distribuidor recoge en el campo",

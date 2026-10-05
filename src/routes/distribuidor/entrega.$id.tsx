@@ -18,14 +18,14 @@ function Entrega() {
   const [fase, setFase] = useState<"entrega" | "merma">("entrega");
 
   const volver = (
-    <Link to="/distribuidor/ruta" aria-label="Volver a la ruta" className="mt-1 flex h-9 w-9 items-center justify-center rounded-full bg-secondary">
+    <Link to="/distribuidor/ruta" aria-label="Volver a la ruta" className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary">
       <ChevronLeft className="h-5 w-5" />
     </Link>
   );
 
   if (!order) {
     return (
-      <AppShell eyebrow="Entrega" title="Entrega" right={volver}>
+      <AppShell eyebrow="Entrega" title="Entrega" back={volver}>
         <p className="px-5 py-10 text-center text-sm text-muted-foreground">No encontramos este pedido en este navegador.</p>
       </AppShell>
     );
@@ -34,7 +34,7 @@ function Entrega() {
   const domicilio = order.entrega === "domicilio";
 
   return (
-    <AppShell eyebrow={`#${order.id} · ${domicilio ? "A domicilio" : "Para recoger"}`} title={fase === "merma" ? "Registro de merma" : order.cliente} right={volver}>
+    <AppShell eyebrow={`#${order.id} · ${domicilio ? "A domicilio" : "Para recoger"}`} title={fase === "merma" ? "Registro de merma" : order.cliente} back={volver}>
       <div className="space-y-5 px-5">
         <div className="rounded-2xl border border-border bg-card p-4 text-sm">
           <div className="flex items-start gap-2 text-xs text-muted-foreground">

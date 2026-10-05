@@ -44,6 +44,7 @@ export function AppShell({
   tabs,
   tone,
   right,
+  back,
 }: {
   title?: string;
   eyebrow?: string;
@@ -51,18 +52,21 @@ export function AppShell({
   tabs?: Tab[];
   tone?: "milpa" | "miel" | "terracota";
   right?: React.ReactNode;
+  /** Botón de regresar: siempre arriba a la izquierda, sobre el título */
+  back?: React.ReactNode;
 }) {
   return (
     <div className="flex min-h-full flex-col">
       {(title || eyebrow) && (
         <header className="sticky top-0 z-20 bg-background/85 px-5 pb-3 pt-4 backdrop-blur-xl">
+          {back && <div className="mb-3">{back}</div>}
           <div className="flex items-start justify-between gap-3">
             <div>
               {eyebrow && <div className="eyebrow">{eyebrow}</div>}
               {title && <h1 className="display mt-1 text-4xl">{title}</h1>}
             </div>
             {/* Las pantallas principales de cada rol llevan la campanita; las que traen su propio botón, no */}
-            {right ?? (tabs ? <Campana rol={tabs[0].to.slice(1) as Rol} /> : null)}
+            {right ?? (tabs && !back ? <Campana rol={tabs[0].to.slice(1) as Rol} /> : null)}
           </div>
         </header>
       )}

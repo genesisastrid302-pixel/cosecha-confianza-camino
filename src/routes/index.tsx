@@ -18,13 +18,12 @@ export const Route = createFileRoute("/")({
 
 function Apertura() {
   return (
-    <div className="relative flex h-full flex-col text-paper">
-      <img
-        src={illustration}
-        alt="Ilustración de la cadena corta Milpa"
-        className="absolute inset-0 h-full w-full object-cover"
-      />
-      <div className="absolute inset-0 bg-gradient-to-b from-ink/40 via-ink/65 to-ink/95" />
+    <div className="relative flex h-full flex-col bg-ink text-paper">
+      {/* La ilustración se ve completa (sin recortar los lados) y pegada al borde superior; se funde con el fondo */}
+      <div className="absolute inset-x-0 top-0">
+        <img src={illustration} alt="Ilustración de la cadena corta Milpa" className="block h-auto w-full" />
+        <div className="absolute inset-0 bg-gradient-to-b from-ink/40 via-ink/65 to-ink" />
+      </div>
 
       <div className="relative flex h-full flex-col px-6 pb-8 pt-14">
         <Seal className="h-14 w-14 text-paper" />

@@ -1,4 +1,6 @@
 import { useRef, type ReactNode } from "react";
+import { useRouterState } from "@tanstack/react-router";
+import { Wifi } from "lucide-react";
 import { IndicadorScroll } from "@/components/IndicadorScroll";
 
 /**
@@ -6,8 +8,12 @@ import { IndicadorScroll } from "@/components/IndicadorScroll";
  * - On phones: full bleed.
  * - On tablet/desktop: shows a phone mock (notch + rounded edges) centered on a warm canvas.
  */
+const INMERSIVAS = ["/"];
+
 export function MobileFrame({ children }: { children: ReactNode }) {
   const contenido = useRef<HTMLDivElement>(null);
+  // Pantallas con imagen de fondo: el contenido sube hasta el borde y la barra de estado va encima, en claro
+  const inmersiva = useRouterState({ select: (s) => INMERSIVAS.includes(s.location.pathname) });
   return (
     <div className="min-h-[100dvh] w-full bg-paper md:flex md:items-center md:justify-center md:py-10">
       {/* Desktop ambient backdrop */}
@@ -25,17 +31,17 @@ export function MobileFrame({ children }: { children: ReactNode }) {
           <div className="hidden md:block pointer-events-none absolute left-1/2 top-2 z-50 h-7 w-32 -translate-x-1/2 rounded-full bg-ink" />
 
           {/* Status bar (desktop only) */}
-          <div className="hidden md:flex pointer-events-none absolute inset-x-0 top-0 z-40 h-10 items-center justify-between px-7 text-[11px] font-medium text-foreground">
+          <div className={`hidden md:flex pointer-events-none absolute inset-x-0 top-0 z-40 h-10 items-center justify-between px-7 text-[11px] font-medium ${inmersiva ? "text-paper" : "text-foreground"}`}>
             <span>9:41</span>
-            <span className="flex items-center gap-1.5 opacity-80">
-              <span>•••</span>
-              <span>􀙇</span>
-              <span>􀛨</span>
+            {/* Mismo tamaño que la hora: el texto hereda los 11px y el ícono ocupa su alto de letra */}
+            <span className="flex items-center gap-1.5">
+              <span>5G</span>
+              <Wifi className="h-[13px] w-[13px]" strokeWidth={2.5} aria-label="Wi-Fi" />
             </span>
           </div>
 
           {/* Content */}
-          <div ref={contenido} className="relative h-full w-full overflow-y-auto md:pt-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div ref={contenido} className={`relative h-full w-full overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${inmersiva ? "" : "md:pt-10"}`}>
             {children}
           </div>
           <IndicadorScroll contenedor={contenido} />

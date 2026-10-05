@@ -30,14 +30,14 @@ function Recoleccion() {
   const [foto, setFoto] = useState<string | undefined>();
 
   const volver = (
-    <Link to="/distribuidor/ruta" aria-label="Volver a la ruta" className="mt-1 flex h-9 w-9 items-center justify-center rounded-full bg-secondary">
+    <Link to="/distribuidor/ruta" aria-label="Volver a la ruta" className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary">
       <ChevronLeft className="h-5 w-5" />
     </Link>
   );
 
   if (!parada) {
     return (
-      <AppShell eyebrow="Recolección" title="Recolección" right={volver}>
+      <AppShell eyebrow="Recolección" title="Recolección" back={volver}>
         <p className="px-5 py-10 text-center text-sm text-muted-foreground">
           Esta parada ya no tiene lotes pendientes.{" "}
           <Link to="/distribuidor/ruta" className="text-foreground underline">Volver a la ruta</Link>
@@ -70,7 +70,7 @@ function Recoleccion() {
   };
 
   return (
-    <AppShell eyebrow={parada.enLocal ? "Recibir en local" : "Recolección"} title={parada.nombre} right={volver}>
+    <AppShell eyebrow={parada.enLocal ? "Recibir en local" : "Recolección"} title={parada.nombre} back={volver}>
       <div className="space-y-5 px-5">
         <div className="rounded-2xl border border-border bg-card p-4 text-sm">
           <div className="text-xs text-muted-foreground">{parada.lugar}</div>

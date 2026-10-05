@@ -8,14 +8,18 @@ Una sola lista para consumidor, productor y distribuidor:
 
 | Estado | Quién lo provoca | Qué ve el consumidor |
 |---|---|---|
-| `nuevo` | Consumidor paga en el checkout | "Pedido recibido" |
+| `nuevo` | Consumidor paga en el checkout | "Pedido realizado" |
 | `aceptado` | Productor toca "Puedo entregar" | "Aceptado por el productor" |
-| `empacado` | Productor registra cadena de frío y genera el QR | "Empacando" |
+| `empacado` | Productor registra cadena de frío y genera el QR | "Empacado" |
 | `en_recoleccion` | Distribuidor confirma la recolección de todos los lotes del pedido (o los recibe en su local) | "Recolectado" |
 | `en_ruta` | Distribuidor termina las recolecciones y toca "Salir a entregar" | "En camino" |
 | `entregado` | Distribuidor confirma la entrega | "Entregado" |
 | `recibido` | Consumidor confirma "Sí, ya tengo mi canasta" (o pasan 24 h) | "Recibido" |
 | `calificado` | Consumidor envía feedback | "Calificado" |
+
+Los tres roles y la página de trazabilidad usan el mismo texto (`STATUS_LABEL`) y el mismo bloque **Estado del pedido** (`src/components/EstadoPedido.tsx`): estado actual, hora y "Sigue:" con el siguiente paso (`siguientePaso` en `src/lib/orders.ts`). Ninguna pantalla inventa su propio nombre para un estado; los títulos del productor siguen la tabla ("Pedido recolectado" en `en_recoleccion`, "Pedido en camino" solo en `en_ruta`). Las etiquetas de estado van en pasado: dicen lo que ya pasó, no lo que está pasando.
+
+Donde aparece el nombre del productor se dice su papel ("Cultivado por …").
 
 Desvíos: `rechazado` (productor toca "No esta vez") y `con_problema` (distribuidor reporta un problema en la recolección).
 
@@ -32,6 +36,8 @@ La página pública se titula **Trazabilidad del pedido** y muestra: pedido y lo
 ## Notificaciones
 
 Los tres roles tienen una campanita en el encabezado con el número de avisos sin ver; lleva a la pantalla **Notificaciones**. Los avisos no se guardan aparte: se derivan del historial de cada pedido (`src/lib/notificaciones.ts`), así siempre coinciden con lo que pasó. Al abrir la pantalla se marcan como vistos.
+
+La pantalla agrupa **por pedido, no por acción**: una sección por pedido (la de actividad más reciente arriba). La vista previa muestra el número de pedido, su estado actual (`STATUS_LABEL`), la última novedad y cuántas hay sin ver. Al abrirla aparecen "Sigue:", todas sus novedades (con el detalle, p. ej. dónde recoger) y **un solo botón** a la pantalla del pedido de ese rol, con el título de esa pantalla como etiqueta. Las secciones con novedades sin ver se abren solas. Los avisos que no son de un pedido (reservas, cosechas compartidas) van en "Otros avisos".
 
 | Rol | Le avisa |
 |---|---|
@@ -51,10 +57,12 @@ Todo sale de los pedidos (`src/lib/orders.ts` y `src/lib/distribucion.ts`); no h
 
 1. **Iniciar ruta** → paradas de recolección: una por productor con pedidos empacados. Si el productor lleva el producto, la parada es "Recibir en local" y no cuenta como viaje.
 2. En cada parada: confirmar llegada → escanear el QR de cada pedido → temperatura → "¿Producto en buen estado?". Si no, se reporta el problema con motivo y foto: el pedido pasa a `con_problema`, el productor lo ve y lo deja listo otra vez.
-3. **Salir a entregar** → los pedidos pasan a `en_ruta` y el consumidor ve su **código de entrega** (4 dígitos).
+3. **Salir a entregar** → los pedidos pasan a `en_ruta` y el consumidor ve su **código de entrega** (4 dígitos) arriba en Pedidos y como aviso en Mercado. Si tiene varios pedidos abiertos, Pedidos muestra primero el que va en camino.
 4. En cada entrega el distribuidor pide el código. A domicilio además captura firma; para recoger confirma que llegó el consumidor y verifica su identidad. Si el pago es en efectivo, lo cobra ahí.
 5. Después de cada entrega: "¿Hubo merma?" con kg, motivo, lote y foto. El % de merma del distribuidor se calcula solo (kg perdidos / kg entregados).
 6. El consumidor confirma, escanea el QR (ve lote, empaque y temperaturas reales) y califica. Esa calificación suma una reseña al productor y libera su pago.
+
+Mapa de la ruta: mapa real de OpenStreetMap (Leaflet) con la ruta por calles de OSRM; si OSRM no responde se dibuja un trazo aproximado. Los pines llevan el número y color de la lista (verde recolección, terracota entrega) y la línea sale del local. Las coordenadas viven en `src/lib/data.ts` (campos de productores) y `src/lib/distribucion.ts` (direcciones del demo). "Abrir en navegación" manda esas mismas coordenadas a Google Maps.
 
 Finanzas del distribuidor: gana la logística ($18) por pedido entregado; del efectivo que cobra liquida el resto a productores y Milpa.
 
@@ -76,7 +84,7 @@ Validación por sistema en 3 capas, como en el modelo de negocio (`src/lib/score
 - El consumidor paga producto + logística ($18) + plataforma ($10). El pago se reparte en automático (Conekta, split payment).
 - Modelo B2B2C: el productor es **socio** de Milpa y aporta un porcentaje de cada venta (`APORTACION_SOCIO`, 10 % por ahora). Se retiene en automático en el split de cada pago; de las ventas en efectivo se descuenta del siguiente pago digital. Sin cuotas fijas ni pagos por adelantado. Lo acepta al registrarse.
 - El productor puede recibir por varios métodos a la vez: CLABE (con banco y titular), CoDi y efectivo al recolectar.
-- El distribuidor recibe la logística a su CLABE o CoDi; si el consumidor paga en efectivo, lo cobra al entregar.
+- El distribuidor recibe la logística por transferencia (CLABE o tarjeta, con banco y titular) o CoDi; si el consumidor paga en efectivo, lo cobra al entregar. En el registro la sección "Cuenta de cobro" se muestra abierta con transferencia preseleccionada y el titular propuesto con su nombre.
 - Al productor se le paga cuando el consumidor confirma que recibió (o pasan 24 h).
 - Cosecha compartida: planes de 8, 12 y 24 semanas, sin descuento.
 
@@ -93,3 +101,17 @@ Para transferencias se acepta CLABE (18 dígitos) o tarjeta de débito (16), con
 ## Demo
 
 No hay backend. El estado (carrito, pedidos, productor) se guarda en el navegador y se comparte entre roles: lo que hace el consumidor aparece al entrar como productor o distribuidor en el mismo navegador.
+
+## Navegación
+
+El botón de regresar va siempre arriba a la izquierda, sobre el título (`back` en `AppShell`). La X de cerrar un flujo (p. ej. confirmar la llegada) es otra cosa y se queda a la derecha.
+
+Toda pantalla con más contenido del que cabe muestra una línea de scroll vertical a la derecha (`IndicadorScroll` en el marco de la app); termina arriba de la barra de pestañas.
+
+## Carga
+
+Cuando algo tarda (leer la canasta, preparar el pedido, trazar la ruta del mapa o una pantalla que demora más de medio segundo) se muestra `IndicadorCarga`: una forma verde (`--milpa`) que gira y cambia de forma, al estilo del indicador de carga de Material 3. Con "reducir movimiento" se queda quieta.
+
+## Ficha del cultivo
+
+Debajo de "Cultivado por …" va **Productos relacionados**: cultivos del Mercado (primero del mismo productor, luego de la misma temporada) con la foto en un marco Cookie de 12 lados. No hay rachas ni insignias de constancia en la app.

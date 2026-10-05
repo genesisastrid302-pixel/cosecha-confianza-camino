@@ -56,7 +56,6 @@ function CosechaCompartida() {
             <ul className="mt-3 space-y-2 text-muted-foreground">
               <li>· {prod.name} confirma tu lugar en la siembra.</li>
               <li>· Recibes aviso el día de la primera cosecha.</li>
-              <li>· Tu racha de temporada empieza con la primera entrega.</li>
             </ul>
           </div>
           <button onClick={() => setListo(false)} className="w-full rounded-full border border-border py-3 text-sm text-muted-foreground">

@@ -6,6 +6,7 @@ import { consumidorTabs } from "@/components/tabs";
 import { Button } from "@/components/ui/button";
 import { products, getProducer } from "@/lib/data";
 import { addToCart } from "@/lib/cart";
+import { ProductosRelacionados } from "@/components/ProductosRelacionados";
 
 export const Route = createFileRoute("/consumidor/producto/$id")({
   loader: ({ params }) => {
@@ -93,6 +94,8 @@ function ProductDetailContent({ product }: { product: (typeof products)[number] 
           <img src={producer.photo} alt="" className="h-9 w-9 rounded-full object-cover" />
           Cultivado por {producer.name} <span aria-hidden="true">→</span>
         </Link>}
+
+        <ProductosRelacionados id={product.id} />
       </div>
     </AppShell>
   );

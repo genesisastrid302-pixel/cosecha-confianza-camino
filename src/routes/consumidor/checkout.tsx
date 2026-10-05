@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ChevronLeft, MapPin, Store, CreditCard, QrCode, Banknote, ShieldCheck } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
+import { IndicadorCarga } from "@/components/IndicadorCarga";
 import { products, getProducer, unitLabel } from "@/lib/data";
 import { readCart, subscribeCart, writeCart, type CartLine } from "@/lib/cart";
 import { readConsumer } from "@/lib/accounts";
@@ -72,14 +73,18 @@ function Checkout() {
     <AppShell
       eyebrow="Tu canasta"
       title="Confirmar pedido"
-      right={
-        <Link to="/consumidor/carrito" aria-label="Volver al carrito" className="mt-1 flex h-9 w-9 items-center justify-center rounded-full bg-secondary">
+      back={
+        <Link to="/consumidor/carrito" aria-label="Volver al carrito" className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary">
           <ChevronLeft className="h-5 w-5" />
         </Link>
       }
     >
       <div className="space-y-6 px-5">
-        {ready && items.length === 0 ? (
+        {!ready ? (
+          <div className="flex justify-center py-16">
+            <IndicadorCarga etiqueta="Cargando tu pedido" />
+          </div>
+        ) : items.length === 0 ? (
           <div className="py-10 text-center text-sm text-muted-foreground">
             Tu canasta está vacía.{" "}
             <Link to="/consumidor" className="text-foreground underline">Ir al Mercado</Link>

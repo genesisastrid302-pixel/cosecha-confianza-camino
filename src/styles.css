@@ -160,6 +160,53 @@
   }
 }
 
+/* Mapa de ruta del distribuidor (Leaflet + OpenStreetMap) */
+.mapa-ruta .leaflet-container {
+  background: var(--secondary);
+  font-family: var(--font-sans);
+}
+/* Calienta los mosaicos para que el mapa entre en la paleta de papel */
+.mapa-ruta .leaflet-tile-pane {
+  filter: sepia(0.25) saturate(0.7) brightness(1.03);
+}
+.mapa-ruta .ruta-borde {
+  stroke: var(--paper);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.mapa-ruta .ruta-linea {
+  stroke: var(--ink);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.mapa-ruta .ruta-aprox {
+  stroke-dasharray: 2 9;
+}
+.mapa-ruta .pin-ruta {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 2px solid var(--paper);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--paper);
+  box-shadow: 0 2px 6px rgb(60 40 20 / 0.3);
+}
+.mapa-ruta .pin-recoleccion { background: var(--milpa); }
+.mapa-ruta .pin-entrega { background: var(--terracota); }
+.mapa-ruta .pin-local { background: var(--ink); }
+.mapa-ruta .leaflet-control-attribution {
+  background: color-mix(in oklch, var(--card) 85%, transparent);
+  font-size: 9px;
+}
+.mapa-ruta .leaflet-control-zoom a {
+  color: var(--ink);
+  background: var(--card);
+}
+
 @layer utilities {
   .grain {
     position: relative;

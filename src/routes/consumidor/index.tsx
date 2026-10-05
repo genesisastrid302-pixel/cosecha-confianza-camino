@@ -5,6 +5,8 @@ import { consumidorTabs } from "@/components/tabs";
 import { products, getProducer, trustScore10, scoreTone } from "@/lib/data";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { codigoDe, muestraCodigo, pedidosEnCurso, STATUS_LABEL, useOrders } from "@/lib/orders";
+import { nombreCorto, useDistributor } from "@/lib/accounts";
 
 export const Route = createFileRoute("/consumidor/")({
   head: () => ({
@@ -42,6 +44,7 @@ function ConsumidorHome() {
   return (
     <AppShell tabs={consumidorTabs} tone="terracota" eyebrow="Semana 19 · Monterrey" title="Mercado">
       <div className="space-y-4 px-5">
+        <AvisoCodigo />
         <div className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2.5">
           <Search className="h-4 w-4 text-muted-foreground" />
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar cultivo" className="flex-1 bg-transparent text-sm placeholder:text-muted-foreground/70 focus:outline-none" />
@@ -87,5 +90,35 @@ function ConsumidorHome() {
         {list.length === 0 && <p className="py-8 text-center text-sm text-muted-foreground">No hay cultivos con ese filtro esta semana.</p>}
       </div>
     </AppShell>
+  );
+}
+
+/** Recordatorio del código de entrega mientras el distribuidor trae un pedido */
+function AvisoCodigo() {
+  const enCamino = pedidosEnCurso(useOrders()).filter(muestraCodigo);
+  const distribuidor = nombreCorto(useDistributor().nombre);
+  if (enCamino.length === 0) return null;
+  return (
+    <>
+      {enCamino.map((o) => (
+        <Link
+          key={o.id}
+          to="/consumidor/pedidos"
+          className="flex items-center justify-between gap-3 rounded-2xl border-2 border-dashed border-terracota/40 bg-terracota/5 p-4"
+        >
+          <div className="min-w-0">
+            <div className="eyebrow text-terracota">{STATUS_LABEL[o.status]}</div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Dale este código a {distribuidor} al recibir tu pedido #{o.id}.
+            </p>
+            <span className="mt-1 inline-block text-xs underline">Pedidos</span>
+          </div>
+          <div className="shrink-0 text-center">
+            <div className="text-[9px] uppercase tracking-widest text-terracota">Código de entrega</div>
+            <div className="display mt-0.5 text-3xl tracking-[0.2em]">{codigoDe(o)}</div>
+          </div>
+        </Link>
+      ))}
+    </>
   );
 }

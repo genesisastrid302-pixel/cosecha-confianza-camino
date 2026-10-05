@@ -1,4 +1,5 @@
-import { type ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
+import { IndicadorScroll } from "@/components/IndicadorScroll";
 
 /**
  * Mobile app frame.
@@ -6,6 +7,7 @@ import { type ReactNode } from "react";
  * - On tablet/desktop: shows a phone mock (notch + rounded edges) centered on a warm canvas.
  */
 export function MobileFrame({ children }: { children: ReactNode }) {
+  const contenido = useRef<HTMLDivElement>(null);
   return (
     <div className="min-h-[100dvh] w-full bg-paper md:flex md:items-center md:justify-center md:py-10">
       {/* Desktop ambient backdrop */}
@@ -33,9 +35,10 @@ export function MobileFrame({ children }: { children: ReactNode }) {
           </div>
 
           {/* Content */}
-          <div className="relative h-full w-full overflow-y-auto md:pt-10 [&::-webkit-scrollbar]:hidden">
+          <div ref={contenido} className="relative h-full w-full overflow-y-auto md:pt-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {children}
           </div>
+          <IndicadorScroll contenedor={contenido} />
         </div>
       </div>
     </div>

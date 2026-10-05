@@ -1,12 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { consumidorTabs } from "@/components/tabs";
 import santiago from "@/assets/producer-santiago.jpg";
 import { CheckCircle2, PackageCheck, Clock3 } from "lucide-react";
-import { useOrders, FLOW, STATUS_LABEL, codigoDe, formatTime, type Order } from "@/lib/orders";
+import { useOrders, FLOW, STATUS_LABEL, codigoDe, formatTime, muestraCodigo, pedidosEnCurso, type Order } from "@/lib/orders";
 import { nombreCorto, useDistributor } from "@/lib/accounts";
 import { getProducer, unitLabel } from "@/lib/data";
 import { LinkTrazabilidad } from "@/components/LinkTrazabilidad";
+import { EstadoPedido } from "@/components/EstadoPedido";
 
 const steps = [
   { t: "Cosechado", d: "Ayer · 6:40 AM", s: "done" as const },
@@ -23,12 +25,46 @@ export const Route = createFileRoute("/consumidor/pedidos")({
 
 function Pedidos() {
   const orders = useOrders();
-  const active = orders.find((o) => o.status !== "calificado" && o.status !== "rechazado");
-  const past = orders.filter((o) => o !== active);
+  const [elegido, setElegido] = useState<string | null>(null);
+  // Arriba va el pedido que más necesita al consumidor (el que va en camino, con su código)
+  const enCurso = pedidosEnCurso(orders);
+  const active = enCurso.find((o) => o.id === elegido) ?? enCurso[0];
+  const otros = enCurso.filter((o) => o !== active);
+  const past = orders.filter((o) => !enCurso.includes(o));
   return (
     <AppShell tabs={consumidorTabs} tone="terracota" eyebrow="En curso" title="Pedidos">
       <div className="space-y-5 px-5">
         {active ? <LiveOrder order={active} /> : <DemoOrder />}
+        {otros.length > 0 && (
+          <section>
+            <div className="eyebrow">También en curso</div>
+            <div className="mt-2 space-y-2">
+              {otros.map((o) => (
+                <button
+                  key={o.id}
+                  type="button"
+                  onClick={() => {
+                    setElegido(o.id);
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                  className="flex w-full items-center gap-3 rounded-xl border border-border bg-card p-3 text-left"
+                >
+                  <Clock3 className="h-5 w-5 shrink-0 text-terracota" />
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm">#{o.id} · {o.items.map((i) => i.name).join(", ")}</div>
+                    <div className="text-[11px] text-muted-foreground">{STATUS_LABEL[o.status]} · Ver detalle</div>
+                  </div>
+                  {muestraCodigo(o) && (
+                    <div className="shrink-0 text-right">
+                      <div className="text-[9px] uppercase tracking-widest text-terracota">Código</div>
+                      <div className="text-base font-medium tracking-[0.2em]">{codigoDe(o)}</div>
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
         <section>
           <div className="eyebrow">Pedidos anteriores</div>
           <div className="mt-2 space-y-2">
@@ -50,7 +86,7 @@ function Pedidos() {
 }
 
 function LiveOrder({ order }: { order: Order }) {
-  const producerNames = [...new Set(order.items.map((i) => getProducer(i.producerSlug).name.split(" ")[0]))];
+  const producerNames = [...new Set(order.items.map((i) => getProducer(i.producerSlug).name))];
   const firstProducer = getProducer(order.items[0]?.producerSlug ?? "santiago");
   const distribuidor = nombreCorto(useDistributor().nombre);
   const reached = (s: (typeof FLOW)[number]) => order.history.find((h) => h.status === s);
@@ -62,7 +98,8 @@ function LiveOrder({ order }: { order: Order }) {
         <img src={firstProducer.photo} alt={firstProducer.name} className="h-32 w-full object-cover" />
         <div className="p-4">
           <div className="text-[10px] uppercase tracking-widest text-muted-foreground">#{order.id} · {order.entrega === "domicilio" ? "A domicilio" : "Para recoger"}</div>
-          <div className="serif mt-1 text-lg">De {producerNames.join(" y ")}</div>
+          <div className="mt-2 text-[11px] text-muted-foreground">Cultivado por</div>
+          <div className="serif text-lg leading-tight">{producerNames.join(" y ")}</div>
           <div className="text-[11px] text-muted-foreground">
             {order.items.map((i) => `${i.quantity} ${unitLabel(i.unit, i.quantity)} ${i.name.toLowerCase()}`).join(" · ")}
           </div>
@@ -70,11 +107,20 @@ function LiveOrder({ order }: { order: Order }) {
         </div>
       </div>
 
-      {order.status === "con_problema" && (
-        <div className="rounded-2xl border-2 border-dashed border-terracota/40 bg-terracota/5 p-4 text-sm">
-          {STATUS_LABEL.con_problema}. Te avisamos en cuanto se resuelva.
+      {/* El código va arriba: es lo primero que necesita cuando llega el distribuidor */}
+      {muestraCodigo(order) && (
+        <div className="rounded-2xl border-2 border-dashed border-terracota/40 bg-terracota/5 p-4 text-center">
+          <div className="eyebrow text-terracota">Código de entrega</div>
+          <div className="display mt-1 text-4xl tracking-[0.3em]">{codigoDe(order)}</div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            {order.entrega === "domicilio"
+              ? `Dáselo a ${distribuidor} cuando llegue a tu puerta.`
+              : `Dáselo a ${distribuidor} cuando pases a recoger tu canasta.`}
+          </p>
         </div>
       )}
+
+      <EstadoPedido order={order} />
 
       <ol className="space-y-4">
         {steps.map((st, i) => {
@@ -93,7 +139,7 @@ function LiveOrder({ order }: { order: Order }) {
               <div className="flex-1">
                 <div className={`serif text-base leading-tight ${state === "todo" ? "text-muted-foreground" : ""}`}>{STATUS_LABEL[st]}</div>
                 <div className="text-[11px] text-muted-foreground">
-                  {hit ? formatTime(hit.at) : state === "active" && st === "aceptado" ? "El productor confirma antes de las 18:00" : "Pendiente"}
+                  {hit ? formatTime(hit.at) : state === "active" && st === "aceptado" ? "El productor confirma antes de las 18:00" : state === "active" ? "Sigue" : "Pendiente"}
                   {st === "empacado" && hit ? ` · Lote ${Object.values(order.lots).join(", ")}` : ""}
                   {st === "en_recoleccion" && hit ? ` · por ${distribuidor}${order.temperaturaRecoleccion !== undefined ? ` · ${order.temperaturaRecoleccion} °C` : ""}` : ""}
                   {st === "entregado" && hit ? ` · por ${distribuidor}` : ""}
@@ -117,16 +163,6 @@ function LiveOrder({ order }: { order: Order }) {
           </div>
           <PackageCheck className="h-7 w-7" />
         </Link>
-      ) : order.status === "en_recoleccion" || order.status === "en_ruta" ? (
-        <div className="rounded-2xl border-2 border-dashed border-terracota/40 bg-terracota/5 p-4 text-center">
-          <div className="eyebrow text-terracota">Código de entrega</div>
-          <div className="display mt-1 text-4xl tracking-[0.3em]">{codigoDe(order)}</div>
-          <p className="mt-2 text-xs text-muted-foreground">
-            {order.entrega === "domicilio"
-              ? `Dáselo a ${distribuidor} cuando llegue a tu puerta.`
-              : `Dáselo a ${distribuidor} cuando pases a recoger tu canasta.`}
-          </p>
-        </div>
       ) : order.status === "recibido" ? (
         <Link to="/consumidor/recibir" className="block rounded-2xl border border-border bg-card p-4 text-center text-sm">
           Ya la recibiste. <span className="underline">Califica tu canasta</span>

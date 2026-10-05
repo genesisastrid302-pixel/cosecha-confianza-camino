@@ -14,6 +14,8 @@ export type Producer = {
   slug: string;
   name: string;
   region: string;
+  /** Ubicación aproximada del campo [lat, lng], para el mapa de ruta */
+  coords: [number, number];
   practice: string;
   photo: string;
   score: number;
@@ -27,6 +29,7 @@ export const producers: Record<string, Producer> = {
     slug: "santiago",
     name: "Ezequiel Martínez",
     region: "Rancho Seis Tierras · Ramos Arizpe, Coahuila",
+    coords: [25.5418, -100.9474],
     practice: "Verduras agroecológicas de semilla ancestral",
     photo: santiago,
     score: 9.6,
@@ -43,6 +46,7 @@ export const producers: Record<string, Producer> = {
     slug: "rosa",
     name: "Rosa María Lozano",
     region: "Galeana, Nuevo León",
+    coords: [24.8253, -100.075],
     practice: "Cítricos y hortalizas de temporada",
     photo: rosa,
     score: 9.1,
@@ -156,6 +160,16 @@ export const products: Product[] = [
 
 export function getProducer(slug: string) {
   return producers[slug];
+}
+/** Otros cultivos del Mercado: primero del mismo productor y luego de la misma temporada */
+export function productosRelacionados(id: string, max = 6) {
+  const base = products.find((p) => p.id === id);
+  if (!base) return [];
+  const afinidad = (p: Product) => (p.producerSlug === base.producerSlug ? 2 : 0) + (p.season === base.season ? 1 : 0);
+  return products
+    .filter((p) => p.id !== id)
+    .sort((a, b) => afinidad(b) - afinidad(a))
+    .slice(0, max);
 }
 export function getProductsByProducer(slug: string) {
   return products.filter((p) => p.producerSlug === slug);

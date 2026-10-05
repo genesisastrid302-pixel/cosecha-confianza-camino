@@ -21,8 +21,8 @@ function Rendimiento() {
       tone="miel"
       eyebrow="Entregas y merma"
       title="Rendimiento"
-      right={
-        <Link to="/distribuidor" aria-label="Volver al inicio" className="mt-1 flex h-9 w-9 items-center justify-center rounded-full bg-secondary">
+      back={
+        <Link to="/distribuidor" aria-label="Volver al inicio" className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary">
           <ChevronLeft className="h-5 w-5" />
         </Link>
       }

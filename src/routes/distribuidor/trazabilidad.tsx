@@ -4,7 +4,7 @@ import { AppShell } from "@/components/AppShell";
 import { distribuidorTabs } from "@/components/tabs";
 import { getProducer } from "@/lib/data";
 import { LinkTrazabilidad } from "@/components/LinkTrazabilidad";
-import { STATUS_LABEL, formatTime, useOrders } from "@/lib/orders";
+import { STATUS_LABEL, formatTime, siguientePaso, useOrders } from "@/lib/orders";
 
 export const Route = createFileRoute("/distribuidor/trazabilidad")({
   head: () => ({ meta: [{ title: "Trazabilidad · Distribuidor — Milpa" }] }),
@@ -20,8 +20,8 @@ function Trazabilidad() {
       tone="miel"
       eyebrow="Lotes y cadena de frío"
       title="Trazabilidad"
-      right={
-        <Link to="/distribuidor" aria-label="Volver al inicio" className="mt-1 flex h-9 w-9 items-center justify-center rounded-full bg-secondary">
+      back={
+        <Link to="/distribuidor" aria-label="Volver al inicio" className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary">
           <ChevronLeft className="h-5 w-5" />
         </Link>
       }
@@ -54,6 +54,7 @@ function Trazabilidad() {
                       {o.temperaturaRecoleccion !== undefined ? ` · ${o.temperaturaRecoleccion} °C ${o.traslado === "productor_lleva" ? "al recibirlo" : "al recolectar"}` : ""}
                     </span>
                   </li>
+                  <li className="flex justify-between gap-3"><span>Sigue</span><span className="text-right">{siguientePaso(o)}</span></li>
                   <li className="flex justify-between gap-3"><span>Destino</span><span className="text-right">{o.direccion}</span></li>
                   {o.problema && (
                     <li className={`flex justify-between gap-3 ${o.status === "con_problema" ? "text-destructive" : ""}`}>

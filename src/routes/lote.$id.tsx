@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { ChevronLeft, Leaf, MapPin, ShieldCheck, Snowflake, Sprout, Truck } from "lucide-react";
 import { QrCode } from "@/components/QrCode";
+import { EstadoPedido } from "@/components/EstadoPedido";
 import { getProducer, producerDetails, products, trustScore10, unitLabel } from "@/lib/data";
 import { formatScore, scoreTone } from "@/lib/score";
 import { FLOW, STATUS_LABEL, formatTime, useOrders, type Order, type OrderStatus } from "@/lib/orders";
@@ -79,20 +80,16 @@ function Lote() {
   return (
     <div className="flex min-h-full flex-col">
       <header className="sticky top-0 z-20 bg-background/85 px-5 pb-3 pt-4 backdrop-blur-xl">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <div className="eyebrow">Milpa · Del campo a tu mesa</div>
-            <h1 className="display mt-1 text-3xl leading-tight">Trazabilidad del pedido</h1>
-          </div>
-          <button
-            type="button"
-            onClick={() => router.history.back()}
-            aria-label="Volver"
-            className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => router.history.back()}
+          aria-label="Volver"
+          className="mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-secondary"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+        <div className="eyebrow">Milpa · Del campo a tu mesa</div>
+        <h1 className="display mt-1 text-3xl leading-tight">Trazabilidad del pedido</h1>
       </header>
 
       <main className="flex-1 space-y-5 px-5 pb-8">
@@ -124,11 +121,12 @@ function Detalle({ order, distribuidor, ejemplo }: { order: Order; distribuidor:
             <div className="mt-0.5 text-xs text-muted-foreground">
               {Object.keys(order.lots).length === 1 ? "Lote" : "Lotes"} {Object.values(order.lots).join(", ")}
             </div>
-            <div className="mt-1.5 inline-flex rounded-full bg-background px-2.5 py-1 text-[11px]">{STATUS_LABEL[order.status]}</div>
           </div>
         </div>
         {ejemplo && <p className="border-t border-primary/20 px-4 py-2 text-[11px] text-muted-foreground">Pedido de ejemplo para mostrar cómo se ve la trazabilidad.</p>}
       </section>
+
+      <EstadoPedido order={order} />
 
       <section>
         <div className="eyebrow">Quién lo cultivó</div>

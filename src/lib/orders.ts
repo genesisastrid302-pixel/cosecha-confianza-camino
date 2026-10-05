@@ -99,9 +99,9 @@ export const FLOW: OrderStatus[] = [
 ];
 
 export const STATUS_LABEL: Record<OrderStatus, string> = {
-  nuevo: "Pedido recibido",
+  nuevo: "Pedido realizado",
   aceptado: "Aceptado por el productor",
-  empacado: "Empacando",
+  empacado: "Empacado",
   en_recoleccion: "Recolectado",
   en_ruta: "En camino",
   entregado: "Entregado",
@@ -197,6 +197,19 @@ export function updateOrder(id: string, patch: Partial<Omit<Order, "id" | "histo
   );
 }
 
+/** El consumidor ve su código de entrega mientras el distribuidor tiene el pedido */
+export const muestraCodigo = (o: Order) => o.status === "en_recoleccion" || o.status === "en_ruta";
+
+/** Del que más pide atención del consumidor al que menos */
+const URGENCIA: OrderStatus[] = ["en_ruta", "entregado", "en_recoleccion", "recibido", "con_problema", "empacado", "aceptado", "nuevo"];
+
+/** Pedidos del consumidor que siguen abiertos, el más urgente primero (p. ej. el que va en camino) */
+export function pedidosEnCurso(orders: Order[]) {
+  return orders
+    .filter((o) => URGENCIA.includes(o.status))
+    .sort((a, b) => URGENCIA.indexOf(a.status) - URGENCIA.indexOf(b.status));
+}
+
 /** Código de entrega del pedido (los pedidos viejos lo derivan de su número) */
 export function codigoDe(o: Order) {
   return o.codigoEntrega ?? String(1000 + ((Number(o.id.replace(/\D/g, "")) * 7919) % 9000));
@@ -242,6 +255,49 @@ export function crearPedidoEjemplo() {
 
 export function getOrder(id: string) {
   return readOrders().find((o) => o.id === id);
+}
+
+/**
+ * Qué sigue después del estado actual, en las mismas palabras para los tres
+ * roles: así consumidor, productor y distribuidor leen la misma historia.
+ */
+export function siguientePaso(o: Order): string {
+  switch (o.status) {
+    case "nuevo":
+      return "El productor confirma si puede surtirlo.";
+    case "aceptado":
+      return "El productor lo empaca y registra la cadena de frío.";
+    case "empacado":
+      return o.traslado === "productor_lleva"
+        ? "El productor lo lleva al local del distribuidor."
+        : "El distribuidor lo recoge en el campo.";
+    case "en_recoleccion":
+      return "El distribuidor termina sus recolecciones y sale a entregar.";
+    case "en_ruta":
+      return o.entrega === "domicilio"
+        ? "El distribuidor lo entrega en el domicilio con el código de 4 dígitos."
+        : "El consumidor lo recoge en el punto de entrega con el código de 4 dígitos.";
+    case "entregado":
+      return "El consumidor confirma que lo recibió.";
+    case "recibido":
+      return "El consumidor califica su canasta.";
+    case "con_problema":
+      return "El productor revisa el problema y lo deja listo otra vez.";
+    default:
+      return "Pedido cerrado.";
+  }
+}
+
+/** Título de la pantalla del pedido del productor según su estado */
+export function tituloPedidoProductor(o: Order) {
+  if (o.status === "nuevo") return "Nuevo pedido";
+  if (o.status === "aceptado") return "Prepara el pedido";
+  if (o.status === "rechazado") return "Pedido rechazado";
+  if (o.status === "con_problema") return "Revisa este pedido";
+  if (o.status === "en_recoleccion") return "Pedido recolectado";
+  if (o.status === "en_ruta") return "Pedido en camino";
+  if (["entregado", "recibido", "calificado"].includes(o.status)) return "Pedido entregado";
+  return "Pedido listo";
 }
 
 export const TRASLADO_LABEL: Record<Traslado, string> = {

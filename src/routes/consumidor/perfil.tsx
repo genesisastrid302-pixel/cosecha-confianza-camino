@@ -32,7 +32,7 @@ function Perfil() {
         <div className="divide-y divide-border rounded-2xl border border-border bg-card">
           <Row l="Datos de contacto" d={c.correo || c.telefono || "Sin capturar"} />
           <Row l="Entrega preferida" d={`${c.entrega === "domicilio" ? "A domicilio" : "Recoger"} · ${c.municipio}`} />
-          <Row l="Método de pago" d={c.pago} />
+          <Row l={c.pagos.length > 1 ? "Métodos de pago" : "Método de pago"} d={c.pagos.join(" · ")} />
           <Row l="Preferencias" d="Verduras y cítricos" />
           <Row l="Mis suscripciones" d="Canasta Seis Tierras" />
         </div>

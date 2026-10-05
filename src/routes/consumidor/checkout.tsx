@@ -35,11 +35,15 @@ function Checkout() {
   const [direccion, setDireccion] = useState(DIRECCIONES[0]);
   const [punto, setPunto] = useState(PUNTOS[0]);
   const [pago, setPago] = useState<MetodoPago>("Tarjeta");
+  // Los métodos que el consumidor guardó en su cuenta van primero; puede pagar con otro
+  const [guardados, setGuardados] = useState<MetodoPago[]>([]);
+  const pagos = [...PAGOS].sort((a, b) => Number(guardados.includes(b.id)) - Number(guardados.includes(a.id)));
 
   useEffect(() => {
     const c = readConsumer();
     setEntrega(c.entrega);
-    setPago(c.pago);
+    setGuardados(c.pagos);
+    setPago(c.pagos[0]);
     const update = () => {
       setLines(readCart());
       setReady(true);
@@ -132,12 +136,19 @@ function Checkout() {
             <section>
               <div className="eyebrow">Método de pago</div>
               <div className="mt-3 space-y-2">
-                {PAGOS.map((m) => (
+                {pagos.map((m) => (
                   <button key={m.id} type="button" onClick={() => setPago(m.id)} className={option(pago === m.id)}>
                     <m.icon className="h-5 w-5 shrink-0 text-muted-foreground" />
                     <span className="flex-1">
-                      <span className="block text-sm">{m.label}</span>
-                      <span className="block text-[11px] text-muted-foreground">{m.detail}</span>
+                      <span className="flex items-center gap-2 text-sm">
+                        {m.label}
+                        {guardados.includes(m.id) && (
+                          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] text-primary">En tu cuenta</span>
+                        )}
+                      </span>
+                      <span className="block text-[11px] text-muted-foreground">
+                        {m.id === "Tarjeta" && !guardados.includes("Tarjeta") ? "La agregas al pagar" : m.detail}
+                      </span>
                     </span>
                     <span className={radio(pago === m.id)} />
                   </button>

@@ -1,12 +1,12 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { ChevronLeft } from "lucide-react";
-import { MUNICIPIOS, saveConsumer, validarAcceso, DEMO_CONSUMER, type ConsumerProfile } from "@/lib/accounts";
+import { Check, ChevronLeft } from "lucide-react";
+import { METODOS_PAGO, MUNICIPIOS, saveConsumer, validarAcceso, DEMO_CONSUMER, type ConsumerProfile } from "@/lib/accounts";
 
 export function ConsumidorForm({ onBack }: { onBack: () => void }) {
   const navigate = useNavigate();
   const [paso, setPaso] = useState<2 | 3>(2);
-  const [p, setP] = useState<ConsumerProfile>({ ...DEMO_CONSUMER, nombre: "", municipio: "" });
+  const [p, setP] = useState<ConsumerProfile>({ ...DEMO_CONSUMER, nombre: "", municipio: "", pagos: [] });
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
   const [error, setError] = useState("");
@@ -60,6 +60,7 @@ export function ConsumidorForm({ onBack }: { onBack: () => void }) {
       className="flex min-h-full flex-col px-5 pb-8 pt-5"
       onSubmit={(e) => {
         e.preventDefault();
+        if (p.pagos.length === 0) return setError("Elige al menos un método de pago.");
         setError("");
         setPaso(3);
       }}
@@ -88,15 +89,33 @@ export function ConsumidorForm({ onBack }: { onBack: () => void }) {
           </div>
         </div>
         <div>
-          <span className="text-xs text-muted-foreground">Método de pago preferido</span>
+          <span className="text-xs text-muted-foreground">Métodos de pago</span>
           <div className="mt-1.5 flex gap-2">
-            {(["Tarjeta", "CoDi", "Efectivo"] as const).map((m) => (
-              <button type="button" key={m} className={pill(p.pago === m)} onClick={() => setP({ ...p, pago: m })}>{m}</button>
-            ))}
+            {METODOS_PAGO.map((m) => {
+              const on = p.pagos.includes(m);
+              return (
+                <button
+                  type="button"
+                  key={m}
+                  aria-pressed={on}
+                  className={`${pill(on)} flex items-center justify-center gap-1.5`}
+                  onClick={() => {
+                    setError("");
+                    // Se guardan siempre en el mismo orden, sin importar cuál tocó primero
+                    setP({ ...p, pagos: METODOS_PAGO.filter((x) => (x === m ? !on : p.pagos.includes(x))) });
+                  }}
+                >
+                  {on && <Check className="h-3.5 w-3.5" />}
+                  {m}
+                </button>
+              );
+            })}
           </div>
-          <p className="mt-1.5 text-[11px] text-muted-foreground">Puedes cambiarlo en cada pedido.</p>
+          <p className="mt-1.5 text-[11px] text-muted-foreground">Puedes elegir uno o varios. En cada pedido decides con cuál pagar.</p>
         </div>
       </div>
+
+      {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
 
       <button type="submit" className="mt-8 w-full rounded-full bg-foreground py-4 text-sm font-medium text-background">
         Continuar

@@ -83,6 +83,7 @@ Validación por sistema en 3 capas, como en el modelo de negocio (`src/lib/score
 
 - El consumidor paga producto + logística ($18) + plataforma ($10). El pago se reparte en automático (Conekta, split payment).
 - Modelo B2B2C: el productor es **socio** de Milpa y aporta un porcentaje de cada venta (`APORTACION_SOCIO`, 10 % por ahora). Se retiene en automático en el split de cada pago; de las ventas en efectivo se descuenta del siguiente pago digital. Sin cuotas fijas ni pagos por adelantado. Lo acepta al registrarse.
+- El consumidor puede guardar varios métodos de pago al registrarse (tarjeta, CoDi, efectivo; al menos uno). En el checkout salen primero los de su cuenta, viene elegido el primero y decide con cuál paga cada pedido.
 - El productor puede recibir por varios métodos a la vez: CLABE (con banco y titular), CoDi y efectivo al recolectar.
 - El distribuidor recibe la logística por transferencia (CLABE o tarjeta, con banco y titular) o CoDi; si el consumidor paga en efectivo, lo cobra al entregar. En el registro la sección "Cuenta de cobro" se muestra abierta con transferencia preseleccionada y el titular propuesto con su nombre.
 - Al productor se le paga cuando el consumidor confirma que recibió (o pasan 24 h).

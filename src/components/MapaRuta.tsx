@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { LayerGroup, Map as LeafletMap } from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { IndicadorCarga } from "@/components/IndicadorCarga";
 import { coordsDe, LOCAL_DISTRIBUIDOR, type Coords, type PuntoMapa } from "@/lib/distribucion";
 
 /** Servidor público de OSRM: traza la ruta por calles sin clave (uso de demo) */
@@ -20,12 +21,15 @@ export function MapaRuta({ puntos }: { puntos: PuntoMapa[] }) {
   const el = useRef<HTMLDivElement>(null);
   const mapa = useRef<LeafletMap | null>(null);
   const capa = useRef<LayerGroup | null>(null);
-  const [trazo, setTrazo] = useState<"calles" | "aproximado">("calles");
+  const [trazo, setTrazo] = useState<"cargando" | "calles" | "aproximado">("cargando");
   const clave = puntos.map((p) => `${p.n}:${p.tipo}:${p.coords.join(",")}`).join("|");
 
   useEffect(() => {
     let cancelado = false;
     const ctrl = new AbortController();
+    // Si el servicio de rutas no contesta en 8 s, se queda el trazo aproximado
+    const limite = setTimeout(() => ctrl.abort(), 8000);
+    setTrazo("cargando");
 
     (async () => {
       const L = (await import("leaflet")).default;
@@ -87,7 +91,7 @@ export function MapaRuta({ puntos }: { puntos: PuntoMapa[] }) {
 
       m.fitBounds(L.latLngBounds(ruta), { padding: [32, 32], maxZoom: 14 });
 
-      if (ruta.length < 2) return;
+      if (ruta.length < 2) return setTrazo("calles");
       try {
         const res = await fetch(
           `${OSRM}${ruta.map(([lat, lng]) => `${lng},${lat}`).join(";")}?overview=full&geometries=geojson`,
@@ -111,6 +115,7 @@ export function MapaRuta({ puntos }: { puntos: PuntoMapa[] }) {
 
     return () => {
       cancelado = true;
+      clearTimeout(limite);
       ctrl.abort();
     };
     // `clave` resume `puntos`: solo se redibuja si cambian las paradas
@@ -128,6 +133,11 @@ export function MapaRuta({ puntos }: { puntos: PuntoMapa[] }) {
   return (
     <div className="mapa-ruta relative isolate h-56 overflow-hidden rounded-2xl border border-border bg-secondary">
       <div ref={el} className="h-full w-full" role="region" aria-label="Mapa de la ruta del día" />
+      {trazo === "cargando" && (
+        <div className="pointer-events-none absolute inset-0 z-[500] flex items-center justify-center bg-secondary/60">
+          <IndicadorCarga etiqueta="Cargando la ruta" contenido />
+        </div>
+      )}
       {trazo === "aproximado" && (
         <span className="pointer-events-none absolute right-3 top-3 z-[500] rounded-full bg-card/90 px-2.5 py-1 text-[10px] uppercase tracking-widest text-muted-foreground">
           Trazo aproximado

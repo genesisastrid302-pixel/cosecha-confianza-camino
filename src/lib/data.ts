@@ -161,6 +161,16 @@ export const products: Product[] = [
 export function getProducer(slug: string) {
   return producers[slug];
 }
+/** Otros cultivos del Mercado: primero del mismo productor y luego de la misma temporada */
+export function productosRelacionados(id: string, max = 6) {
+  const base = products.find((p) => p.id === id);
+  if (!base) return [];
+  const afinidad = (p: Product) => (p.producerSlug === base.producerSlug ? 2 : 0) + (p.season === base.season ? 1 : 0);
+  return products
+    .filter((p) => p.id !== id)
+    .sort((a, b) => afinidad(b) - afinidad(a))
+    .slice(0, max);
+}
 export function getProductsByProducer(slug: string) {
   return products.filter((p) => p.producerSlug === slug);
 }

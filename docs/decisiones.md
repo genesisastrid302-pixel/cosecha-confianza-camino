@@ -105,3 +105,13 @@ No hay backend. El estado (carrito, pedidos, productor) se guarda en el navegado
 ## Navegación
 
 El botón de regresar va siempre arriba a la izquierda, sobre el título (`back` en `AppShell`). La X de cerrar un flujo (p. ej. confirmar la llegada) es otra cosa y se queda a la derecha.
+
+Toda pantalla con más contenido del que cabe muestra una línea de scroll vertical a la derecha (`IndicadorScroll` en el marco de la app); termina arriba de la barra de pestañas.
+
+## Carga
+
+Cuando algo tarda (leer la canasta, preparar el pedido, trazar la ruta del mapa o una pantalla que demora más de medio segundo) se muestra `IndicadorCarga`: una forma verde (`--milpa`) que gira y cambia de forma, al estilo del indicador de carga de Material 3. Con "reducir movimiento" se queda quieta.
+
+## Ficha del cultivo
+
+Debajo de "Cultivado por …" va **Productos relacionados**: cultivos del Mercado (primero del mismo productor, luego de la misma temporada) con la foto en un marco Cookie de 12 lados. No hay rachas ni insignias de constancia en la app.

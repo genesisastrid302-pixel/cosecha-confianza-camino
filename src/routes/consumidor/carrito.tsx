@@ -4,7 +4,8 @@ import { consumidorTabs } from "@/components/tabs";
 import { products, unitLabel } from "@/lib/data";
 import { LOGISTICA, PLATAFORMA, shareToProducers } from "@/lib/orders";
 import { useEffect, useState } from "react";
-import { Minus, Plus, Trash2 } from "lucide-react";
+import { ChevronLeft, Minus, Plus, Trash2 } from "lucide-react";
+import { IndicadorCarga } from "@/components/IndicadorCarga";
 import { Button } from "@/components/ui/button";
 import { readCart, subscribeCart, writeCart, type CartLine } from "@/lib/cart";
 
@@ -19,8 +20,13 @@ export const Route = createFileRoute("/consumidor/carrito")({
 
 function Carrito() {
   const [lines, setLines] = useState<CartLine[]>([]);
+  // La canasta vive en el navegador: hasta leerla no sabemos si está vacía
+  const [listo, setListo] = useState(false);
   useEffect(() => {
-    const update = () => setLines(readCart());
+    const update = () => {
+      setLines(readCart());
+      setListo(true);
+    };
     update();
     return subscribeCart(update);
   }, []);
@@ -35,7 +41,12 @@ function Carrito() {
   return (
     <AppShell tabs={consumidorTabs} tone="terracota" eyebrow="Tu canasta" title="Carrito">
       <div className="space-y-5 px-5">
-        {items.length === 0 && <p className="py-10 text-center text-sm text-muted-foreground">Tu canasta está vacía. Explora los cultivos del Mercado.</p>}
+        {!listo && (
+          <div className="flex justify-center py-16">
+            <IndicadorCarga etiqueta="Cargando tu canasta" />
+          </div>
+        )}
+        {listo && items.length === 0 && <p className="pt-10 text-center text-sm text-muted-foreground">Tu canasta está vacía. Explora los cultivos del Mercado.</p>}
         {items.map((p) => (
           <div key={p.id} className="flex gap-3 rounded-2xl border border-border bg-card p-3">
             <img src={p.photo} alt={p.name} className="h-16 w-16 rounded-lg object-cover" />
@@ -69,6 +80,17 @@ function Carrito() {
         <Link to="/consumidor/checkout" className="block w-full rounded-full bg-foreground py-4 text-center text-sm font-medium text-background transition active:scale-[0.98]">
           Confirmar pedido →
         </Link></>}
+
+        {listo && (
+          <Link
+            to="/consumidor"
+            className={`flex w-full items-center justify-center gap-1.5 rounded-full py-3.5 text-sm transition active:scale-[0.98] ${
+              items.length === 0 ? "bg-foreground font-medium text-background" : "border border-border bg-card"
+            }`}
+          >
+            <ChevronLeft className="h-4 w-4" /> Volver al Mercado
+          </Link>
+        )}
       </div>
     </AppShell>
   );

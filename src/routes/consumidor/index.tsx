@@ -5,8 +5,7 @@ import { consumidorTabs } from "@/components/tabs";
 import { products, getProducer, trustScore10, scoreTone } from "@/lib/data";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { codigoDe, muestraCodigo, pedidosEnCurso, STATUS_LABEL, useOrders } from "@/lib/orders";
-import { nombreCorto, useDistributor } from "@/lib/accounts";
+import { codigoDe, muestraCodigo, pedidosEnCurso, STATUS_LABEL, useMisPedidos, repartidor } from "@/lib/orders";
 
 export const Route = createFileRoute("/consumidor/")({
   head: () => ({
@@ -95,8 +94,7 @@ function ConsumidorHome() {
 
 /** Recordatorio del código de entrega mientras el distribuidor trae un pedido */
 function AvisoCodigo() {
-  const enCamino = pedidosEnCurso(useOrders()).filter(muestraCodigo);
-  const distribuidor = nombreCorto(useDistributor().nombre);
+  const enCamino = pedidosEnCurso(useMisPedidos()).filter(muestraCodigo);
   if (enCamino.length === 0) return null;
   return (
     <>
@@ -109,7 +107,7 @@ function AvisoCodigo() {
           <div className="min-w-0">
             <div className="eyebrow text-terracota">{STATUS_LABEL[o.status]}</div>
             <p className="mt-1 text-xs text-muted-foreground">
-              Dale este código a {distribuidor} al recibir tu pedido #{o.id}.
+              Dale este código a {repartidor(o)} al recibir tu pedido #{o.id}.
             </p>
             <span className="mt-1 inline-block text-xs underline">Pedidos</span>
           </div>

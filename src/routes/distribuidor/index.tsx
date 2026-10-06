@@ -3,8 +3,8 @@ import { AlertTriangle, ChevronRight, MapPin, Store } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { distribuidorTabs } from "@/components/tabs";
 import { nombreCorto, useDistributor } from "@/lib/accounts";
-import { useOrders, crearPedidoEjemplo } from "@/lib/orders";
-import { entregasPendientes, esperandoProductor, fueEntregado, kpis, paradasRecoleccion, tiempoEstimado } from "@/lib/distribucion";
+import { useOrders } from "@/lib/orders";
+import { entregasPendientes, esperandoProductor, fueEntregado, kpis, paradasRecoleccion, porcentaje, tiempoEstimado } from "@/lib/distribucion";
 
 export const Route = createFileRoute("/distribuidor/")({
   head: () => ({ meta: [{ title: "Inicio · Distribuidor — Milpa" }] }),
@@ -26,8 +26,8 @@ function Inicio() {
     <AppShell tabs={distribuidorTabs} tone="miel" eyebrow={hoy} title={nombreCorto(d.nombre).split(" ")[0]}>
       <div className="space-y-5 px-5">
         <div className="grid grid-cols-3 gap-2 text-center">
-          <Kpi n={`${k.aTiempoPct}%`} l="Entregas a tiempo" />
-          <Kpi n={`${k.mermaPct}%`} l="Merma" alerta />
+          <Kpi n={porcentaje(k.aTiempoPct)} l="Entregas a tiempo" />
+          <Kpi n={porcentaje(k.mermaPct)} l="Merma" alerta={!!k.mermaPct} />
           <Kpi n={String(k.activos)} l="Pedidos activos" />
         </div>
 
@@ -50,11 +50,6 @@ function Inicio() {
                   ? `Ruta terminada: entregaste ${hechas} ${hechas === 1 ? "pedido" : "pedidos"}.`
                   : "No hay pedidos listos. Cuando un productor termine de empacar, su recolección aparece aquí."}
               </p>
-              {orders.length === 0 && (
-                <button onClick={() => crearPedidoEjemplo()} className="mt-3 rounded-full border border-border px-4 py-2 text-xs">
-                  Probar con un pedido de ejemplo
-                </button>
-              )}
             </div>
           ) : (
             <Link to="/distribuidor/ruta" className="mt-3 block rounded-2xl bg-miel p-5 text-ink">

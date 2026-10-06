@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { CerrarSesion } from "@/components/CerrarSesion";
 import { AppShell } from "@/components/AppShell";
 import { distribuidorTabs } from "@/components/tabs";
 import { LogOut, Truck, Package, Snowflake, MapPin, Landmark } from "lucide-react";
@@ -30,9 +31,7 @@ function Perfil() {
         <p className="text-[11px] text-muted-foreground">
           Recibes la parte de logística y cadena de frío de cada pedido entregado. Tu registro en cada recolección cuenta para el score del productor.
         </p>
-        <Link to="/" className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border py-3 text-sm text-muted-foreground">
-          <LogOut className="h-4 w-4" /> Cerrar sesión
-        </Link>
+        <CerrarSesion rol="distribuidor" />
       </div>
     </AppShell>
   );

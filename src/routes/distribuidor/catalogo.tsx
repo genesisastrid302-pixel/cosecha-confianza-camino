@@ -7,7 +7,7 @@ import { getProducer, products, scoreTone, trustScore10, unitLabel } from "@/lib
 import { formatScore } from "@/lib/score";
 import { useOrders } from "@/lib/orders";
 import { readReservas, type Reserva } from "@/lib/distribucion";
-import { useProducer } from "@/lib/producer-store";
+import { listarCuentas } from "@/lib/producer-store";
 
 export const Route = createFileRoute("/distribuidor/catalogo")({
   head: () => ({
@@ -28,7 +28,12 @@ function fechaCosecha(dias: number) {
 
 function Catalogo() {
   const orders = useOrders();
-  const [productor] = useProducer();
+  // Cosechas compartidas de todos los productores registrados en este navegador
+  const [cosechas, setCosechas] = useState<{ id: string; cropName: string; harvestDate: string; expectedKg: number; productor: string }[]>([]);
+  useEffect(
+    () => setCosechas(listarCuentas().flatMap(({ state }) => state.cosechas.map((c) => ({ ...c, productor: state.profile.name })))),
+    [],
+  );
   const [filtro, setFiltro] = useState<Filtro | null>(null);
   const [reservas, setReservas] = useState<Reserva[]>([]);
   useEffect(() => setReservas(readReservas()), []);
@@ -122,7 +127,7 @@ function Catalogo() {
           <div className="eyebrow">Proyección de volumen</div>
           <p className="mt-1 text-[11px] text-muted-foreground">Volumen futuro según las cosechas compartidas confirmadas.</p>
           <div className="mt-3 space-y-2">
-            {reservas.length === 0 && productor.cosechas.length === 0 && (
+            {reservas.length === 0 && cosechas.length === 0 && (
               <p className="rounded-2xl border border-border bg-card p-4 text-sm text-muted-foreground">
                 Aún no hay reservas de cosecha compartida. Aparecen aquí cuando un consumidor reserva.
               </p>
@@ -136,10 +141,10 @@ function Catalogo() {
                 <div className="serif text-lg">{r.semanas * r.kgSemana} kg</div>
               </div>
             ))}
-            {productor.cosechas.map((c) => (
+            {cosechas.map((c) => (
               <div key={c.id} className="flex items-center justify-between rounded-2xl border border-border bg-card p-3 text-sm">
                 <div>
-                  {c.cropName} · {productor.profile.name}
+                  {c.cropName} · {c.productor}
                   <div className="text-[11px] text-muted-foreground">
                     Cosecha compartida · {new Date(c.harvestDate + "T12:00:00").toLocaleDateString("es-MX", { day: "numeric", month: "short" })}
                   </div>

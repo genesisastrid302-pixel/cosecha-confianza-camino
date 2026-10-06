@@ -35,7 +35,8 @@ export function IndicadorCarga({
     const inicio = performance.now();
     const ciclo = FIJA_MS + CAMBIO_MS;
     const tick = (ahora: number) => {
-      const t = ahora - inicio;
+      // El primer cuadro puede traer una hora anterior a `inicio`; sin el tope el índice sale negativo
+      const t = Math.max(0, ahora - inicio);
       const i = Math.floor(t / ciclo) % RADIOS.length;
       const enCiclo = t % ciclo;
       const avance = enCiclo < FIJA_MS ? 0 : suave((enCiclo - FIJA_MS) / CAMBIO_MS);

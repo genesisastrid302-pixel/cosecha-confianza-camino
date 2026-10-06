@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getProductsByProducer, producerDetails, producers } from "@/lib/data";
 import { SCORE_LAYERS, score10 } from "@/lib/score";
+import { coincide, iniciarSesion, sesionDe, suscribirSesion } from "@/lib/acceso";
 
 export type Zona = "Galeana" | "Allende" | "Ramos Arizpe";
 export type Pago = "CLABE" | "CoDi" | "Efectivo";
@@ -132,9 +133,14 @@ export function esNuevo(s: ProducerState) {
   return s.resenas < RESENAS_PARA_SCORE;
 }
 
-/** Suma una reseña cuando un consumidor envía su feedback */
-export function addResena() {
-  updateProducer((s) => ({ ...s, resenas: s.resenas + 1 }));
+/** Suma una reseña a la cuenta del productor que atendió el pedido, cuando el consumidor lo califica */
+export function addResena(productorId?: string) {
+  if (!productorId) return;
+  const cuentas = readCuentas();
+  const cuenta = cuentas[productorId] ?? (productorId === DEMO_ID ? seed() : undefined);
+  if (!cuenta) return;
+  if (!writeCuentas({ ...cuentas, [productorId]: { ...cuenta, resenas: cuenta.resenas + 1 } })) return;
+  window.dispatchEvent(new Event(EVENT));
 }
 
 const KEY = "milpa-productor";
@@ -183,12 +189,16 @@ function seed(): ProducerState {
   };
 }
 
+/** Cuenta sin datos: lo que hay mientras no se ha iniciado sesión */
+function vacio(): ProducerState {
+  return { profile: EMPTY_PROFILE, crops: [], cosechas: [], lastScore: null, resenas: 0 };
+}
+
 // --- Varias cuentas de productor en el mismo navegador ---
-// Cada cuenta vive en CUENTAS_KEY bajo un id estable; ACTIVA_KEY dice con cuál se entró.
-// La cuenta de ejemplo (Ezequiel) siempre existe con el id DEMO_ID.
+// Cada cuenta vive en CUENTAS_KEY bajo un id estable; la sesión (src/lib/acceso.ts) dice con cuál se entró.
+// La cuenta de ejemplo (Ezequiel) siempre existe con el id DEMO_ID y entra sin contraseña.
 
 const CUENTAS_KEY = "milpa-productores";
-const ACTIVA_KEY = "milpa-productor-activo";
 export const DEMO_ID = "demo";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -209,11 +219,7 @@ function readCuentas(): Record<string, ProducerState> {
     const legado = window.localStorage.getItem(KEY);
     if (legado) {
       const st = normalizar(JSON.parse(legado));
-      if (st.profile.correo && st.profile.correo !== seed().profile.correo) {
-        const id = newId();
-        cuentas[id] = st;
-        window.localStorage.setItem(ACTIVA_KEY, id);
-      }
+      if (st.profile.correo && st.profile.correo !== seed().profile.correo) cuentas[newId()] = st;
       window.localStorage.removeItem(KEY);
       window.localStorage.setItem(CUENTAS_KEY, JSON.stringify(cuentas));
     }
@@ -233,30 +239,30 @@ function writeCuentas(cuentas: Record<string, ProducerState>) {
   return true;
 }
 
-function activaId() {
-  return window.localStorage.getItem(ACTIVA_KEY) || DEMO_ID;
-}
-
+/** Cuenta de productor con sesión iniciada (vacía si no hay sesión) */
 export function readProducer(): ProducerState {
-  if (typeof window === "undefined") return seed();
-  return readCuentas()[activaId()] ?? seed();
+  if (typeof window === "undefined") return vacio();
+  const id = sesionDe("productor");
+  if (!id) return vacio();
+  return readCuentas()[id] ?? (id === DEMO_ID ? seed() : vacio());
 }
 
 /** Guarda cambios en la cuenta con la que se entró */
 export function writeProducer(next: ProducerState) {
-  const cuentas = readCuentas();
-  const id = cuentas[activaId()] || activaId() === DEMO_ID ? activaId() : DEMO_ID;
-  if (!writeCuentas({ ...cuentas, [id]: next })) return;
+  const id = sesionDe("productor");
+  if (!id) return;
+  if (!writeCuentas({ ...readCuentas(), [id]: next })) return;
   window.dispatchEvent(new Event(EVENT));
 }
 
-/** Crea una cuenta nueva y entra con ella; las demás cuentas se conservan */
+/** Crea una cuenta nueva y devuelve su id; las demás cuentas se conservan.
+ *  La sesión la inicia quien registra, ya con la contraseña guardada. */
 export function registrarProductor(profile: ProducerProfile) {
   const id = newId();
   const nueva: ProducerState = { ...seed(), resenas: 0, lastScore: null, cosechas: [], profile };
-  if (!writeCuentas({ ...readCuentas(), [id]: nueva })) return;
-  window.localStorage.setItem(ACTIVA_KEY, id);
+  if (!writeCuentas({ ...readCuentas(), [id]: nueva })) return null;
   window.dispatchEvent(new Event(EVENT));
+  return id;
 }
 
 /** Cuentas de productor guardadas en este navegador; la de ejemplo va primero */
@@ -274,17 +280,11 @@ export function listarCuentas(): { id: string; state: ProducerState; ejemplo: bo
 
 /** Busca una cuenta por correo o teléfono */
 export function buscarCuenta(identificador: string) {
-  const txt = identificador.trim().toLowerCase();
-  const digitos = identificador.replace(/\D/g, "").slice(-10);
-  if (!txt) return undefined;
-  return listarCuentas().find(
-    (c) => c.state.profile.correo.toLowerCase() === txt || (digitos.length === 10 && c.state.profile.telefono === digitos),
-  );
+  return listarCuentas().find((c) => coincide(c.state.profile, identificador));
 }
 
 export function entrarComoProductor(id: string) {
-  window.localStorage.setItem(ACTIVA_KEY, id);
-  window.dispatchEvent(new Event(EVENT));
+  iniciarSesion("productor", id);
 }
 
 export function updateProducer(fn: (s: ProducerState) => ProducerState) {
@@ -292,17 +292,17 @@ export function updateProducer(fn: (s: ProducerState) => ProducerState) {
 }
 
 export function useProducer(): [ProducerState, boolean] {
-  const [state, setState] = useState<ProducerState>(seed);
+  const [state, setState] = useState<ProducerState>(vacio);
   const [ready, setReady] = useState(false);
   useEffect(() => {
     const sync = () => setState(readProducer());
     sync();
     setReady(true);
     window.addEventListener(EVENT, sync);
-    window.addEventListener("storage", sync);
+    const quitar = suscribirSesion(sync);
     return () => {
       window.removeEventListener(EVENT, sync);
-      window.removeEventListener("storage", sync);
+      quitar();
     };
   }, []);
   return [state, ready];

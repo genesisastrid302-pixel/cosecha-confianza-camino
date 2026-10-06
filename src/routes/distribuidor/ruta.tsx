@@ -3,7 +3,7 @@ import { CheckCircle2, ChevronRight, Clock3, MapPin, Navigation, Store, Truck } 
 import { AppShell } from "@/components/AppShell";
 import { MapaRuta } from "@/components/MapaRuta";
 import { distribuidorTabs } from "@/components/tabs";
-import { useOrders, updateOrder, crearPedidoEjemplo } from "@/lib/orders";
+import { useOrders, updateOrder } from "@/lib/orders";
 import {
   entregasPendientes,
   fueEntregado,
@@ -44,11 +44,6 @@ function Ruta() {
                 ? `Entregaste ${hechas.length} ${hechas.length === 1 ? "pedido" : "pedidos"}. Los consumidores confirman y califican desde su app.`
                 : "Cuando un productor termine de empacar, su recolección aparece aquí."}
             </p>
-            {orders.length === 0 && (
-              <button onClick={() => crearPedidoEjemplo()} className="mt-3 rounded-full border border-border px-4 py-2 text-xs">
-                Probar con un pedido de ejemplo
-              </button>
-            )}
           </div>
         ) : (
           <>

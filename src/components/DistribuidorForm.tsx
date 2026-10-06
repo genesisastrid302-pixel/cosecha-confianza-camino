@@ -4,10 +4,12 @@ import { ChevronLeft, Truck, Package, Landmark, Smartphone } from "lucide-react"
 import {
   EMPTY_DISTRIBUTOR,
   MUNICIPIOS,
-  saveDistributor,
+  listarDistribuidores,
+  registrarDistribuidor,
   validarAcceso,
   type DistributorProfile,
 } from "@/lib/accounts";
+import { contactoRepetido, guardarClave, iniciarSesion } from "@/lib/acceso";
 import { tipoCuenta } from "@/lib/producer-store";
 
 /** ¿La cuenta de cobro del distribuidor está completa? */
@@ -24,6 +26,7 @@ export function DistribuidorForm({ onBack }: { onBack: () => void }) {
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
   const [error, setError] = useState("");
+  const [guardando, setGuardando] = useState(false);
   const input = "mt-1.5 w-full rounded-xl border border-input bg-card px-4 py-3.5 text-sm placeholder:text-muted-foreground/60 focus:border-foreground focus:outline-none";
   const pill = (on: boolean) => `flex-1 rounded-xl border py-3 text-sm ${on ? "border-foreground bg-foreground text-background" : "border-border bg-card"}`;
   const toggleZona = (z: string) => setD({ ...d, zonas: d.zonas.includes(z) ? d.zonas.filter((x) => x !== z) : [...d.zonas, z] });
@@ -33,15 +36,24 @@ export function DistribuidorForm({ onBack }: { onBack: () => void }) {
     return (
       <form
         className="flex min-h-full flex-col px-5 pb-8 pt-5"
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
           if (!d.cobro) return setError("Elige cómo quieres recibir tus pagos.");
           if (!cobroDistribuidorCompleto(d))
             return setError(d.cobro === "CLABE" ? "Completa la CLABE (18 dígitos) o tarjeta (16), el banco y el titular." : "El celular de CoDi debe tener 10 dígitos.");
-          const err = validarAcceso(d.telefono, password, password2);
+          const perfil = { ...d, nombre: d.nombre.trim(), correo: d.correo.trim().toLowerCase() };
+          const err = validarAcceso(d.telefono, password, password2) || contactoRepetido(listarDistribuidores().map((c) => c.perfil), perfil);
           if (err) return setError(err);
-          saveDistributor({ ...d, nombre: d.nombre.trim() });
-          navigate({ to: "/distribuidor" });
+          setGuardando(true);
+          try {
+            const id = registrarDistribuidor(perfil);
+            await guardarClave("distribuidor", id, password);
+            iniciarSesion("distribuidor", id);
+            navigate({ to: "/distribuidor" });
+          } catch (e) {
+            setError(e instanceof Error ? e.message : "No se pudo crear la cuenta.");
+            setGuardando(false);
+          }
         }}
       >
         <button type="button" onClick={() => setPaso(2)} className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary">
@@ -108,8 +120,8 @@ export function DistribuidorForm({ onBack }: { onBack: () => void }) {
         </div>
 
         {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
-        <button type="submit" className="mt-8 w-full rounded-full bg-foreground py-4 text-sm font-medium text-background">
-          Crear mi cuenta
+        <button type="submit" disabled={guardando} className="mt-8 w-full rounded-full bg-foreground py-4 text-sm font-medium text-background disabled:opacity-60">
+          {guardando ? "Creando tu cuenta…" : "Crear mi cuenta"}
         </button>
       </form>
     );

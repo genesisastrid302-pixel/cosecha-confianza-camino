@@ -1,12 +1,14 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Check, ChevronLeft } from "lucide-react";
-import { METODOS_PAGO, MUNICIPIOS, saveConsumer, validarAcceso, DEMO_CONSUMER, type ConsumerProfile } from "@/lib/accounts";
+import { EMPTY_CONSUMER, METODOS_PAGO, MUNICIPIOS, listarConsumidores, registrarConsumidor, validarAcceso, type ConsumerProfile } from "@/lib/accounts";
+import { contactoRepetido, guardarClave, iniciarSesion } from "@/lib/acceso";
 
 export function ConsumidorForm({ onBack }: { onBack: () => void }) {
   const navigate = useNavigate();
   const [paso, setPaso] = useState<2 | 3>(2);
-  const [p, setP] = useState<ConsumerProfile>({ ...DEMO_CONSUMER, nombre: "", municipio: "", pagos: [] });
+  const [p, setP] = useState<ConsumerProfile>(EMPTY_CONSUMER);
+  const [guardando, setGuardando] = useState(false);
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
   const [error, setError] = useState("");
@@ -17,12 +19,22 @@ export function ConsumidorForm({ onBack }: { onBack: () => void }) {
     return (
       <form
         className="flex min-h-full flex-col px-5 pb-8 pt-5"
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
-          const err = validarAcceso(p.telefono, password, password2);
+          const perfil = { ...p, nombre: p.nombre.trim(), correo: p.correo.trim().toLowerCase() };
+          const err = validarAcceso(p.telefono, password, password2) || contactoRepetido(listarConsumidores().map((c) => c.perfil), perfil);
           if (err) return setError(err);
-          saveConsumer({ ...p, nombre: p.nombre.trim() });
-          navigate({ to: "/consumidor" });
+          setGuardando(true);
+          try {
+            // La cuenta queda guardada en este navegador y se entra con ella
+            const id = registrarConsumidor(perfil);
+            await guardarClave("consumidor", id, password);
+            iniciarSesion("consumidor", id);
+            navigate({ to: "/consumidor" });
+          } catch (e) {
+            setError(e instanceof Error ? e.message : "No se pudo crear la cuenta.");
+            setGuardando(false);
+          }
         }}
       >
         <button type="button" onClick={() => setPaso(2)} className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary">
@@ -48,8 +60,8 @@ export function ConsumidorForm({ onBack }: { onBack: () => void }) {
         </div>
 
         {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
-        <button type="submit" className="mt-8 w-full rounded-full bg-foreground py-4 text-sm font-medium text-background">
-          Crear mi cuenta
+        <button type="submit" disabled={guardando} className="mt-8 w-full rounded-full bg-foreground py-4 text-sm font-medium text-background disabled:opacity-60">
+          {guardando ? "Creando tu cuenta…" : "Crear mi cuenta"}
         </button>
       </form>
     );

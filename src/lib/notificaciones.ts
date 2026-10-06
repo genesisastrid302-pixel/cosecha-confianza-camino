@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { getProducer, unitLabel } from "@/lib/data";
-import { codigoDe, tituloPedidoProductor, useOrders, type Order, type OrderStatus } from "@/lib/orders";
+import { codigoDe, misPedidos, repartidor, tituloPedidoProductor, useOrders, type Order, type OrderStatus } from "@/lib/orders";
 import { LOCAL_DISTRIBUIDOR, fueEntregado, readReservas } from "@/lib/distribucion";
 import { APORTACION_SOCIO, listarCuentas } from "@/lib/producer-store";
-import { nombreCorto, readDistributor } from "@/lib/accounts";
+import { sesionDe } from "@/lib/acceso";
 
 /**
  * Notificaciones de los tres roles.
@@ -29,7 +29,7 @@ export type Aviso = {
 const resumen = (o: Order) => o.items.map((i) => `${i.quantity} ${unitLabel(i.unit, i.quantity)} ${i.name.toLowerCase()}`).join(", ");
 const nombres = (o: Order) => [...new Set(o.items.map((i) => getProducer(i.producerSlug).name.split(" ")[0]))].join(" y ");
 
-function deUnPedido(rol: Rol, o: Order, dist: string): Aviso[] {
+function deUnPedido(rol: Rol, o: Order): Aviso[] {
   const out: Aviso[] = [];
   const add = (status: OrderStatus, at: string, a: Omit<Aviso, "id" | "at" | "pedido">) => out.push({ id: `${o.id}-${status}-${at}`, at, pedido: o.id, ...a });
   const pedidoProductor = `/productor/pedido/${o.id}`;
@@ -44,13 +44,13 @@ function deUnPedido(rol: Rol, o: Order, dist: string): Aviso[] {
       if (h.status === "con_problema")
         add(h.status, h.at, {
           titulo: `Problema en la recolección de #${o.id}`,
-          detalle: `${dist} reportó: ${o.problema?.motivo ?? "revisa el pedido"}. Corrígelo para que vuelva a la ruta.`,
+          detalle: `${repartidor(o, true)} reportó: ${o.problema?.motivo ?? "revisa el pedido"}. Corrígelo para que vuelva a la ruta.`,
           href: pedidoProductor,
           alerta: true,
         });
       if (h.status === "en_recoleccion")
         add(h.status, h.at, {
-          titulo: `${dist} ${o.traslado === "productor_lleva" ? "recibió" : "recolectó"} el pedido #${o.id}`,
+          titulo: `${repartidor(o, true)} ${o.traslado === "productor_lleva" ? "recibió" : "recolectó"} el pedido #${o.id}`,
           detalle: "Su registro en la recolección cuenta para tu score.",
           href: pedidoProductor,
         });
@@ -95,7 +95,7 @@ function deUnPedido(rol: Rol, o: Order, dist: string): Aviso[] {
           alerta: true,
         });
       if (h.status === "en_ruta")
-        add(h.status, h.at, { titulo: "Tu pedido va en camino", detalle: `Código de entrega ${codigoDe(o)}: dáselo a ${dist} al recibir #${o.id}.`, href });
+        add(h.status, h.at, { titulo: "Tu pedido va en camino", detalle: `Código de entrega ${codigoDe(o)}: dáselo a ${repartidor(o)} al recibir #${o.id}.`, href });
       if (h.status === "entregado")
         add(h.status, h.at, { titulo: "Tu canasta fue entregada", detalle: `Confirma que llegó #${o.id}, escanea su QR y califícala.`, href });
     }
@@ -121,8 +121,9 @@ function deUnPedido(rol: Rol, o: Order, dist: string): Aviso[] {
 
 export function avisosDe(rol: Rol, orders: Order[]): Aviso[] {
   if (typeof window === "undefined") return [];
-  const dist = nombreCorto(readDistributor().nombre).split(" ")[0];
-  const out = orders.flatMap((o) => deUnPedido(rol, o, dist));
+  // El consumidor solo recibe avisos de sus propios pedidos
+  const propios = rol === "consumidor" ? misPedidos(orders) : orders;
+  const out = propios.flatMap((o) => deUnPedido(rol, o));
 
   if (rol === "productor") {
     readReservas().forEach((r) =>
@@ -137,7 +138,7 @@ export function avisosDe(rol: Rol, orders: Order[]): Aviso[] {
   }
 
   // Nueva cosecha compartida → a consumidores que ya compraron
-  if (rol === "consumidor" && orders.length > 0) {
+  if (rol === "consumidor" && propios.length > 0) {
     listarCuentas().forEach(({ state }) =>
       state.cosechas.forEach((c) => {
         if (!c.creadaEn) return;
@@ -196,7 +197,10 @@ export function agruparPorPedido(avisos: Aviso[], orders: Order[]) {
 const VISTOS_KEY = "milpa-avisos-vistos";
 const VISTOS_EVENT = "milpa-avisos-change";
 
-function readVistos(): Partial<Record<Rol, string>> {
+/** Cada cuenta lleva su propia marca de "visto" */
+const llave = (rol: Rol) => `${rol}:${sesionDe(rol) ?? ""}`;
+
+function readVistos(): Record<string, string> {
   try {
     return JSON.parse(window.localStorage.getItem(VISTOS_KEY) || "{}");
   } catch {
@@ -206,11 +210,11 @@ function readVistos(): Partial<Record<Rol, string>> {
 
 /** Hasta cuándo vio sus avisos este rol ("" si nunca ha entrado) */
 export function leerVisto(rol: Rol) {
-  return readVistos()[rol] ?? "";
+  return readVistos()[llave(rol)] ?? "";
 }
 
 export function marcarVistos(rol: Rol) {
-  window.localStorage.setItem(VISTOS_KEY, JSON.stringify({ ...readVistos(), [rol]: new Date().toISOString() }));
+  window.localStorage.setItem(VISTOS_KEY, JSON.stringify({ ...readVistos(), [llave(rol)]: new Date().toISOString() }));
   window.dispatchEvent(new Event(VISTOS_EVENT));
 }
 
@@ -220,11 +224,11 @@ export function useAvisos(rol: Rol) {
   const [tick, setTick] = useState(0);
   useEffect(() => {
     const sync = () => {
-      setVisto(readVistos()[rol] ?? "");
+      setVisto(leerVisto(rol));
       setTick((t) => t + 1);
     };
     sync();
-    const eventos = [VISTOS_EVENT, "storage", "milpa-productor-change"];
+    const eventos = [VISTOS_EVENT, "storage", "milpa-productor-change", "milpa-sesion-change"];
     eventos.forEach((e) => window.addEventListener(e, sync));
     return () => eventos.forEach((e) => window.removeEventListener(e, sync));
   }, [rol]);

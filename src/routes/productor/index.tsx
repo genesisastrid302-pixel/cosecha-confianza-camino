@@ -4,7 +4,7 @@ import { productorTabs } from "@/components/tabs";
 import { Bell, TrendingDown, CheckCircle2, Clock } from "lucide-react";
 import { useProducer } from "@/lib/producer-store";
 import { ScoreCard } from "@/components/ScoreCard";
-import { useOrders, updateOrder } from "@/lib/orders";
+import { pesoPedido, useOrders, updateOrder } from "@/lib/orders";
 import { unitLabel } from "@/lib/data";
 
 export const Route = createFileRoute("/productor/")({
@@ -18,7 +18,15 @@ function ProductorHome() {
   const nuevos = orders.filter((o) => o.status === "nuevo");
   const activos = orders.filter((o) => ["aceptado", "empacado", "en_recoleccion", "en_ruta", "con_problema"].includes(o.status));
   const pendiente = nuevos[0];
-  const kgSold = 312 + state.crops.reduce((n, c) => n + Math.max(0, c.kgEstimated - c.kgAvailable), 0);
+  // Indicadores solo con pedidos reales
+  const vendidos = orders.filter((o) => o.status !== "rechazado");
+  const kgSold = Math.round(vendidos.reduce((n, o) => n + pesoPedido(o), 0) * 10) / 10;
+  const mermaKg = orders.reduce((n, o) => n + (o.merma?.kg ?? 0), 0);
+  const kgEntregados = orders.filter((o) => ["entregado", "recibido", "calificado"].includes(o.status)).reduce((n, o) => n + pesoPedido(o), 0);
+  const merma = kgEntregados > 0 ? `${Math.round((mermaKg / kgEntregados) * 1000) / 10}%` : "—";
+  const hoy = new Date().toISOString().slice(0, 10);
+  const proxima = state.crops.map((c) => c.harvestDate).filter((d) => d >= hoy).sort()[0];
+  const diasCosecha = proxima ? Math.round((new Date(proxima).getTime() - new Date(hoy).getTime()) / 86_400_000) : null;
   return (
     <AppShell
       tabs={productorTabs}
@@ -32,8 +40,8 @@ function ProductorHome() {
         <div className="grid grid-cols-2 gap-3">
           <Kpi icon={Bell} label="Pedidos activos" value={String(activos.length + nuevos.length)} tone="terracota" />
           <Kpi icon={CheckCircle2} label="Kg vendidos" value={`${kgSold} kg`} tone="primary" />
-          <Kpi icon={TrendingDown} label="Merma del mes" value="↓ 8%" tone="primary" />
-          <Kpi icon={Clock} label="Próxima cosecha" value="3 días" tone="miel" />
+          <Kpi icon={TrendingDown} label="Merma" value={merma} tone="primary" />
+          <Kpi icon={Clock} label="Próxima cosecha" value={diasCosecha === null ? "—" : diasCosecha === 0 ? "Hoy" : diasCosecha === 1 ? "1 día" : `${diasCosecha} días`} tone="miel" />
         </div>
 
         {/* Acciones del flujo */}

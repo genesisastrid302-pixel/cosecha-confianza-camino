@@ -123,25 +123,26 @@ export function urlNavegacion(recolecciones: ParadaRecoleccion[], entregas: Orde
   return `https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=${destino}${paradas}`;
 }
 
-/** Historial previo del distribuidor de ejemplo, para que los indicadores no arranquen en cero */
-const HISTORIAL = { entregas: 48, aTiempo: 46, kg: 310, mermaKg: 6.5 };
-
+/** Indicadores del distribuidor, solo con pedidos reales. Sin entregas todavía no hay porcentaje (null). */
 export function kpis(orders: Order[]) {
   const entregados = orders.filter(fueEntregado);
   const conProblema = entregados.filter((o) => o.history.some((h) => h.status === "con_problema")).length;
-  const entregas = HISTORIAL.entregas + entregados.length;
-  const aTiempo = HISTORIAL.aTiempo + entregados.length - conProblema;
-  const kg = HISTORIAL.kg + entregados.reduce((n, o) => n + pesoPedido(o), 0);
-  const mermaKg = HISTORIAL.mermaKg + orders.reduce((n, o) => n + (o.merma?.kg ?? 0), 0);
+  const entregas = entregados.length;
+  const aTiempo = entregados.length - conProblema;
+  const kg = entregados.reduce((n, o) => n + pesoPedido(o), 0);
+  const mermaKg = orders.reduce((n, o) => n + (o.merma?.kg ?? 0), 0);
   return {
     entregas,
     entregasHoy: entregados.length,
-    aTiempoPct: Math.round((aTiempo / entregas) * 100),
-    mermaPct: Math.round((mermaKg / kg) * 1000) / 10,
+    aTiempoPct: entregas > 0 ? Math.round((aTiempo / entregas) * 100) : null,
+    mermaPct: kg > 0 ? Math.round((mermaKg / kg) * 1000) / 10 : null,
     mermaKg: Math.round(mermaKg * 10) / 10,
     activos: orders.filter((o) => !["rechazado", "calificado", "recibido", "entregado"].includes(o.status)).length,
   };
 }
+
+/** "92%" o una raya cuando todavía no hay datos */
+export const porcentaje = (n: number | null) => (n === null ? "—" : `${n}%`);
 
 /** Dinero del distribuidor: logística ganada y efectivo que cobró al entregar */
 export function finanzas(orders: Order[]) {

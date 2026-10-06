@@ -26,18 +26,10 @@ const GRUPO: Record<OrderStatus, Filtro | null> = {
   rechazado: null,
 };
 
-// Pedidos de ejemplo para que la pantalla no se vea vacía en la demo
-const ejemplos = [
-  { id: "MLP-0517", who: "Ximena R.", zone: "San Pedro", items: "1 kg chiles serranos", total: 54, filtro: "En proceso" as Filtro, nota: "✓ Empacado · QR generado" },
-  { id: "MLP-0516", who: "Jorge T.", zone: "Cumbres", items: "Canasta semanal", total: 320, filtro: "Entregados" as Filtro, nota: "✓ Pago recibido · ★★★★★" },
-  { id: "MLP-0515", who: "Marta L.", zone: "Linda Vista", items: "3 kg jitomate", total: 204, filtro: "Entregados" as Filtro, nota: "✓ Pago recibido · ★★★★☆" },
-];
-
 function Pedidos() {
   const orders = useOrders();
   const [filtro, setFiltro] = useState<Filtro>("Pendientes");
   const reales = orders.filter((o) => GRUPO[o.status] === filtro);
-  const demo = ejemplos.filter((e) => e.filtro === filtro);
   const pendientes = orders.filter((o) => o.status === "nuevo").length;
 
   return (
@@ -60,22 +52,13 @@ function Pedidos() {
           {reales.map((o) => (
             <OrderCard key={o.id} order={o} />
           ))}
-          {demo.map((e) => (
-            <div key={e.id} className="rounded-2xl border-2 border-border bg-card p-4">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <div className="text-[10px] uppercase tracking-widest text-muted-foreground">#{e.id} · ejemplo</div>
-                  <div className="serif mt-1 text-base">{e.who} · {e.zone}</div>
-                  <div className="mt-1 text-xs text-muted-foreground">{e.items}</div>
-                </div>
-                <div className="serif text-xl">${e.total}</div>
-              </div>
-              <div className="mt-3 text-xs text-muted-foreground">{e.nota}</div>
-            </div>
-          ))}
-          {reales.length === 0 && demo.length === 0 && (
+          {reales.length === 0 && (
             <p className="py-10 text-center text-sm text-muted-foreground">
-              No hay pedidos pendientes. Cuando un consumidor compre, aparece aquí.
+              {filtro === "Pendientes"
+                ? "No hay pedidos pendientes. Cuando un consumidor compre, aparece aquí."
+                : filtro === "En proceso"
+                  ? "No hay pedidos en proceso."
+                  : "Aún no hay pedidos entregados."}
             </p>
           )}
         </div>

@@ -1,11 +1,10 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { ChevronLeft, Leaf, MapPin, ShieldCheck, Snowflake, Sprout, Truck } from "lucide-react";
 import { QrCode } from "@/components/QrCode";
 import { EstadoPedido } from "@/components/EstadoPedido";
 import { getProducer, producerDetails, products, trustScore10, unitLabel } from "@/lib/data";
 import { formatScore, scoreTone } from "@/lib/score";
-import { FLOW, STATUS_LABEL, formatTime, useOrders, type Order, type OrderStatus } from "@/lib/orders";
-import { nombreCorto, useDistributor } from "@/lib/accounts";
+import { FLOW, STATUS_LABEL, formatTime, repartidor, useOrders, type Order, type OrderStatus } from "@/lib/orders";
 
 /**
  * Página pública del QR (docs/decisiones.md): un QR por pedido, con sus lotes dentro.
@@ -17,65 +16,13 @@ export const Route = createFileRoute("/lote/$id")({
   component: Lote,
 });
 
-const EJEMPLO_ID = "MLP-0518";
-
-/** El pedido de ejemplo que aparece cuando el consumidor aún no ha comprado */
-function pedidoEjemplo(): Order {
-  const at = (diasAtras: number, h: number, m: number) => {
-    const d = new Date();
-    d.setDate(d.getDate() - diasAtras);
-    d.setHours(h, m, 0, 0);
-    return d.toISOString();
-  };
-  const item = (id: string, quantity: number) => {
-    const p = products.find((x) => x.id === id)!;
-    return { productId: p.id, name: p.name, producerSlug: p.producerSlug, unit: p.unit, price: p.price, quantity };
-  };
-  const items = [item("jitomate", 2), item("cilantro", 1)];
-  const subtotal = items.reduce((n, i) => n + i.price * i.quantity, 0);
-  return {
-    id: EJEMPLO_ID,
-    cliente: "",
-    createdAt: at(2, 19, 10),
-    items,
-    lots: { santiago: "LT-0518" },
-    entrega: "domicilio",
-    direccion: "",
-    pago: "Tarjeta",
-    subtotal,
-    logistica: 18,
-    plataforma: 10,
-    total: subtotal + 28,
-    status: "en_ruta",
-    history: [
-      { status: "nuevo", at: at(2, 19, 10) },
-      { status: "aceptado", at: at(2, 19, 40) },
-      { status: "empacado", at: at(1, 7, 15) },
-      { status: "en_recoleccion", at: at(0, 8, 2) },
-      { status: "en_ruta", at: at(0, 9, 30) },
-    ],
-    traslado: "distribuidor_recoge",
-    temperaturaRecoleccion: 6,
-    empaque: {
-      temperatura: 5,
-      tipo: "Contenedor refrigerado",
-      refrigeracion: true,
-      condiciones: "Se cortó al amanecer y pasó directo a la cámara fría del rancho.",
-      hora: "07:15",
-      registradoEn: at(1, 7, 15),
-    },
-  };
-}
-
 function Lote() {
   const { id } = Route.useParams();
   const router = useRouter();
   const orders = useOrders();
   const clave = id.toUpperCase();
   // El QR trae el número de pedido; también se puede buscar por número de lote
-  const real = orders.find((o) => o.id === clave || Object.values(o.lots).includes(clave));
-  const order = real ?? (clave === EJEMPLO_ID || clave === "LT-0518" ? pedidoEjemplo() : undefined);
-  const distribuidor = nombreCorto(useDistributor().nombre).split(" ")[0];
+  const order = orders.find((o) => o.id === clave || Object.values(o.lots).includes(clave));
 
   return (
     <div className="flex min-h-full flex-col">
@@ -93,13 +40,14 @@ function Lote() {
       </header>
 
       <main className="flex-1 space-y-5 px-5 pb-8">
-        {order ? <Detalle order={order} distribuidor={distribuidor} ejemplo={!real} /> : <NoEncontrado id={clave} />}
+        {order ? <Detalle order={order} /> : <NoEncontrado id={clave} />}
       </main>
     </div>
   );
 }
 
-function Detalle({ order, distribuidor, ejemplo }: { order: Order; distribuidor: string; ejemplo: boolean }) {
+function Detalle({ order }: { order: Order }) {
+  const distribuidor = repartidor(order);
   const e = order.empaque;
   const pasos = FLOW.filter((s) => s !== "calificado");
   const hito = (s: OrderStatus) => [...order.history].reverse().find((h) => h.status === s);
@@ -123,7 +71,6 @@ function Detalle({ order, distribuidor, ejemplo }: { order: Order; distribuidor:
             </div>
           </div>
         </div>
-        {ejemplo && <p className="border-t border-primary/20 px-4 py-2 text-[11px] text-muted-foreground">Pedido de ejemplo para mostrar cómo se ve la trazabilidad.</p>}
       </section>
 
       <EstadoPedido order={order} />
@@ -218,7 +165,7 @@ function Detalle({ order, distribuidor, ejemplo }: { order: Order; distribuidor:
                     {s === "en_recoleccion" && h
                       ? order.traslado === "productor_lleva"
                         ? ` · el productor lo llevó al local de ${distribuidor}`
-                        : ` · ${distribuidor} lo recogió en el campo`
+                        : ` · ${repartidor(order, true)} lo recogió en el campo`
                       : ""}
                     {s === "entregado" && h ? ` · ${order.entrega === "domicilio" ? "a domicilio" : "para recoger"}` : ""}
                   </div>
@@ -264,13 +211,6 @@ function NoEncontrado({ id }: { id: string }) {
       <p className="mt-2 text-sm text-muted-foreground">
         En este prototipo los pedidos se guardan en el navegador donde se hicieron, así que solo se pueden consultar desde ahí.
       </p>
-      <Link
-        to="/lote/$id"
-        params={{ id: EJEMPLO_ID }}
-        className="mt-4 inline-flex rounded-full border border-border px-4 py-2.5 text-sm"
-      >
-        Trazabilidad del pedido {EJEMPLO_ID}
-      </Link>
     </div>
   );
 }

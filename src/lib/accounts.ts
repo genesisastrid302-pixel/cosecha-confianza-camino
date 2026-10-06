@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import type { MetodoPago } from "@/lib/orders";
+import { coincide, nuevoId, sesionDe, suscribirSesion, type Rol } from "@/lib/acceso";
 
 /**
- * Cuentas de consumidor y distribuidor guardadas en el navegador (prototipo, sin backend).
- * La contraseña nunca se guarda: solo se valida en el registro.
+ * Cuentas reales de consumidor y distribuidor guardadas en el navegador (prototipo, sin backend).
+ * Puede haber varias por rol; la sesión dice con cuál se entró (src/lib/acceso.ts).
+ * La contraseña no vive aquí: acceso.ts guarda solo su derivado para comprobarla.
  */
 
 export type ConsumerProfile = {
@@ -47,32 +49,16 @@ export const MUNICIPIOS = [
   "García",
 ];
 
-export const DEMO_CONSUMER: ConsumerProfile = {
-  nombre: "Adriana Martínez",
+/** Sin sesión no hay datos de nadie: los formularios y pantallas parten de aquí */
+export const EMPTY_CONSUMER: ConsumerProfile = {
+  nombre: "",
   correo: "",
   telefono: "",
-  municipio: "Monterrey",
+  municipio: "",
   entrega: "domicilio",
-  pagos: ["Tarjeta"],
+  pagos: [],
 };
 
-export const DEMO_DISTRIBUTOR: DistributorProfile = {
-  nombre: "Claudia Ramírez",
-  correo: "claudia@rutamty.mx",
-  telefono: "8187654321",
-  transporte: "Vehículo propio",
-  vehiculo: "Camioneta",
-  refrigerado: true,
-  paqueteria: "",
-  zonas: ["Monterrey", "San Pedro Garza García"],
-  cobro: "CLABE",
-  clabe: "072580009876543210",
-  banco: "Banorte",
-  titular: "Claudia Ramírez",
-  codi: "",
-};
-
-/** Formulario de registro en blanco */
 export const EMPTY_DISTRIBUTOR: DistributorProfile = {
   nombre: "",
   correo: "",
@@ -91,59 +77,125 @@ export const EMPTY_DISTRIBUTOR: DistributorProfile = {
 
 const EVENT = "milpa-accounts-change";
 
-function read<T>(key: string, fallback: T, normalizar: (v: T, guardado: Record<string, unknown>) => T = (v) => v): T {
-  if (typeof window === "undefined") return fallback;
+/** Cuentas guardadas antes tenían un solo método (`pago`); se conserva como su lista. */
+function normalizarConsumidor(guardado: Record<string, unknown>): ConsumerProfile {
+  const lista: unknown[] = Array.isArray(guardado.pagos) ? guardado.pagos : guardado.pago ? [guardado.pago] : [];
+  const c = { ...EMPTY_CONSUMER, ...guardado } as ConsumerProfile & { pago?: unknown };
+  delete c.pago;
+  return { ...c, pagos: METODOS_PAGO.filter((m) => lista.includes(m)) };
+}
+
+const normalizarDistribuidor = (guardado: Record<string, unknown>) => ({ ...EMPTY_DISTRIBUTOR, ...guardado }) as DistributorProfile;
+
+type Almacen<T> = {
+  rol: Rol;
+  /** Todas las cuentas del rol: { id: perfil } */
+  key: string;
+  /** Versión anterior: un solo perfil por navegador */
+  legado: string;
+  vacio: T;
+  normalizar: (guardado: Record<string, unknown>) => T;
+};
+
+const CONSUMIDORES: Almacen<ConsumerProfile> = {
+  rol: "consumidor",
+  key: "milpa-consumidores",
+  legado: "milpa-consumidor",
+  vacio: EMPTY_CONSUMER,
+  normalizar: normalizarConsumidor,
+};
+
+const DISTRIBUIDORES: Almacen<DistributorProfile> = {
+  rol: "distribuidor",
+  key: "milpa-distribuidores",
+  legado: "milpa-distribuidor",
+  vacio: EMPTY_DISTRIBUTOR,
+  normalizar: normalizarDistribuidor,
+};
+
+function leerCuentas<T extends { correo: string; telefono: string }>(a: Almacen<T>): Record<string, T> {
+  if (typeof window === "undefined") return {};
   try {
-    const raw = window.localStorage.getItem(key);
-    if (!raw) return fallback;
-    const guardado = JSON.parse(raw);
-    return normalizar({ ...fallback, ...guardado }, guardado);
+    const cuentas: Record<string, T> = {};
+    const raw = window.localStorage.getItem(a.key);
+    if (raw) for (const [id, v] of Object.entries(JSON.parse(raw))) cuentas[id] = a.normalizar(v as Record<string, unknown>);
+    // El perfil único de la versión anterior se conserva como una cuenta más (si tenía cómo identificarse)
+    const legado = window.localStorage.getItem(a.legado);
+    if (legado) {
+      const perfil = a.normalizar(JSON.parse(legado));
+      if (perfil.correo || perfil.telefono) cuentas[nuevoId()] = perfil;
+      window.localStorage.removeItem(a.legado);
+      window.localStorage.setItem(a.key, JSON.stringify(cuentas));
+    }
+    return cuentas;
   } catch {
-    return fallback;
+    return {};
   }
 }
 
-function write<T>(key: string, value: T) {
-  window.localStorage.setItem(key, JSON.stringify(value));
+function guardarCuentas<T>(a: Almacen<T>, cuentas: Record<string, T>) {
+  window.localStorage.setItem(a.key, JSON.stringify(cuentas));
   window.dispatchEvent(new Event(EVENT));
 }
 
-function useStored<T>(key: string, fallback: T, normalizar?: (v: T, guardado: Record<string, unknown>) => T): T {
-  const [value, setValue] = useState<T>(fallback);
+function registrar<T extends { correo: string; telefono: string }>(a: Almacen<T>, perfil: T) {
+  const id = nuevoId();
+  guardarCuentas(a, { ...leerCuentas(a), [id]: perfil });
+  return id;
+}
+
+function activa<T extends { correo: string; telefono: string }>(a: Almacen<T>): T {
+  const id = sesionDe(a.rol);
+  return (id && leerCuentas(a)[id]) || a.vacio;
+}
+
+function guardarActiva<T extends { correo: string; telefono: string }>(a: Almacen<T>, perfil: T) {
+  const id = sesionDe(a.rol);
+  if (!id) return;
+  guardarCuentas(a, { ...leerCuentas(a), [id]: perfil });
+}
+
+function listar<T extends { correo: string; telefono: string }>(a: Almacen<T>) {
+  return Object.entries(leerCuentas(a)).map(([id, perfil]) => ({ id, perfil }));
+}
+
+function useActiva<T extends { correo: string; telefono: string }>(a: Almacen<T>): T {
+  const [value, setValue] = useState<T>(a.vacio);
   useEffect(() => {
-    const sync = () => setValue(read(key, fallback, normalizar));
+    const sync = () => setValue(activa(a));
     sync();
     window.addEventListener(EVENT, sync);
-    window.addEventListener("storage", sync);
+    const quitar = suscribirSesion(sync);
     return () => {
       window.removeEventListener(EVENT, sync);
-      window.removeEventListener("storage", sync);
+      quitar();
     };
-    // fallback y normalizar son constantes del módulo
+    // el almacén es una constante del módulo
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key]);
+  }, []);
   return value;
 }
 
-/** Cuentas guardadas antes tenían un solo método (`pago`); se conserva como su lista. */
-function normalizarConsumidor(c: ConsumerProfile, guardado: Record<string, unknown>): ConsumerProfile {
-  const lista: unknown[] = Array.isArray(guardado.pagos) ? guardado.pagos : guardado.pago ? [guardado.pago] : [];
-  const pagos = METODOS_PAGO.filter((m) => lista.includes(m));
-  return { ...c, pagos: pagos.length ? pagos : DEMO_CONSUMER.pagos };
-}
+/** Crea la cuenta y devuelve su id (la sesión la inicia quien registra, ya con la contraseña guardada) */
+export const registrarConsumidor = (p: ConsumerProfile) => registrar(CONSUMIDORES, p);
+export const listarConsumidores = () => listar(CONSUMIDORES);
+export const buscarConsumidor = (identificador: string) => listarConsumidores().find((c) => coincide(c.perfil, identificador));
+/** Perfil del consumidor con sesión iniciada (vacío si no hay sesión) */
+export const readConsumer = () => activa(CONSUMIDORES);
+export const saveConsumer = (p: ConsumerProfile) => guardarActiva(CONSUMIDORES, p);
+export const useConsumer = () => useActiva(CONSUMIDORES);
 
-export const readConsumer = () => read("milpa-consumidor", DEMO_CONSUMER, normalizarConsumidor);
-export const saveConsumer = (p: ConsumerProfile) => write("milpa-consumidor", p);
-export const useConsumer = () => useStored("milpa-consumidor", DEMO_CONSUMER, normalizarConsumidor);
-
-export const readDistributor = () => read("milpa-distribuidor", DEMO_DISTRIBUTOR);
-export const saveDistributor = (p: DistributorProfile) => write("milpa-distribuidor", p);
-export const useDistributor = () => useStored("milpa-distribuidor", DEMO_DISTRIBUTOR);
+export const registrarDistribuidor = (p: DistributorProfile) => registrar(DISTRIBUIDORES, p);
+export const listarDistribuidores = () => listar(DISTRIBUIDORES);
+export const buscarDistribuidor = (identificador: string) => listarDistribuidores().find((c) => coincide(c.perfil, identificador));
+export const readDistributor = () => activa(DISTRIBUIDORES);
+export const saveDistributor = (p: DistributorProfile) => guardarActiva(DISTRIBUIDORES, p);
+export const useDistributor = () => useActiva(DISTRIBUIDORES);
 
 /** "Adriana Martínez" → "Adriana M." */
 export function nombreCorto(nombre: string) {
   const [first, last] = nombre.trim().split(/\s+/);
-  return last ? `${first} ${last[0]}.` : first || "Consumidor";
+  return last ? `${first} ${last[0]}.` : first || "";
 }
 
 export function validarAcceso(telefono: string, password: string, password2: string) {

@@ -2,12 +2,10 @@ import { addResena } from "@/lib/producer-store";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { getProducer, products, unitLabel } from "@/lib/data";
-import { formatTime, updateOrder, useOrders } from "@/lib/orders";
-import { nombreCorto, useDistributor } from "@/lib/accounts";
+import { formatTime, repartidor, updateOrder, useMisPedidos } from "@/lib/orders";
 import { LinkTrazabilidad } from "@/components/LinkTrazabilidad";
 import { AppShell } from "@/components/AppShell";
 import { consumidorTabs } from "@/components/tabs";
-import santiago from "@/assets/producer-santiago.jpg";
 import {
   ArrowLeft, Camera, CheckCircle2, Star, Sparkles, Thermometer, Leaf, Package, Heart, X,
   QrCode, Snowflake, CalendarDays, MapPin, Sprout, Truck, ShieldCheck,
@@ -38,20 +36,13 @@ function Recibir() {
   const [tipMerma, setTipMerma] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
 
-  // Pedido real: primero el que ya confirmó y le falta calificar; si no, el que el distribuidor
-  // marcó como entregado (si no hay ninguno, se muestra el ejemplo)
-  const orders = useOrders();
+  // Pedido de esta cuenta: primero el que ya confirmó y le falta calificar; si no, el que el
+  // distribuidor marcó como entregado
+  const orders = useMisPedidos();
   const [orderId, setOrderId] = useState<string | null>(null);
   const order =
     orders.find((o) => o.id === orderId) ?? orders.find((o) => o.status === "recibido") ?? orders.find((o) => o.status === "entregado");
-  const distribuidor = nombreCorto(useDistributor().nombre).split(" ")[0];
-  const productores = order ? [...new Set(order.items.map((i) => i.producerSlug))].map(getProducer) : [getProducer("santiago")];
-  const primer = productores[0].name.split(" ")[0];
-  const pedidoId = order?.id ?? "MLP-0518";
-  const lotes = order ? Object.values(order.lots).join(", ") : "LT-0518";
-  const resumen = order
-    ? order.items.map((i) => `${i.quantity} ${unitLabel(i.unit, i.quantity)} ${i.name.toLowerCase()}`).join(" · ")
-    : "2 kg jitomate · 1 manojo cilantro";
+  const distribuidor = repartidor(order, true);
 
   // Si ya confirmó que la recibió, entra directo a escanear y calificar
   useEffect(() => {
@@ -66,6 +57,31 @@ function Recibir() {
     const next = Array.from(files).map((f) => URL.createObjectURL(f));
     setPhotos((p) => [...p, ...next]);
   }
+
+  if (!order) {
+    return (
+      <AppShell tabs={consumidorTabs} tone="terracota" eyebrow="Confirmación de llegada" title="¿Ya llegó?">
+        <div className="px-5">
+          <div className="rounded-2xl border border-border bg-card p-6 text-center">
+            <Package className="mx-auto h-7 w-7 text-terracota" />
+            <div className="serif mt-3 text-lg">No tienes canastas por confirmar</div>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Cuando el distribuidor marque tu pedido como entregado, aquí lo confirmas, escaneas su QR y lo calificas.
+            </p>
+            <Link to="/consumidor/pedidos" className="mt-4 inline-flex rounded-full bg-foreground px-5 py-3 text-sm text-background">
+              Pedidos
+            </Link>
+          </div>
+        </div>
+      </AppShell>
+    );
+  }
+
+  const productores = [...new Set(order.items.map((i) => i.producerSlug))].map(getProducer);
+  const primer = productores[0].name.split(" ")[0];
+  const pedidoId = order.id;
+  const lotes = Object.values(order.lots).join(", ");
+  const resumen = order.items.map((i) => `${i.quantity} ${unitLabel(i.unit, i.quantity)} ${i.name.toLowerCase()}`).join(" · ");
 
   return (
     <AppShell
@@ -85,11 +101,11 @@ function Recibir() {
         {/* Tarjeta del pedido */}
         <div className="overflow-hidden rounded-2xl border border-border bg-card">
           <div className="flex gap-3 p-3">
-            <img src={order ? productores[0].photo : santiago} alt="" className="h-16 w-16 rounded-xl object-cover" />
+            <img src={productores[0].photo} alt="" className="h-16 w-16 rounded-xl object-cover" />
             <div className="flex-1">
               <div className="text-[10px] uppercase tracking-widest text-muted-foreground">#{pedidoId}</div>
               <div className="serif text-base leading-tight">
-                {order ? `De ${productores.map((x) => x.name.split(" ")[0]).join(" y ")}` : "De Ezequiel · Seis Tierras"}
+                De {productores.map((x) => x.name.split(" ")[0]).join(" y ")}
               </div>
               <div className="text-[11px] text-muted-foreground">{resumen}</div>
             </div>
@@ -103,7 +119,7 @@ function Recibir() {
                 <Sparkles className="h-7 w-7 text-primary" />
               </div>
               <div className="serif text-xl leading-tight">
-                {order?.entrega === "pickup" ? `${distribuidor} te entregó tu canasta` : `${distribuidor} dejó tu canasta en la puerta`}
+                {order.entrega === "pickup" ? `${distribuidor} te entregó tu canasta` : `${distribuidor} dejó tu canasta en la puerta`}
               </div>
               <p className="mt-2 text-sm text-muted-foreground">
                 Confirma para cerrar el ciclo. Tu retroalimentación llega de regreso al campo.
@@ -113,10 +129,8 @@ function Recibir() {
             <div className="space-y-2">
               <Button
                 onClick={() => {
-                  if (order) {
-                    setOrderId(order.id);
-                    updateOrder(order.id, { status: "recibido" });
-                  }
+                  setOrderId(order.id);
+                  updateOrder(order.id, { status: "recibido" });
                   setStep("scan");
                 }}
                 className="h-14 w-full rounded-2xl bg-foreground text-background text-base"
@@ -176,7 +190,6 @@ function Recibir() {
                     </span>
                   </div>
                   <div className="divide-y divide-border">
-                    {order ? (
                       <>
                         <CultivoRow icon={Sprout} label="Cultivo" value={order.items.map((i) => i.name).join(" · ")} />
                         <CultivoRow icon={MapPin} label="Origen" value={productores.map((x) => x.region).join(" · ")} />
@@ -197,7 +210,7 @@ function Recibir() {
                         <CultivoRow
                           icon={Truck}
                           label="Trayecto"
-                          value={`${order.traslado === "productor_lleva" ? "El productor lo llevó al local" : `Recolectado en campo por ${distribuidor}`} · entregado ${order.entregaRegistro ? formatTime(order.entregaRegistro.at) : ""}`}
+                          value={`${order.traslado === "productor_lleva" ? "El productor lo llevó al local" : `Recolectado en campo por ${repartidor(order)}`} · entregado ${order.entregaRegistro ? formatTime(order.entregaRegistro.at) : ""}`}
                         />
                         <CultivoRow
                           icon={Leaf}
@@ -205,35 +218,15 @@ function Recibir() {
                           value={products.find((x) => x.id === order.items[0]?.productId)?.cropPractice ?? "Agroecológico"}
                         />
                       </>
-                    ) : (
-                      <>
-                        <CultivoRow icon={Sprout} label="Cultivo" value="Jitomate heirloom · variedad criolla" />
-                        <CultivoRow icon={MapPin} label="Origen" value="Rancho Seis Tierras · Ramos Arizpe, Coah." />
-                        <CultivoRow icon={CalendarDays} label="Cosechado" value="Ayer, 6:40 a.m." />
-                        <CultivoRow icon={Snowflake} label="Cadena de frío" value="4–7 °C constantes · sin rupturas" />
-                        <CultivoRow icon={Truck} label="Trayecto" value="98 km · 1 parada · 3 h 12 min" />
-                        <CultivoRow icon={Leaf} label="Prácticas" value="Agroecológico · agua de lluvia captada" />
-                      </>
-                    )}
                   </div>
                 </section>
 
-                {order ? (
-                  order.empaque?.condiciones && (
+                {order.empaque?.condiciones && (
                     <div className="rounded-2xl border-2 border-dashed border-primary/30 bg-card p-4">
                       <div className="eyebrow text-primary">Cómo lo guardó {primer}</div>
                       <p className="serif mt-1 text-sm leading-relaxed">{order.empaque.condiciones}</p>
                     </div>
-                  )
-                ) : (
-                  <div className="rounded-2xl border-2 border-dashed border-primary/30 bg-card p-4">
-                    <div className="eyebrow text-primary">Nota del productor</div>
-                    <p className="serif mt-1 text-sm leading-relaxed">
-                      "Este lote se cortó cuando el sol apenas calentaba. Salió más
-                      dulce por las lluvias del fin de semana."
-                    </p>
-                  </div>
-                )}
+                  )}
 
                 <LinkTrazabilidad id={pedidoId} />
 
@@ -395,13 +388,12 @@ function Recibir() {
             <Button
               disabled={overall === 0}
               onClick={() => {
-                if (order) {
-                  updateOrder(order.id, {
-                    status: "calificado",
-                    feedback: { estrellas: overall, merma: tipMerma, nota: comment.trim(), at: new Date().toISOString() },
-                  });
-                }
-                addResena();
+                updateOrder(order.id, {
+                  status: "calificado",
+                  feedback: { estrellas: overall, merma: tipMerma, nota: comment.trim(), at: new Date().toISOString() },
+                });
+                // La reseña cuenta para el productor que atendió este pedido
+                addResena(order.productor?.id);
                 setStep("thanks");
               }}
               className="h-14 w-full rounded-2xl bg-foreground text-base text-background disabled:opacity-40"

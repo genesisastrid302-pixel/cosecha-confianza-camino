@@ -3,7 +3,7 @@ import { AlertTriangle, ChevronLeft } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { distribuidorTabs } from "@/components/tabs";
 import { formatTime, pesoPedido, useOrders } from "@/lib/orders";
-import { kpis } from "@/lib/distribucion";
+import { kpis, porcentaje } from "@/lib/distribucion";
 
 export const Route = createFileRoute("/distribuidor/analytics")({
   head: () => ({ meta: [{ title: "Rendimiento · Distribuidor — Milpa" }] }),
@@ -29,12 +29,12 @@ function Rendimiento() {
     >
       <div className="space-y-5 px-5">
         <div className="grid grid-cols-3 gap-2 text-center">
-          <Kpi n={`${k.aTiempoPct}%`} l="Entregas a tiempo" />
-          <Kpi n={`${k.mermaPct}%`} l="Merma" alerta />
+          <Kpi n={porcentaje(k.aTiempoPct)} l="Entregas a tiempo" />
+          <Kpi n={porcentaje(k.mermaPct)} l="Merma" alerta={!!k.mermaPct} />
           <Kpi n={String(k.entregas)} l="Entregas" />
         </div>
         <p className="text-[11px] text-muted-foreground">
-          La merma se calcula sola: kilos perdidos entre kilos entregados. Incluye tu historial y lo que registras después de cada entrega.
+          La merma se calcula sola: kilos perdidos entre kilos entregados, con lo que registras después de cada entrega.
         </p>
 
         <section>

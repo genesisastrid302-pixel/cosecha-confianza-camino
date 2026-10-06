@@ -11,6 +11,7 @@ import {
   tipoCuenta,
   EMPTY_PROFILE,
   fileToDataUrl,
+  listarCuentas,
   profileCompleteness,
   registrarProductor,
   type IdTipo,
@@ -18,6 +19,7 @@ import {
   type ProducerProfile,
   type Zona,
 } from "@/lib/producer-store";
+import { contactoRepetido, guardarClave, iniciarSesion } from "@/lib/acceso";
 
 const zonas: Zona[] = ["Galeana", "Allende", "Ramos Arizpe"];
 const pagos: Pago[] = ["CLABE", "CoDi", "Efectivo"];
@@ -65,7 +67,7 @@ export function ProductorForm({ onBack }: { onBack: () => void }) {
   return (
     <form
       className="flex min-h-full flex-col px-5 pb-8 pt-5"
-      onSubmit={(e) => {
+      onSubmit={async (e) => {
         e.preventDefault();
         if (!/^\d{10}$/.test(p.telefono)) return setError("El teléfono debe tener 10 dígitos.");
         if (password.length < 8) return setError("La contraseña debe tener al menos 8 caracteres.");
@@ -77,11 +79,21 @@ export function ProductorForm({ onBack }: { onBack: () => void }) {
         if (faltan.length > 0) return setError(faltan[0]);
         if (p.photos.length < FOTOS_MIN) return setError(`Como productor nuevo, sube al menos ${FOTOS_MIN} fotos de tu campo.`);
         if (!p.socio) return setError("Para vender en Milpa necesitas aceptar el acuerdo de socio.");
+        const perfil = { ...p, name: p.name.trim(), correo: p.correo.trim().toLowerCase(), story: p.story.trim(), idEstado: "en_revision" as const };
+        const repetido = contactoRepetido(listarCuentas().map((c) => c.state.profile), perfil);
+        if (repetido) return setError(repetido);
         setError("");
         // Cuenta nueva: sin reseñas, el score se genera con el feedback de los consumidores.
         // Las cuentas que ya existían en este dispositivo se conservan.
-        registrarProductor({ ...p, name: p.name.trim(), story: p.story.trim(), idEstado: "en_revision" });
-        setDone(true);
+        try {
+          const id = registrarProductor(perfil);
+          if (!id) return;
+          await guardarClave("productor", id, password);
+          iniciarSesion("productor", id);
+          setDone(true);
+        } catch (e) {
+          setError(e instanceof Error ? e.message : "No se pudo crear la cuenta.");
+        }
       }}
     >
       <button type="button" onClick={onBack} className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary">

@@ -1,5 +1,6 @@
-import { useRef, type ReactNode } from "react";
-import { useRouterState } from "@tanstack/react-router";
+import { useEffect, useRef, type ReactNode } from "react";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
+import { useSesion, type Rol } from "@/lib/acceso";
 import { Wifi } from "lucide-react";
 import { IndicadorScroll } from "@/components/IndicadorScroll";
 
@@ -9,11 +10,21 @@ import { IndicadorScroll } from "@/components/IndicadorScroll";
  * - On tablet/desktop: shows a phone mock (notch + rounded edges) centered on a warm canvas.
  */
 const INMERSIVAS = ["/"];
+const ROLES: Rol[] = ["consumidor", "productor", "distribuidor"];
 
 export function MobileFrame({ children }: { children: ReactNode }) {
   const contenido = useRef<HTMLDivElement>(null);
   // Pantallas con imagen de fondo: el contenido sube hasta el borde y la barra de estado va encima, en claro
   const inmersiva = useRouterState({ select: (s) => INMERSIVAS.includes(s.location.pathname) });
+  // Las pantallas de cada rol son de la cuenta que inició sesión: sin sesión, primero se entra
+  const rol = useRouterState({ select: (s) => ROLES.find((r) => s.location.pathname.split("/")[1] === r) ?? null });
+  const sesion = useSesion(rol);
+  const navigate = useNavigate();
+  const sinSesion = !!rol && sesion.lista && !sesion.id;
+  useEffect(() => {
+    if (sinSesion && rol) navigate({ to: "/login", search: { rol }, replace: true });
+  }, [sinSesion, rol, navigate]);
+  const visible = !rol || (sesion.lista && !!sesion.id);
   return (
     <div className="min-h-[100dvh] w-full bg-paper md:flex md:items-center md:justify-center md:py-10">
       {/* Desktop ambient backdrop */}
@@ -42,7 +53,7 @@ export function MobileFrame({ children }: { children: ReactNode }) {
 
           {/* Content */}
           <div ref={contenido} className={`relative h-full w-full overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${inmersiva ? "" : "md:pt-10"}`}>
-            {children}
+            {visible ? children : null}
           </div>
           <IndicadorScroll contenedor={contenido} />
         </div>

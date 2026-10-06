@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { products } from "@/lib/data";
 import type { CartLine } from "@/lib/cart";
-import { nombreCorto, readConsumer } from "@/lib/accounts";
+import { nombreCorto, readConsumer, readDistributor } from "@/lib/accounts";
+import { sesionDe, suscribirSesion } from "@/lib/acceso";
+import { readProducer } from "@/lib/producer-store";
 
 // Estados acordados en docs/decisiones.md
 export type OrderStatus =
@@ -52,13 +54,22 @@ export type EntregaRegistro = { at: string; firmado: boolean; identidad: boolean
 /** Calificación del consumidor al recibir */
 export type Feedback = { estrellas: number; merma: boolean; nota: string; at: string };
 
+/** Cuenta real que hizo algo en el pedido: su id y su nombre corto */
+export type Persona = { id: string; nombre: string };
+
 export type Order = {
-  id: string; // MLP-0601
+  id: string; // MLP-0000, MLP-0001… en el orden en que se hicieron
+  /** Cuenta del consumidor que lo pidió; solo esa cuenta lo ve en sus Pedidos */
+  consumidorId?: string;
   cliente: string;
+  /** Productor que lo aceptó y empacó */
+  productor?: Persona;
+  /** Distribuidor que lo recolectó y entregó */
+  distribuidor?: Persona;
   createdAt: string; // ISO
   items: OrderItem[];
   /** Un lote por productor que participa en el pedido */
-  lots: Record<string, string>; // producerSlug -> LT-0601
+  lots: Record<string, string>; // producerSlug -> LT-0000 (mismo número que su pedido)
   entrega: Entrega;
   direccion: string;
   pago: MetodoPago;
@@ -112,8 +123,18 @@ export const STATUS_LABEL: Record<OrderStatus, string> = {
 };
 
 const KEY = "milpa-orders";
-const SEQ_KEY = "milpa-order-seq";
+/** Número que le toca al siguiente pedido (el primero es 0000) */
+const SEQ_KEY = "milpa-pedido-siguiente";
 const EVENT = "milpa-orders-change";
+
+// Borrón único: los pedidos de prueba de la numeración anterior (MLP-06xx) no estaban
+// ligados a ninguna cuenta. Se quitan una sola vez para que el seguimiento empiece en 0000.
+const VERSION_KEY = "milpa-datos-version";
+const VERSION = "2";
+if (typeof window !== "undefined" && window.localStorage.getItem(VERSION_KEY) !== VERSION) {
+  ["milpa-orders", "milpa-order-seq", "milpa-ruta", "milpa-avisos-vistos"].forEach((k) => window.localStorage.removeItem(k));
+  window.localStorage.setItem(VERSION_KEY, VERSION);
+}
 
 export function readOrders(): Order[] {
   if (typeof window === "undefined") return [];
@@ -130,11 +151,18 @@ function writeOrders(orders: Order[]) {
   window.dispatchEvent(new Event(EVENT));
 }
 
+/** Consecutivo de pedidos: 0000, 0001, 0002… Nunca se repite ni se salta. */
 function nextNumber() {
-  const current = Number(window.localStorage.getItem(SEQ_KEY) || "600");
-  const next = current + 1;
-  window.localStorage.setItem(SEQ_KEY, String(next));
-  return String(next).padStart(4, "0");
+  const guardado = Number(window.localStorage.getItem(SEQ_KEY));
+  // Si el contador se perdió, sigue después del pedido más alto que exista
+  const usados = readOrders().map((o) => Number(o.id.replace(/\D/g, "")) + 1);
+  const n = Math.max(Number.isFinite(guardado) ? guardado : 0, 0, ...usados);
+  window.localStorage.setItem(SEQ_KEY, String(n + 1));
+  return String(n).padStart(4, "0");
+}
+
+function codigoNuevo() {
+  return String(1000 + (window.crypto.getRandomValues(new Uint32Array(1))[0] % 9000));
 }
 
 export function createOrder(input: {
@@ -159,6 +187,7 @@ export function createOrder(input: {
   const now = new Date().toISOString();
   const order: Order = {
     id: `MLP-${n}`,
+    consumidorId: sesionDe("consumidor") ?? undefined,
     cliente: nombreCorto(readConsumer().nombre),
     createdAt: now,
     items,
@@ -172,29 +201,48 @@ export function createOrder(input: {
     total: subtotal + LOGISTICA + PLATAFORMA,
     status: "nuevo",
     history: [{ status: "nuevo", at: now }],
-    codigoEntrega: String(1000 + ((Number(n) * 7919) % 9000)),
+    codigoEntrega: codigoNuevo(),
   };
   writeOrders([order, ...readOrders()]);
   return order;
 }
 
 export function setOrderStatus(id: string, status: OrderStatus) {
-  const now = new Date().toISOString();
-  writeOrders(
-    readOrders().map((o) => (o.id === id ? { ...o, status, history: [...o.history, { status, at: now }] } : o)),
-  );
+  updateOrder(id, { status });
 }
 
-/** Actualiza campos de un pedido; si trae status, lo agrega al historial */
+const PASOS_PRODUCTOR: OrderStatus[] = ["aceptado", "rechazado", "empacado"];
+const PASOS_DISTRIBUIDOR: OrderStatus[] = ["en_recoleccion", "en_ruta", "entregado", "con_problema"];
+
+/** Quién dio el paso: la cuenta de productor o de distribuidor con sesión iniciada */
+function firma(status: OrderStatus): Pick<Order, "productor" | "distribuidor"> {
+  if (PASOS_PRODUCTOR.includes(status)) {
+    const id = sesionDe("productor");
+    return id ? { productor: { id, nombre: nombreCorto(readProducer().profile.name) } } : {};
+  }
+  if (PASOS_DISTRIBUIDOR.includes(status)) {
+    const id = sesionDe("distribuidor");
+    return id ? { distribuidor: { id, nombre: nombreCorto(readDistributor().nombre) } } : {};
+  }
+  return {};
+}
+
+/** Actualiza campos de un pedido; si trae status, lo agrega al historial y anota quién dio el paso */
 export function updateOrder(id: string, patch: Partial<Omit<Order, "id" | "history">>) {
   const now = new Date().toISOString();
   writeOrders(
     readOrders().map((o) => {
       if (o.id !== id) return o;
-      const history = patch.status && patch.status !== o.status ? [...o.history, { status: patch.status, at: now }] : o.history;
-      return { ...o, ...patch, history };
+      const cambia = patch.status && patch.status !== o.status;
+      const history = cambia ? [...o.history, { status: patch.status!, at: now }] : o.history;
+      return { ...o, ...(cambia ? firma(patch.status!) : {}), ...patch, history };
     }),
   );
+}
+
+/** Nombre de quien reparte el pedido; mientras nadie lo recolecta, "el distribuidor" */
+export function repartidor(o: Order | undefined, inicio = false) {
+  return o?.distribuidor?.nombre.split(" ")[0] || (inicio ? "El distribuidor" : "el distribuidor");
 }
 
 /** El consumidor ve su código de entrega mientras el distribuidor tiene el pedido */
@@ -222,35 +270,6 @@ export function pesoKg(i: OrderItem) {
 
 export function pesoPedido(o: Order) {
   return o.items.reduce((n, i) => n + pesoKg(i), 0);
-}
-
-/** Pedido de ejemplo ya empacado, para probar la ruta del distribuidor sin pasar por los otros roles */
-export function crearPedidoEjemplo() {
-  const o = createOrder({
-    lines: [
-      { id: "jitomate", quantity: 2 },
-      { id: "cilantro", quantity: 1 },
-    ],
-    entrega: "domicilio",
-    direccion: "Calle Hidalgo 214, Col. Roma, Monterrey",
-    pago: "Tarjeta",
-  });
-  const now = new Date().toISOString();
-  updateOrder(o.id, { status: "aceptado" });
-  updateOrder(o.id, {
-    status: "empacado",
-    traslado: "distribuidor_recoge",
-    qrGeneradoEn: now,
-    empaque: {
-      temperatura: 6,
-      tipo: "Caja",
-      refrigeracion: true,
-      condiciones: "Sombra y ventilación; cámara fría hasta la recolección.",
-      hora: "07:30",
-      registradoEn: now,
-    },
-  });
-  return o.id;
 }
 
 export function getOrder(id: string) {
@@ -322,6 +341,20 @@ export function useOrders() {
     return subscribeOrders(update);
   }, []);
   return orders;
+}
+
+/** Pedidos de la cuenta de consumidor con sesión iniciada */
+export function misPedidos(orders: Order[] = readOrders()) {
+  const id = sesionDe("consumidor");
+  return id ? orders.filter((o) => o.consumidorId === id) : [];
+}
+
+/** Lo que ve el consumidor: solo sus pedidos, nunca los de otra cuenta del mismo navegador */
+export function useMisPedidos() {
+  const orders = useOrders();
+  const [, setTick] = useState(0);
+  useEffect(() => suscribirSesion(() => setTick((t) => t + 1)), []);
+  return misPedidos(orders);
 }
 
 /** Porcentaje del subtotal que llega a productores (el resto es logística y plataforma) */

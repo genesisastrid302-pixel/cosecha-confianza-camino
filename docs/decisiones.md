@@ -29,9 +29,9 @@ El productor elige al empacar: "Yo lo llevo al local del distribuidor" o "El dis
 
 ## QR
 
-Un QR por **pedido** (`MLP-0518`). Dentro muestra cada **lote** que trae la canasta, uno por productor (`LT-0518`). La página pública `/lote/:id` es solo de consulta: trazabilidad y score, sin calificar.
+Un QR por **pedido** (`MLP-0000`). Dentro muestra cada **lote** que trae la canasta, uno por productor (`LT-0000`). La página pública `/lote/:id` es solo de consulta: trazabilidad y score, sin calificar.
 
-La página pública se titula **Trazabilidad del pedido** y muestra: pedido y lotes, quién cultivó cada lote (con su score de confianza y prácticas), cadena de frío (temperatura al empacar y al recolectar, tipo de empaque), el recorrido con sus horas y las incidencias (problema al recolectar, merma). No muestra quién compró ni la dirección de entrega. Se abre desde el QR del productor, la Trazabilidad del distribuidor y los Pedidos del consumidor. También acepta el número de lote (`/lote/LT-0601`). En el prototipo el QR es un dibujo, no se puede escanear con la cámara; el acceso es el enlace.
+La página pública se titula **Trazabilidad del pedido** y muestra: pedido y lotes, quién cultivó cada lote (con su score de confianza y prácticas), cadena de frío (temperatura al empacar y al recolectar, tipo de empaque), el recorrido con sus horas y las incidencias (problema al recolectar, merma). No muestra quién compró ni la dirección de entrega. Se abre desde el QR del productor, la Trazabilidad del distribuidor y los Pedidos del consumidor. También acepta el número de lote (`/lote/LT-0000`). En el prototipo el QR es un dibujo, no se puede escanear con la cámara; el acceso es el enlace.
 
 ## Notificaciones
 
@@ -91,17 +91,31 @@ Validación por sistema en 3 capas, como en el modelo de negocio (`src/lib/score
 
 ## Cuentas
 
-Los tres roles registran nombre, correo, teléfono y contraseña. La contraseña no se guarda en el prototipo.
+Las cuentas son de personas reales y se guardan en el navegador (`src/lib/accounts.ts`, `src/lib/producer-store.ts`). Puede haber varias por rol; registrarse crea una cuenta nueva sin borrar las demás y no se puede repetir teléfono ni correo dentro del mismo rol.
 
-Productores: puede haber varias cuentas en el mismo navegador (`milpa-productores`). Registrarse crea una cuenta nueva sin borrar las demás. El inicio de sesión identifica la cuenta por correo o teléfono, o eligiéndola de la lista "Cuentas en este dispositivo"; la contraseña no se verifica en el prototipo. La cuenta de ejemplo (Ezequiel Martínez, 24 reseñas, perfil al 100 %) siempre está disponible.
+- **Registro**: nombre, correo, teléfono y contraseña (mínimo 8 caracteres). Al terminar se entra con esa cuenta.
+- **Inicio de sesión**: teléfono o correo + contraseña, y se verifica. La lista "Cuentas en este dispositivo" solo llena el dato de la cuenta; la contraseña se pide igual.
+- **Contraseña**: nunca se guarda el texto, solo un derivado (PBKDF2-SHA-256 con sal) para comprobarla (`src/lib/acceso.ts`). Protege entre cuentas del mismo navegador; no sustituye a un servidor. No hay "olvidé mi contraseña" hasta que exista backend.
+- **Sesión**: una por rol. Sin sesión, las pantallas de ese rol mandan a iniciar sesión. "Cerrar sesión" sale de la cuenta sin borrarla.
+- Las cuentas creadas antes de que hubiera contraseñas adoptan la que se escriba la primera vez que entran.
+- La única cuenta de ejemplo es la del productor Ezequiel Martínez (24 reseñas, perfil al 100 %): entra sin contraseña y está marcada "Ejemplo". No hay consumidor ni distribuidor de ejemplo.
 
 El productor además sube una **identificación oficial** (INE, pasaporte o licencia) para verificar que es la persona correcta. En el prototipo solo se guarda el tipo y el estado ("en revisión"); la foto no se almacena en el navegador. Con backend, la verificación la hace Milpa antes de activar los pagos.
 
 Para transferencias se acepta CLABE (18 dígitos) o tarjeta de débito (16), con banco y titular.
 
-## Demo
+## Pedidos y lotes reales
 
-No hay backend. El estado (carrito, pedidos, productor) se guarda en el navegador y se comparte entre roles: lo que hace el consumidor aparece al entrar como productor o distribuidor en el mismo navegador.
+- Los pedidos se numeran en orden desde `MLP-0000` (`MLP-0001`, `MLP-0002`…) y nunca se repiten. Cada lote lleva el número de su pedido: `LT-0000`, o `LT-0000-A` / `LT-0000-B` si la canasta trae lotes de dos productores.
+- Cada pedido guarda la cuenta del consumidor que lo hizo, el productor que lo aceptó y empacó, y el distribuidor que lo recolectó y entregó (`src/lib/orders.ts`). Los nombres que ven los demás salen de ahí.
+- El consumidor solo ve sus propios pedidos y avisos. El código de entrega es aleatorio por pedido.
+- La reseña del consumidor cuenta para la cuenta del productor que atendió ese pedido.
+- No hay pedidos, lotes ni historiales de ejemplo: las pantallas vacías lo dicen y los indicadores (entregas a tiempo, merma, kg vendidos) se calculan solo con pedidos reales; sin datos muestran "—".
+- Pendiente: todas las cuentas de productor ven todos los pedidos, y el Mercado muestra los cultivos de Ezequiel y Rosa. Falta que cada productor publique lo suyo y reciba solo sus pedidos.
+
+## Datos en el navegador
+
+No hay backend. Cuentas, sesión, carrito y pedidos se guardan en el navegador y se comparten entre roles: lo que hace el consumidor aparece al entrar como productor o distribuidor en el mismo navegador. En otro dispositivo no existen.
 
 ## Navegación
 

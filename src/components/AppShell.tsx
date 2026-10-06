@@ -58,7 +58,7 @@ export function AppShell({
   return (
     <div className="flex min-h-full flex-col">
       {(title || eyebrow) && (
-        <header className="sticky top-0 z-20 bg-background/85 px-5 pb-3 pt-4 backdrop-blur-xl">
+        <header className="sticky top-0 z-20 bg-background px-5 pb-3 pt-4">
           {back && <div className="mb-3">{back}</div>}
           <div className="flex items-start justify-between gap-3">
             <div>

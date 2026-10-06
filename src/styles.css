@@ -221,3 +221,36 @@
     background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
   }
 }
+
+/* Fila que se desliza hacia los lados (filtros, fotos, tarjetas).
+   Su barra es igual a la línea de scroll vertical de la app (IndicadorScroll):
+   3px, mismo riel y mismo color, sin flechas. */
+.deslizar-x {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 0.625rem;
+}
+.deslizar-x::-webkit-scrollbar {
+  height: 3px;
+}
+.deslizar-x::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+}
+.deslizar-x::-webkit-scrollbar-track {
+  /* En filas que llegan hasta la orilla, el riel respeta el margen del contenido */
+  margin-inline: var(--riel-margen, 0px);
+  border-radius: 9999px;
+  background: color-mix(in oklch, var(--ink) 5%, transparent);
+}
+.deslizar-x::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background: color-mix(in oklch, var(--ink) 35%, transparent);
+}
+/* Navegadores sin barra personalizable (Firefox) */
+@supports not selector(::-webkit-scrollbar) {
+  .deslizar-x {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklch, var(--ink) 35%, transparent) color-mix(in oklch, var(--ink) 5%, transparent);
+  }
+}

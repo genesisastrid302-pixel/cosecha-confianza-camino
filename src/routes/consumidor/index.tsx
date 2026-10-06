@@ -49,7 +49,7 @@ function ConsumidorHome() {
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar cultivo" className="flex-1 bg-transparent text-sm placeholder:text-muted-foreground/70 focus:outline-none" />
         </div>
 
-        <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1">
+        <div className="deslizar-x -mx-5 flex gap-2 px-5 [--riel-margen:1.25rem]">
           {filters.map((f) => (
             <Button
               key={f}

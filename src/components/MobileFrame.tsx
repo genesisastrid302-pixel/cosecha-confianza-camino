@@ -42,7 +42,7 @@ export function MobileFrame({ children }: { children: ReactNode }) {
           <div className="hidden md:block pointer-events-none absolute left-1/2 top-2 z-50 h-7 w-32 -translate-x-1/2 rounded-full bg-ink" />
 
           {/* Status bar (desktop only) */}
-          <div className={`hidden md:flex pointer-events-none absolute inset-x-0 top-0 z-40 h-10 items-center justify-between px-7 text-[11px] font-medium ${inmersiva ? "text-paper" : "text-foreground"}`}>
+          <div className={`hidden md:flex pointer-events-none absolute inset-x-0 top-0 z-40 h-10 items-center justify-between px-7 text-[11px] font-medium ${inmersiva ? "text-paper" : "bg-background text-foreground"}`}>
             <span>9:41</span>
             {/* Mismo tamaño que la hora: el texto hereda los 11px y el ícono ocupa su alto de letra */}
             <span className="flex items-center gap-1.5">
@@ -52,7 +52,10 @@ export function MobileFrame({ children }: { children: ReactNode }) {
           </div>
 
           {/* Content */}
-          <div ref={contenido} className={`relative h-full w-full overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${inmersiva ? "" : "md:pt-10"}`}>
+          <div ref={contenido} className={`relative h-full w-full overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
+              // El contenido empieza debajo de la barra de estado: al deslizar nada se asoma detrás de la hora
+              inmersiva ? "" : "md:mt-10 md:h-[calc(100%-2.5rem)]"
+            }`}>
             {visible ? children : null}
           </div>
           <IndicadorScroll contenedor={contenido} />

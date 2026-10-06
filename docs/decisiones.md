@@ -129,6 +129,10 @@ No hay backend. Cuentas, sesión, carrito y pedidos se guardan en el navegador y
 
 El botón de regresar va siempre arriba a la izquierda, sobre el título (`back` en `AppShell`). La X de cerrar un flujo (p. ej. confirmar la llegada) es otra cosa y se queda a la derecha.
 
+El encabezado de cada pantalla es sólido y el contenido empieza debajo de la barra de estado del marco: al deslizar, nada se asoma detrás de la hora ni del título.
+
+Las filas que se deslizan hacia los lados (filtros, fotos, productos relacionados) usan la clase `deslizar-x`: su barra mide lo mismo que la línea vertical (3 px, mismo riel y color, sin flechas).
+
 Toda pantalla con más contenido del que cabe muestra una línea de scroll vertical a la derecha (`IndicadorScroll` en el marco de la app); termina arriba de la barra de pestañas.
 
 ## Carga

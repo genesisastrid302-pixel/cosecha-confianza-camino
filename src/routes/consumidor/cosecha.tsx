@@ -133,7 +133,7 @@ function CosechaCompartida() {
 
         <section className="rounded-2xl border border-border bg-card p-4">
           <div className="eyebrow">Lo que se sembrará para ti</div>
-          <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+          <div className="deslizar-x mt-3 flex gap-2">
             {products.map((p) => (
               <div key={p.id} className="w-20 shrink-0">
                 <img src={p.photo} alt={p.name} className="h-20 w-20 rounded-xl object-cover" />

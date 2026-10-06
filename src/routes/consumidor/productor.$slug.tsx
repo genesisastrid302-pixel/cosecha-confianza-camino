@@ -65,7 +65,7 @@ function ProducerProfile() {
 
         <section>
           <div className="eyebrow">Desde el campo</div>
-          <div className="-mx-5 mt-2 flex gap-2 overflow-x-auto px-5">
+          <div className="deslizar-x -mx-5 mt-2 flex gap-2 px-5 [--riel-margen:1.25rem]">
             {d.gallery.map((g, i) => <img key={i} src={g} alt="" className="h-32 w-40 shrink-0 rounded-xl object-cover" />)}
           </div>
         </section>

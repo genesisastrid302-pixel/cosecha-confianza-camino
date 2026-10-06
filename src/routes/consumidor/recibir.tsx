@@ -320,7 +320,7 @@ function Recibir() {
                   e.target.value = "";
                 }}
               />
-              <div className="mt-3 flex gap-2 overflow-x-auto">
+              <div className="deslizar-x mt-3 flex gap-2">
                 <button
                   onClick={() => fileInput.current?.click()}
                   className="flex h-24 w-24 shrink-0 flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed border-border bg-card text-[10px] text-muted-foreground"

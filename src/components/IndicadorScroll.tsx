@@ -20,7 +20,8 @@ export function IndicadorScroll({ contenedor }: { contenedor: RefObject<HTMLElem
       const abajo = nav ? nav.getBoundingClientRect().height : 0;
       // Mismo arriba que el riel: top-12 en el marco de escritorio (barra de estado), top-2 en el teléfono
       const arriba = window.matchMedia("(min-width: 768px)").matches ? 48 : 8;
-      const riel = clientHeight - abajo - 8 - arriba;
+      // El riel se mide en el marco, no en el contenido (que empieza debajo de la barra de estado)
+      const riel = (el.parentElement?.clientHeight ?? clientHeight) - abajo - 8 - arriba;
       const alto = Math.max(32, (clientHeight / scrollHeight) * riel);
       const top = (scrollTop / (scrollHeight - clientHeight)) * (riel - alto);
       setMedida({ top, alto, abajo });

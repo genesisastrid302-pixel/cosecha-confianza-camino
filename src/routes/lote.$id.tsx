@@ -26,7 +26,7 @@ function Lote() {
 
   return (
     <div className="flex min-h-full flex-col">
-      <header className="sticky top-0 z-20 bg-background/85 px-5 pb-3 pt-4 backdrop-blur-xl">
+      <header className="sticky top-0 z-20 bg-background px-5 pb-3 pt-4">
         <button
           type="button"
           onClick={() => router.history.back()}

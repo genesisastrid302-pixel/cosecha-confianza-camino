@@ -21,7 +21,7 @@ export function ProductosRelacionados({ id }: { id: string }) {
       <h2 id={`${clip}-titulo`} className="serif text-2xl">
         Productos relacionados
       </h2>
-      <ul className="-mx-5 mt-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2 [&::-webkit-scrollbar]:hidden">
+      <ul className="deslizar-x -mx-5 mt-4 flex snap-x snap-mandatory gap-4 px-5 [--riel-margen:1.25rem]">
         {lista.map((p) => (
           <li key={p.id} className="w-28 shrink-0 snap-start">
             <Link to="/consumidor/producto/$id" params={{ id: p.id }} className="group block text-center">

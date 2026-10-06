@@ -81,7 +81,7 @@ function Catalogo() {
           </button>
         ))}
 
-        <div className="flex gap-2 overflow-x-auto text-xs">
+        <div className="deslizar-x flex gap-2 text-xs">
           {(["todos", "disponible", "proximamente", "agotado"] as const).map((t) => (
             <button
               key={t}

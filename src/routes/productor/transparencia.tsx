@@ -151,7 +151,7 @@ function Transparencia() {
           </DialogHeader>
 
           {pending.length > 0 && (
-            <div className="flex gap-2 overflow-x-auto py-1">
+            <div className="deslizar-x flex gap-2 pt-1">
               {pending.map((p, i) => (
                 <div key={i} className="h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-muted">
                   {p.kind === "Audio" ? (

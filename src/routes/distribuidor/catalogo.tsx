@@ -58,7 +58,7 @@ function Catalogo() {
   return (
     <AppShell tabs={distribuidorTabs} tone="miel" eyebrow="Todos los productores" title="Catálogo">
       <div className="space-y-6 px-5">
-        <div className="flex gap-2 overflow-x-auto text-xs [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="deslizar-x flex gap-2 text-xs">
           {FILTROS.map((f) => (
             <button
               key={f}

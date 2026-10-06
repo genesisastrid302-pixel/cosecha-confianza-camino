@@ -13,6 +13,8 @@ export type ConsumerProfile = {
   correo: string;
   telefono: string;
   municipio: string;
+  /** Calle, número y colonia a donde le llevan su canasta ("" si aún no la registra) */
+  direccion: string;
   entrega: "domicilio" | "pickup";
   /** Métodos de pago que usa; puede tener varios. En cada pedido elige con cuál paga. */
   pagos: MetodoPago[];
@@ -55,9 +57,18 @@ export const EMPTY_CONSUMER: ConsumerProfile = {
   correo: "",
   telefono: "",
   municipio: "",
+  direccion: "",
   entrega: "domicilio",
   pagos: [],
 };
+
+/** Mínimo para que un repartidor pueda llegar: calle, número y colonia */
+export const direccionValida = (direccion: string) => direccion.trim().length >= 8;
+
+/** "Calle Hidalgo 214, Col. Roma, Monterrey" */
+export function direccionCompleta(c: Pick<ConsumerProfile, "direccion" | "municipio">) {
+  return [c.direccion.trim(), c.municipio].filter(Boolean).join(", ");
+}
 
 export const EMPTY_DISTRIBUTOR: DistributorProfile = {
   nombre: "",
@@ -179,6 +190,9 @@ function useActiva<T extends { correo: string; telefono: string }>(a: Almacen<T>
 /** Crea la cuenta y devuelve su id (la sesión la inicia quien registra, ya con la contraseña guardada) */
 export const registrarConsumidor = (p: ConsumerProfile) => registrar(CONSUMIDORES, p);
 export const listarConsumidores = () => listar(CONSUMIDORES);
+/** Las demás cuentas del rol (para no repetir teléfono ni correo al editar el perfil) */
+export const otrosConsumidores = () => listarConsumidores().filter((c) => c.id !== sesionDe("consumidor")).map((c) => c.perfil);
+export const otrosDistribuidores = () => listarDistribuidores().filter((c) => c.id !== sesionDe("distribuidor")).map((c) => c.perfil);
 export const buscarConsumidor = (identificador: string) => listarConsumidores().find((c) => coincide(c.perfil, identificador));
 /** Perfil del consumidor con sesión iniciada (vacío si no hay sesión) */
 export const readConsumer = () => activa(CONSUMIDORES);

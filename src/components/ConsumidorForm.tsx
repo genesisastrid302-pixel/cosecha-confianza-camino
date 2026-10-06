@@ -1,7 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Check, ChevronLeft } from "lucide-react";
-import { EMPTY_CONSUMER, METODOS_PAGO, MUNICIPIOS, listarConsumidores, registrarConsumidor, validarAcceso, type ConsumerProfile } from "@/lib/accounts";
+import { EMPTY_CONSUMER, METODOS_PAGO, MUNICIPIOS, direccionValida, listarConsumidores, registrarConsumidor, validarAcceso, type ConsumerProfile } from "@/lib/accounts";
 import { contactoRepetido, guardarClave, iniciarSesion } from "@/lib/acceso";
 
 export function ConsumidorForm({ onBack }: { onBack: () => void }) {
@@ -21,7 +21,7 @@ export function ConsumidorForm({ onBack }: { onBack: () => void }) {
         className="flex min-h-full flex-col px-5 pb-8 pt-5"
         onSubmit={async (e) => {
           e.preventDefault();
-          const perfil = { ...p, nombre: p.nombre.trim(), correo: p.correo.trim().toLowerCase() };
+          const perfil = { ...p, nombre: p.nombre.trim(), correo: p.correo.trim().toLowerCase(), direccion: p.direccion.trim() };
           const err = validarAcceso(p.telefono, password, password2) || contactoRepetido(listarConsumidores().map((c) => c.perfil), perfil);
           if (err) return setError(err);
           setGuardando(true);
@@ -72,6 +72,7 @@ export function ConsumidorForm({ onBack }: { onBack: () => void }) {
       className="flex min-h-full flex-col px-5 pb-8 pt-5"
       onSubmit={(e) => {
         e.preventDefault();
+        if (p.entrega === "domicilio" && !direccionValida(p.direccion)) return setError("Escribe la dirección a donde te llevamos tu canasta: calle, número y colonia.");
         if (p.pagos.length === 0) return setError("Elige al menos un método de pago.");
         setError("");
         setPaso(3);
@@ -99,6 +100,24 @@ export function ConsumidorForm({ onBack }: { onBack: () => void }) {
             <button type="button" className={pill(p.entrega === "domicilio")} onClick={() => setP({ ...p, entrega: "domicilio" })}>A domicilio</button>
             <button type="button" className={pill(p.entrega === "pickup")} onClick={() => setP({ ...p, entrega: "pickup" })}>Recoger</button>
           </div>
+          {p.entrega === "domicilio" ? (
+            <label className="mt-3 block">
+              <span className="text-xs text-muted-foreground">Dirección de entrega</span>
+              <input
+                maxLength={140}
+                autoComplete="street-address"
+                value={p.direccion}
+                onChange={(e) => { setP({ ...p, direccion: e.target.value }); setError(""); }}
+                className={input}
+                placeholder="Calle, número y colonia"
+              />
+              <span className="mt-1.5 block text-[11px] text-muted-foreground">
+                {p.municipio ? `En ${p.municipio}. ` : ""}Puedes cambiarla en cada pedido o desde tu perfil.
+              </span>
+            </label>
+          ) : (
+            <p className="mt-1.5 text-[11px] text-muted-foreground">Recoges en un punto Milpa. Si después quieres entrega a domicilio, agregas tu dirección al pedir.</p>
+          )}
         </div>
         <div>
           <span className="text-xs text-muted-foreground">Métodos de pago</span>

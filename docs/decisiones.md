@@ -79,6 +79,13 @@ Validación por sistema en 3 capas, como en el modelo de negocio (`src/lib/score
 - Colores: verde ≥ 8, amarillo ≥ 5, rojo < 5. Siempre se muestra como `9.4/10`. El mercado muestra primero a los productores con mejor score.
 - Solo califica quien compró, y solo dentro de la app.
 
+## Dirección de entrega
+
+- El consumidor registra su dirección (calle, número y colonia) al elegir "A domicilio" en el registro; el municipio va aparte. Si elige "Recoger" no se le pide.
+- Al confirmar un pedido a domicilio aparece esa dirección y puede cambiarla ahí mismo. Si la cambia, decide si también queda guardada en su perfil o si es solo para ese pedido. Sin dirección no se puede confirmar un pedido a domicilio.
+- No hay direcciones de ejemplo. Los puntos para recoger son los de Milpa.
+- En el mapa del distribuidor, una dirección escrita por el consumidor se ubica en el centro de su municipio (aproximado); el botón de navegación manda la dirección completa a Google Maps.
+
 ## Pagos
 
 - El consumidor paga producto + logística ($18) + plataforma ($10). El pago se reparte en automático (Conekta, split payment).
@@ -97,6 +104,7 @@ Las cuentas son de personas reales y se guardan en el navegador (`src/lib/accoun
 - **Inicio de sesión**: teléfono o correo + contraseña, y se verifica. La lista "Cuentas en este dispositivo" solo llena el dato de la cuenta; la contraseña se pide igual.
 - **Contraseña**: nunca se guarda el texto, solo un derivado (PBKDF2-SHA-256 con sal) para comprobarla (`src/lib/acceso.ts`). Protege entre cuentas del mismo navegador; no sustituye a un servidor. No hay "olvidé mi contraseña" hasta que exista backend.
 - **Sesión**: una por rol. Sin sesión, las pantallas de ese rol mandan a iniciar sesión. "Cerrar sesión" sale de la cuenta sin borrarla.
+- **Perfil editable**: todo lo que se registró al crear la cuenta se puede cambiar desde Perfil en los tres roles (cada fila se abre para editar): datos personales, contraseña (pide la actual), y además entrega y métodos de pago (consumidor); identificación, historia, fotos, cuenta de cobro y ubicación (productor); transporte, zonas y cuenta de cobro (distribuidor). No se puede dejar un teléfono o correo que ya use otra cuenta del mismo rol. Al cambiar la identificación vuelve a "en revisión".
 - Las cuentas creadas antes de que hubiera contraseñas adoptan la que se escriba la primera vez que entran.
 - La única cuenta de ejemplo es la del productor Ezequiel Martínez (24 reseñas, perfil al 100 %): entra sin contraseña y está marcada "Ejemplo". No hay consumidor ni distribuidor de ejemplo.
 

@@ -1,19 +1,26 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { ChevronDown, LogOut, Mail, Phone, Landmark, Sprout } from "lucide-react";
+import { Camera, ChevronDown, IdCard, Mail, Phone, Landmark, Sprout, X } from "lucide-react";
 import { CerrarSesion } from "@/components/CerrarSesion";
 import { AppShell } from "@/components/AppShell";
 import { productorTabs } from "@/components/tabs";
-import { CobroFields } from "@/components/ProductorForm";
+import { CobroFields, IdFoto } from "@/components/ProductorForm";
+import { CambiarClave, FilaEditable as Fila, botonGuardar, campo } from "@/components/FilaEditable";
+import { contactoRepetido, sesionDe } from "@/lib/acceso";
 import { NuevoStamp } from "@/components/NuevoStamp";
 import {
+  FOTOS_MAX,
+  FOTOS_MIN,
   cobroCompleto,
   cobroResumen,
   esNuevo,
+  fileToDataUrl,
+  listarCuentas,
   RESENAS_PARA_SCORE,
   trustScore,
   updateProducer,
   useProducer,
+  type IdTipo,
   type ProducerProfile,
   type Zona,
 } from "@/lib/producer-store";
@@ -25,7 +32,8 @@ export const Route = createFileRoute("/productor/perfil")({
   component: Perfil,
 });
 
-type Seccion = "personal" | "cobro" | "ubicacion" | null;
+type Seccion = "personal" | "identificacion" | "historia" | "fotos" | "cobro" | "ubicacion" | "clave" | null;
+const idTipos: IdTipo[] = ["INE", "Pasaporte", "Licencia"];
 const zonas: Zona[] = ["Galeana", "Allende", "Ramos Arizpe"];
 
 function Perfil() {
@@ -84,12 +92,33 @@ function Perfil() {
             >
               <EditarPersonal p={p} onDone={() => setAbierta(null)} />
             </Fila>
-            <div className="flex items-center justify-between gap-3 px-4 py-3.5 text-sm">
-              <span>Identificación oficial</span>
-              <span className={`text-xs ${p.idTipo ? "text-muted-foreground" : "text-terracota"}`}>
-                {p.idTipo ? `${p.idTipo} · ${p.idEstado === "verificada" ? "Verificada" : "En revisión"}` : "Sin subir"}
-              </span>
-            </div>
+            <Fila
+              label="Identificación oficial"
+              detail={p.idTipo ? `${p.idTipo} · ${p.idEstado === "verificada" ? "Verificada" : "En revisión"}` : "Sin subir"}
+              warn={!p.idTipo}
+              open={abierta === "identificacion"}
+              onClick={() => toggle("identificacion")}
+            >
+              <EditarIdentificacion p={p} onDone={() => setAbierta(null)} />
+            </Fila>
+            <Fila
+              label="Historia de tu rancho"
+              detail={p.story.trim() || "Sin escribir"}
+              warn={p.story.trim().length < 40}
+              open={abierta === "historia"}
+              onClick={() => toggle("historia")}
+            >
+              <EditarHistoria p={p} onDone={() => setAbierta(null)} />
+            </Fila>
+            <Fila
+              label="Fotos del campo"
+              detail={`${p.photos.length} ${p.photos.length === 1 ? "foto" : "fotos"}`}
+              warn={p.photos.length < FOTOS_MIN}
+              open={abierta === "fotos"}
+              onClick={() => toggle("fotos")}
+            >
+              <EditarFotos p={p} />
+            </Fila>
             <Fila
               label="Cuenta para recibir pagos"
               detail={cobroResumen(p)}
@@ -122,6 +151,9 @@ function Perfil() {
                 ))}
               </div>
             </Fila>
+            <Fila label="Contraseña" detail="Cambiar" open={abierta === "clave"} onClick={() => toggle("clave")}>
+              <CambiarClave rol="productor" onDone={() => setAbierta(null)} />
+            </Fila>
           </div>
         </section>
 
@@ -151,7 +183,11 @@ function EditarPersonal({ p, onDone }: { p: ProducerProfile; onDone: () => void 
         e.preventDefault();
         if (!/\S+@\S+\.\S+/.test(d.correo)) return setError("Revisa el correo.");
         if (!/^\d{10}$/.test(d.telefono)) return setError("El teléfono debe tener 10 dígitos.");
-        updateProducer((s) => ({ ...s, profile: { ...s.profile, ...d, name: d.name.trim() } }));
+        const correo = d.correo.trim().toLowerCase();
+        const otras = listarCuentas().filter((c) => c.id !== sesionDe("productor")).map((c) => c.state.profile);
+        const repetido = contactoRepetido(otras, { correo, telefono: d.telefono });
+        if (repetido) return setError(repetido.replace(" Inicia sesión.", ""));
+        updateProducer((s) => ({ ...s, profile: { ...s.profile, ...d, correo, name: d.name.trim() } }));
         onDone();
       }}
     >
@@ -194,31 +230,104 @@ function EditarCobro({ p, onDone }: { p: ProducerProfile; onDone: () => void }) 
   );
 }
 
-function Fila({
-  label,
-  detail,
-  warn,
-  open,
-  onClick,
-  children,
-}: {
-  label: string;
-  detail: string;
-  warn?: boolean;
-  open: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
+function EditarIdentificacion({ p, onDone }: { p: ProducerProfile; onDone: () => void }) {
+  const [tipo, setTipo] = useState<IdTipo | "">(p.idTipo);
+  // Las fotos solo viven en esta pantalla: se guarda el tipo y que quedó en revisión
+  const [frente, setFrente] = useState("");
+  const [reverso, setReverso] = useState("");
+  const [error, setError] = useState("");
   return (
-    <div>
-      <button type="button" onClick={onClick} className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left text-sm">
-        <span>{label}</span>
-        <span className={`flex min-w-0 items-center gap-2 text-xs ${warn ? "text-terracota" : "text-muted-foreground"}`}>
-          <span className="truncate">{detail}</span>
-          <ChevronDown className={`h-4 w-4 shrink-0 transition ${open ? "rotate-180" : ""}`} />
-        </span>
+    <div className="space-y-2.5">
+      <div className="grid grid-cols-3 gap-2">
+        {idTipos.map((t) => (
+          <button
+            type="button"
+            key={t}
+            aria-pressed={tipo === t}
+            onClick={() => { setTipo(t); setError(""); }}
+            className={`rounded-xl border py-2.5 text-xs ${tipo === t ? "border-foreground bg-foreground text-background" : "border-border bg-card"}`}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+      {tipo && (
+        <div className={`grid gap-2 ${tipo === "Pasaporte" ? "grid-cols-1" : "grid-cols-2"}`}>
+          <IdFoto label={tipo === "Pasaporte" ? "Página con tu foto" : "Frente"} src={frente} onChange={setFrente} />
+          {tipo !== "Pasaporte" && <IdFoto label="Reverso" src={reverso} onChange={setReverso} />}
+        </div>
+      )}
+      <p className="text-[11px] text-muted-foreground">Al cambiarla vuelve a quedar en revisión. Las fotos no se guardan en este dispositivo.</p>
+      {error && <p className="text-xs text-destructive">{error}</p>}
+      <button
+        type="button"
+        onClick={() => {
+          if (!tipo) return setError("Elige qué identificación vas a subir.");
+          if (!frente) return setError("Sube la foto del frente de tu identificación.");
+          if (tipo !== "Pasaporte" && !reverso) return setError("Sube la foto del reverso de tu identificación.");
+          updateProducer((s) => ({ ...s, profile: { ...s.profile, idTipo: tipo, idEstado: "en_revision" } }));
+          onDone();
+        }}
+        className={botonGuardar}
+      >
+        <IdCard className="h-4 w-4" /> Enviar a revisión
       </button>
-      {open && <div className="border-t border-border bg-secondary/40 px-4 py-4">{children}</div>}
+    </div>
+  );
+}
+
+function EditarHistoria({ p, onDone }: { p: ProducerProfile; onDone: () => void }) {
+  const [story, setStory] = useState(p.story);
+  return (
+    <div className="space-y-2.5">
+      <textarea rows={5} maxLength={800} value={story} onChange={(e) => setStory(e.target.value)} className={campo} placeholder="¿Desde cuándo siembras? ¿Qué cultivas y cómo?" />
+      <p className={`text-[11px] ${story.trim().length >= 40 ? "text-muted-foreground" : "text-terracota"}`}>
+        {story.trim().length >= 40 ? "Es lo que leen las familias en tu perfil." : `Cuenta un poco más: llevas ${story.trim().length} de 40 caracteres.`}
+      </p>
+      <button
+        type="button"
+        onClick={() => {
+          updateProducer((s) => ({ ...s, profile: { ...s.profile, story: story.trim() } }));
+          onDone();
+        }}
+        className={botonGuardar}
+      >
+        Guardar
+      </button>
+    </div>
+  );
+}
+
+/** Las fotos se guardan al agregarlas o quitarlas */
+function EditarFotos({ p }: { p: ProducerProfile }) {
+  const guardar = (photos: string[]) => updateProducer((s) => ({ ...s, profile: { ...s.profile, photos } }));
+  async function agregar(files: FileList | null) {
+    if (!files) return;
+    const urls = await Promise.all(Array.from(files).slice(0, FOTOS_MAX - p.photos.length).map((f) => fileToDataUrl(f)));
+    guardar([...p.photos, ...urls]);
+  }
+  return (
+    <div className="space-y-2.5">
+      <div className="flex justify-between text-[11px] text-muted-foreground">
+        <span>Mínimo {FOTOS_MIN}, máximo {FOTOS_MAX}. La primera es tu foto de perfil.</span>
+        <span className={p.photos.length >= FOTOS_MIN ? "text-primary" : "text-terracota"}>{p.photos.length}/{FOTOS_MAX}</span>
+      </div>
+      <div className="grid grid-cols-3 gap-2">
+        {p.photos.map((src, i) => (
+          <div key={i} className="relative aspect-square overflow-hidden rounded-xl">
+            <img src={src} alt="" className="h-full w-full object-cover" />
+            <button type="button" aria-label="Quitar foto" onClick={() => guardar(p.photos.filter((_, j) => j !== i))} className="absolute right-1 top-1 rounded-full bg-background/80 p-1">
+              <X className="h-3 w-3" />
+            </button>
+          </div>
+        ))}
+        {p.photos.length < FOTOS_MAX && (
+          <label className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-border text-[11px] text-muted-foreground">
+            <Camera className="h-5 w-5" /> Agregar
+            <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => agregar(e.target.files)} />
+          </label>
+        )}
+      </div>
     </div>
   );
 }

@@ -221,7 +221,7 @@ export function CompletenessCard({ pct, checks }: { pct: number; checks: { label
 }
 
 /** Foto de un lado de la identificación (vista previa solo en esta pantalla) */
-function IdFoto({ label, src, onChange }: { label: string; src: string; onChange: (v: string) => void }) {
+export function IdFoto({ label, src, onChange }: { label: string; src: string; onChange: (v: string) => void }) {
   return (
     <label className="relative flex aspect-[8/5] cursor-pointer flex-col items-center justify-center gap-1 overflow-hidden rounded-xl border-2 border-dashed border-border text-[11px] text-muted-foreground">
       {src ? (

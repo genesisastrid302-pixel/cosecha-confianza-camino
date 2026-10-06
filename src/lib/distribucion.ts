@@ -80,15 +80,30 @@ export function confirmarRecoleccion(o: Order, slug: string, temperatura?: numbe
 
 export type Coords = [number, number];
 
-/** Coordenadas aproximadas de las direcciones y puntos de entrega del demo */
+/** Coordenadas de los puntos de entrega de Milpa */
 const UBICACIONES: Record<string, Coords> = {
   [LOCAL_DISTRIBUIDOR]: [25.6751, -100.3406],
   "Punto Milpa · Mercado Juárez, Centro": [25.6731, -100.3168],
-  "Calle Hidalgo 214, Col. Roma, Monterrey": [25.6565, -100.3567],
-  "Av. Vasconcelos 150, San Pedro Garza García": [25.6524, -100.3698],
 };
 
-export const coordsDe = (lugar: string): Coords | undefined => UBICACIONES[lugar];
+/** Centro aproximado de cada municipio, para ubicar en el mapa las direcciones reales de los consumidores */
+const MUNICIPIOS_COORDS: Record<string, Coords> = {
+  "San Pedro Garza García": [25.6573, -100.4026],
+  "San Nicolás de los Garza": [25.7417, -100.2836],
+  "Santa Catarina": [25.6733, -100.4584],
+  Guadalupe: [25.6775, -100.2597],
+  Apodaca: [25.7818, -100.1886],
+  Escobedo: [25.7969, -100.3186],
+  García: [25.8076, -100.5933],
+  Monterrey: [25.6866, -100.3161],
+};
+
+/** Coordenadas del lugar; una dirección escrita por el consumidor se ubica en el centro de su municipio */
+export function coordsDe(lugar: string): Coords | undefined {
+  if (UBICACIONES[lugar]) return UBICACIONES[lugar];
+  const municipio = Object.keys(MUNICIPIOS_COORDS).find((m) => lugar.endsWith(m));
+  return municipio ? MUNICIPIOS_COORDS[municipio] : undefined;
+}
 
 /** Parada en el mapa; `n` es el mismo número que tiene en la lista de la ruta */
 export type PuntoMapa = { n: number; tipo: "recoleccion" | "entrega"; titulo: string; coords: Coords };

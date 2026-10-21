@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { consumidorTabs } from "@/components/tabs";
-import { products, getProducer, trustScore10, scoreTone } from "@/lib/data";
-import { Search } from "lucide-react";
+import { products, producers, getProducer, trustScore10, scoreTone, unitLabel } from "@/lib/data";
+import { formatScore } from "@/lib/score";
+import { addToCart } from "@/lib/cart";
+import { Check, Search, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { codigoDe, muestraCodigo, pedidosEnCurso, STATUS_LABEL, useMisPedidos, repartidor } from "@/lib/orders";
 
@@ -44,6 +46,7 @@ function ConsumidorHome() {
     <AppShell tabs={consumidorTabs} tone="terracota" eyebrow="Semana 19 · Monterrey" title="Mercado">
       <div className="space-y-4 px-5">
         <AvisoCodigo />
+        <ConoceProductores />
         <div className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2.5">
           <Search className="h-4 w-4 text-muted-foreground" />
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar cultivo" className="flex-1 bg-transparent text-sm placeholder:text-muted-foreground/70 focus:outline-none" />
@@ -65,26 +68,9 @@ function ConsumidorHome() {
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          {list.map((p) => {
-            const prod = getProducer(p.producerSlug);
-            const s = trustScore10(p.producerSlug);
-            return (
-              <Link to="/consumidor/producto/$id" params={{ id: p.id }} key={p.id} className="overflow-hidden rounded-lg border border-border bg-card">
-                <div className="relative aspect-square bg-muted">
-                  <img src={p.photo} alt={p.name} loading="lazy" width={816} height={816} className="h-full w-full object-cover" />
-                  <span className={`absolute right-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-medium ${scoreTone(s)}`}>{s}/10</span>
-                </div>
-                <div className="p-2.5">
-                  <div className="serif text-sm leading-tight">{p.name}</div>
-                  <div className="mt-0.5 text-sm">${p.price}<span className="text-[10px] text-muted-foreground"> / {p.unit === "kilo" ? "kg" : p.unit}</span></div>
-                  <div className="mt-2 flex items-center gap-1.5">
-                    <img src={prod.photo} alt={prod.name} className="h-5 w-5 rounded-full object-cover" />
-                    <span className="truncate text-[11px] text-muted-foreground">{prod.name}</span>
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
+          {list.map((p) => (
+            <TarjetaProducto key={p.id} producto={p} />
+          ))}
         </div>
         {list.length === 0 && <p className="py-8 text-center text-sm text-muted-foreground">No hay cultivos con ese filtro esta semana.</p>}
       </div>
@@ -118,5 +104,107 @@ function AvisoCodigo() {
         </Link>
       ))}
     </>
+  );
+}
+
+/** Carrusel de productores del catálogo; cada tarjeta abre su perfil */
+function ConoceProductores() {
+  return (
+    <section aria-labelledby="conoce-productores" className="grain overflow-hidden rounded-3xl bg-primary pt-4 text-primary-foreground">
+      <h2 id="conoce-productores" className="serif px-4 text-xl">
+        Conoce a los productores
+      </h2>
+      {/* Sin cajas: cada productor va directo sobre el verde, separado solo por el espacio */}
+      <ul className="deslizar-x deslizar-x-claro mt-3 flex gap-4 px-4 pb-4 [--riel-margen:1rem]">
+        {Object.values(producers).map((p) => {
+          const s = trustScore10(p.slug);
+          return (
+            <li key={p.slug} className="w-40 shrink-0">
+              <Link
+                to="/consumidor/productor/$slug"
+                params={{ slug: p.slug }}
+                className="group flex h-full flex-col rounded-2xl transition active:scale-[0.98]"
+              >
+                <img
+                  src={p.photo}
+                  alt=""
+                  loading="lazy"
+                  className="aspect-[4/3] w-full rounded-2xl object-cover ring-1 ring-primary-foreground/15"
+                />
+                <span className="serif mt-2.5 block text-base leading-tight group-hover:underline">{p.name}</span>
+                <span className="mt-1 line-clamp-2 text-[11px] leading-snug text-primary-foreground/75">{p.practice}</span>
+                {/* El score queda abajo en todas, con aire aunque la especialidad ocupe dos líneas */}
+                <span className="mt-auto pt-2.5">
+                  {/* Sobre el verde, el score bueno va en papel con letra verde; miel y rojo se quedan como en toda la app */}
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${s >= 8 ? "bg-primary-foreground text-primary" : scoreTone(s)}`}
+                  >
+                    {formatScore(s)}
+                  </span>
+                </span>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
+/**
+ * Tarjeta del Mercado. Orden: cultivo, quién lo cultivó (lleva a su perfil),
+ * precio y agregar. Son enlaces hermanos, no anidados, para que cada uno lleve a su lugar.
+ */
+function TarjetaProducto({ producto: p }: { producto: (typeof products)[number] }) {
+  const prod = getProducer(p.producerSlug);
+  const s = trustScore10(p.producerSlug);
+  const [agregado, setAgregado] = useState(false);
+  useEffect(() => {
+    if (!agregado) return;
+    const t = setTimeout(() => setAgregado(false), 1600);
+    return () => clearTimeout(t);
+  }, [agregado]);
+
+  return (
+    <article className="flex flex-col overflow-hidden rounded-lg border border-border bg-card">
+      <Link to="/consumidor/producto/$id" params={{ id: p.id }} className="relative block aspect-square bg-muted" tabIndex={-1} aria-hidden>
+        <img src={p.photo} alt="" loading="lazy" width={816} height={816} className="h-full w-full object-cover" />
+        <span className={`absolute right-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-medium ${scoreTone(s)}`}>{s}/10</span>
+      </Link>
+      <div className="flex flex-1 flex-col p-2.5">
+        <Link to="/consumidor/producto/$id" params={{ id: p.id }} className="serif text-sm leading-tight">
+          {p.name}
+        </Link>
+        <Link
+          to="/consumidor/productor/$slug"
+          params={{ slug: prod.slug }}
+          className="-mx-1 mt-0.5 flex min-h-6 items-center gap-1.5 rounded-md px-1 text-[11px] font-medium text-primary"
+        >
+          <img src={prod.photo} alt="" className="h-4 w-4 shrink-0 rounded-full object-cover" />
+          <span className="truncate">{prod.name}</span>
+        </Link>
+        <p className="mt-1 text-sm">
+          ${p.price}
+          <span className="text-[11px] text-muted-foreground"> · {unitLabel(p.unit)}</span>
+        </p>
+        <button
+          type="button"
+          onClick={() => {
+            addToCart(p.id, 1, p.unitsLeft);
+            setAgregado(true);
+          }}
+          aria-label={agregado ? `${p.name} en tu carrito` : `Agregar ${p.name} al carrito`}
+          className={`mt-2.5 flex h-9 w-full items-center justify-center gap-1.5 rounded-full text-xs font-medium transition active:scale-[0.97] ${
+            agregado ? "bg-primary/10 text-primary" : "bg-foreground text-background"
+          }`}
+        >
+          {agregado ? <Check className="h-4 w-4" /> : <ShoppingCart className="h-4 w-4" />}
+          {agregado ? "Agregado" : "Agregar"}
+        </button>
+        <span className="sr-only" aria-live="polite">
+          {agregado ? `${p.name} se agregó a tu carrito` : ""}
+        </span>
+      </div>
+    </article>
   );
 }

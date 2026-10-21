@@ -11,7 +11,7 @@ export const Route = createFileRoute("/consumidor/productores")({
     <AppShell tabs={consumidorTabs} tone="terracota" eyebrow="Cerca de ti" title="Productores">
       <div className="space-y-3 px-5">
         {Object.values(producers).map((p) => (
-          <Link to="/consumidor/carrito" key={p.slug} className="flex gap-3 rounded-2xl border border-border bg-card p-3">
+          <Link to="/consumidor/productor/$slug" params={{ slug: p.slug }} key={p.slug} className="flex gap-3 rounded-2xl border border-border bg-card p-3">
             <img src={p.photo} alt={p.name} className="h-20 w-20 rounded-xl object-cover" />
             <div className="flex-1">
               <div className="serif text-lg leading-tight">{p.name}</div>

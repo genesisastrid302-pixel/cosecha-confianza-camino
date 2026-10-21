@@ -80,8 +80,8 @@ function ProducerProfile() {
           <p className="mt-2 text-sm text-foreground/80">{d.coldChain}</p>
         </section>
 
-        <Link to="/consumidor/cosecha" className="block w-full rounded-full bg-foreground py-4 text-center text-sm font-medium text-background">
-          Ver cosecha compartida
+        <Link to="/consumidor/planes" search={{ tab: "cosecha" }} className="block w-full rounded-full bg-foreground py-4 text-center text-sm font-medium text-background">
+          Cosecha compartida
         </Link>
       </div>
     </AppShell>

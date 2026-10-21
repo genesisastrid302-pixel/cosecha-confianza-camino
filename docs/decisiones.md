@@ -42,7 +42,7 @@ La pantalla agrupa **por pedido, no por acción**: una sección por pedido (la d
 | Rol | Le avisa |
 |---|---|
 | Productor | pedido nuevo, problema en la recolección, pedido recolectado, entregado, pago liberado (ya con la aportación de socio descontada), calificación recibida (alerta si es de 2★ o menos o trae merma), nueva reserva de cosecha compartida |
-| Consumidor | pedido aceptado o rechazado, empacado, en revisión por un problema, en camino (con su código de entrega), entregado, nueva cosecha compartida si ya compró antes |
+| Consumidor | pedido aceptado o rechazado, empacado, en revisión por un problema, en camino (con su código de entrega), entregado, desbloqueó Cosecha compartida (con su 3ª canasta recibida), nueva cosecha compartida si ya compró antes |
 | Distribuidor | pedido confirmado, recolección lista (campo o local), consumidor confirmó la entrega |
 
 Cada aviso lleva a la pantalla donde se atiende. Son avisos dentro de la app; push, WhatsApp o correo necesitan backend.
@@ -94,7 +94,7 @@ Validación por sistema en 3 capas, como en el modelo de negocio (`src/lib/score
 - El productor puede recibir por varios métodos a la vez: CLABE (con banco y titular), CoDi y efectivo al recolectar.
 - El distribuidor recibe la logística por transferencia (CLABE o tarjeta, con banco y titular) o CoDi; si el consumidor paga en efectivo, lo cobra al entregar. En el registro la sección "Cuenta de cobro" se muestra abierta con transferencia preseleccionada y el titular propuesto con su nombre.
 - Al productor se le paga cuando el consumidor confirma que recibió (o pasan 24 h).
-- Cosecha compartida: planes de 8, 12 y 24 semanas, sin descuento.
+- Planes del consumidor: ver la sección **Planes**.
 
 ## Cuentas
 
@@ -142,3 +142,19 @@ Cuando algo tarda (leer la canasta, preparar el pedido, trazar la ruta del mapa 
 ## Ficha del cultivo
 
 Debajo de "Cultivado por …" va **Productos relacionados**: cultivos del Mercado (primero del mismo productor, luego de la misma temporada) con la foto en un marco Cookie de 12 lados. No hay rachas ni insignias de constancia en la app.
+
+## Planes
+
+La pestaña **Planes** (antes "Cosecha") tiene dos pestañas: **Suscripción** (la de entrada) y **Cosecha compartida**. Todo vive en `src/lib/suscripcion.ts`.
+
+**Suscripción**: canasta Individual ($175, 1 persona, 4-5 productos), Pareja ($320, 2 personas, 6-8) o Familiar ($480, 3-4 personas, 10-12). El precio es por canasta y ya incluye entrega y plataforma. Cada semana o cada 15 días, a domicilio o para recoger, con el método de pago que elija. Se puede pausar, reanudar o cancelar desde Planes. Se guarda una suscripción por cuenta de consumidor. "Elegir plan" abre la pantalla Elegir plan.
+
+**Cosecha compartida** se desbloquea con la **3ª canasta recibida**: cuenta los pedidos de esa cuenta que el consumidor confirmó como recibidos (fecha del historial), nunca un número inventado. Mientras está bloqueada: candado en la pestaña, barra "N de 3 canastas" y una vista previa al 40 % que no se puede tocar; en Suscripción aparece el aviso "¿Conoces a tu productor?". Al desbloquearse llega el aviso "Desbloqueaste Cosecha compartida".
+
+Desbloqueada: se elige a uno o más productores (la canasta se reparte entre ellos) y el compromiso:
+- **Prueba**: 4 semanas al mismo precio que su canasta.
+- **Temporada**: 12 semanas con 10 % menos por semana.
+
+El precio se muestra por semana, igual que la suscripción (nunca por kg). Sin suscripción, el consumidor elige el tamaño de canasta para calcularlo. Reservar no cambia su suscripción. Cada reserva queda en `milpa-reservas` con la cuenta que reservó; los kg por semana de cada canasta solo sirven para la proyección de volumen del productor y el distribuidor.
+
+Las tarjetas de suscripción son limpias; las de Cosecha compartida llevan textura y fotos con marco Cookie de 12 lados.

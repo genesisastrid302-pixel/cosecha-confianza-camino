@@ -4,7 +4,7 @@ import { codigoDe, misPedidos, repartidor, tituloPedidoProductor, useOrders, typ
 import { LOCAL_DISTRIBUIDOR, fueEntregado, readReservas } from "@/lib/distribucion";
 import { APORTACION_SOCIO, listarCuentas } from "@/lib/producer-store";
 import { sesionDe } from "@/lib/acceso";
-import { CANASTAS_PARA_COSECHA, cosechaDesbloqueadaEn } from "@/lib/suscripcion";
+import { PEDIDOS_PARA_COSECHA, cosechaDesbloqueadaEn } from "@/lib/suscripcion";
 
 /**
  * Notificaciones de los tres roles.
@@ -138,7 +138,7 @@ export function avisosDe(rol: Rol, orders: Order[]): Aviso[] {
     );
   }
 
-  // Con su 3ª canasta recibida se le abre Cosecha compartida (la fecha sale del historial del pedido)
+  // Con su 3er pedido recibido se le abre Cosecha compartida (la fecha sale del historial del pedido)
   if (rol === "consumidor") {
     const desde = cosechaDesbloqueadaEn(propios);
     if (desde)
@@ -146,7 +146,7 @@ export function avisosDe(rol: Rol, orders: Order[]): Aviso[] {
         id: `cosecha-desbloqueada-${desde}`,
         at: desde,
         titulo: "Desbloqueaste Cosecha compartida",
-        detalle: `Ya recibiste ${CANASTAS_PARA_COSECHA} canastas. Ahora puedes reservar tu parte de la cosecha con un productor.`,
+        detalle: `Ya recibiste ${PEDIDOS_PARA_COSECHA} pedidos. Ahora puedes reservar tu parte de la cosecha con un productor.`,
         href: "/consumidor/cosecha",
       });
   }

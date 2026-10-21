@@ -11,13 +11,13 @@ import { addReserva } from "@/lib/distribucion";
 import { sesionDe } from "@/lib/acceso";
 import { useMisPedidos } from "@/lib/orders";
 import {
-  CANASTAS_PARA_COSECHA,
+  PEDIDOS_PARA_COSECHA,
   COMPROMISOS,
   FRECUENCIA_LABEL,
   PLANES,
   cambiarEstado,
   cancelarSuscripcion,
-  canastasRecibidas,
+  pedidosRecibidos,
   planDe,
   precioCosecha,
   useMiSuscripcion,
@@ -50,8 +50,8 @@ function Planes() {
   const navigate = useNavigate({ from: "/consumidor/planes" });
   const pestana: Pestana = tab ?? "suscripcion";
   const { s, listo } = useMiSuscripcion();
-  const recibidas = canastasRecibidas(useMisPedidos()).length;
-  const bloqueada = recibidas < CANASTAS_PARA_COSECHA;
+  const recibidas = pedidosRecibidos(useMisPedidos()).length;
+  const bloqueada = recibidas < PEDIDOS_PARA_COSECHA;
   const ir = (t: Pestana) => navigate({ search: t === "cosecha" ? { tab: "cosecha" } : {}, replace: true });
 
   return (
@@ -142,7 +142,7 @@ function TabSuscripcion({ s, bloqueada, irACosecha }: { s: Suscripcion | null; b
           <span>
             <span className="serif block text-base">¿Conoces a tu productor?</span>
             <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">
-              Después de tu 3ª canasta, podrás acceder a Cosecha Compartida y reservar directamente de un productor.
+              Después de tu 3er pedido, podrás acceder a Cosecha Compartida y reservar directamente de un productor.
             </span>
           </span>
         </button>
@@ -240,7 +240,7 @@ function MiSuscripcion({ s }: { s: Suscripcion }) {
 // --- Pestaña 2: Cosecha compartida ---
 
 function CosechaBloqueada({ recibidas }: { recibidas: number }) {
-  const n = Math.min(recibidas, CANASTAS_PARA_COSECHA);
+  const n = Math.min(recibidas, PEDIDOS_PARA_COSECHA);
   return (
     <div className="space-y-5">
       <section className="grain overflow-hidden rounded-3xl border border-primary/20 bg-primary/5 p-5 text-center">
@@ -249,28 +249,28 @@ function CosechaBloqueada({ recibidas }: { recibidas: number }) {
         </span>
         <h2 className="display mt-3 text-3xl">Cosecha compartida</h2>
         <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-muted-foreground">
-          Reserva tu parte de la cosecha directamente con un productor. Se desbloquea después de tu 3ª canasta.
+          Reserva tu parte de la cosecha directamente con un productor. Se desbloquea después de tu 3er pedido.
         </p>
         <div className="mx-auto mt-4 max-w-xs text-left">
           <div className="flex justify-between text-xs">
             <span className="font-medium">
-              {n} de {CANASTAS_PARA_COSECHA} canastas
+              {n} de {PEDIDOS_PARA_COSECHA} pedidos
             </span>
             <span className="text-muted-foreground">
-              {CANASTAS_PARA_COSECHA - n === 1 ? "Te falta 1" : `Te faltan ${CANASTAS_PARA_COSECHA - n}`}
+              {PEDIDOS_PARA_COSECHA - n === 1 ? "Te falta 1" : `Te faltan ${PEDIDOS_PARA_COSECHA - n}`}
             </span>
           </div>
           <div
             role="progressbar"
             aria-valuemin={0}
-            aria-valuemax={CANASTAS_PARA_COSECHA}
+            aria-valuemax={PEDIDOS_PARA_COSECHA}
             aria-valuenow={n}
-            aria-label="Canastas recibidas"
+            aria-label="Pedidos recibidos"
             className="mt-1.5 h-2 overflow-hidden rounded-full bg-primary/15"
           >
-            <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${(n / CANASTAS_PARA_COSECHA) * 100}%` }} />
+            <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${(n / PEDIDOS_PARA_COSECHA) * 100}%` }} />
           </div>
-          <p className="mt-1.5 text-[11px] text-muted-foreground">Cuenta cada canasta que confirmas como recibida.</p>
+          <p className="mt-1.5 text-[11px] text-muted-foreground">Cuenta cada pedido que confirmas como recibido.</p>
         </div>
       </section>
 

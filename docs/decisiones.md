@@ -42,7 +42,7 @@ La pantalla agrupa **por pedido, no por acción**: una sección por pedido (la d
 | Rol | Le avisa |
 |---|---|
 | Productor | pedido nuevo, problema en la recolección, pedido recolectado, entregado, pago liberado (ya con la aportación de socio descontada), calificación recibida (alerta si es de 2★ o menos o trae merma), nueva reserva de cosecha compartida |
-| Consumidor | pedido aceptado o rechazado, empacado, en revisión por un problema, en camino (con su código de entrega), entregado, desbloqueó Cosecha compartida (con su 3ª canasta recibida), nueva cosecha compartida si ya compró antes |
+| Consumidor | pedido aceptado o rechazado, empacado, en revisión por un problema, en camino (con su código de entrega), entregado, desbloqueó Cosecha compartida (con su 3er pedido recibido), nueva cosecha compartida si ya compró antes |
 | Distribuidor | pedido confirmado, recolección lista (campo o local), consumidor confirmó la entrega |
 
 Cada aviso lleva a la pantalla donde se atiende. Son avisos dentro de la app; push, WhatsApp o correo necesitan backend.
@@ -149,7 +149,7 @@ La pestaña **Planes** (antes "Cosecha") tiene dos pestañas: **Suscripción** (
 
 **Suscripción**: canasta Individual ($175, 1 persona, 4-5 productos), Pareja ($320, 2 personas, 6-8) o Familiar ($480, 3-4 personas, 10-12). El precio es por canasta y ya incluye entrega y plataforma. Cada semana o cada 15 días, a domicilio o para recoger, con el método de pago que elija. Se puede pausar, reanudar o cancelar desde Planes. Se guarda una suscripción por cuenta de consumidor. "Elegir plan" abre la pantalla Elegir plan.
 
-**Cosecha compartida** se desbloquea con la **3ª canasta recibida**: cuenta los pedidos de esa cuenta que el consumidor confirmó como recibidos (fecha del historial), nunca un número inventado. Mientras está bloqueada: candado en la pestaña, barra "N de 3 canastas" y una vista previa al 40 % que no se puede tocar; en Suscripción aparece el aviso "¿Conoces a tu productor?". Al desbloquearse llega el aviso "Desbloqueaste Cosecha compartida".
+**Cosecha compartida** se desbloquea con el **3er pedido recibido**: cuenta los pedidos de esa cuenta que el consumidor confirmó como recibidos (fecha del historial), nunca un número inventado. Mientras está bloqueada: candado en la pestaña, barra "N de 3 pedidos" y una vista previa al 40 % que no se puede tocar; en Suscripción aparece el aviso "¿Conoces a tu productor?". Al desbloquearse llega el aviso "Desbloqueaste Cosecha compartida".
 
 Desbloqueada: se elige a uno o más productores (la canasta se reparte entre ellos) y el compromiso:
 - **Prueba**: 4 semanas al mismo precio que su canasta.

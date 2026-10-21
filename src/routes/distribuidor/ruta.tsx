@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { dinero } from "@/lib/data";
 import { CheckCircle2, ChevronRight, Clock3, MapPin, Navigation, Store, Truck } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { MapaRuta } from "@/components/MapaRuta";
@@ -118,7 +119,7 @@ function Ruta() {
                       titulo={o.cliente}
                       tipo={o.entrega === "domicilio" ? "A domicilio" : "Para recoger"}
                       lugar={o.direccion}
-                      detalle={`#${o.id} · ${o.pago === "Efectivo" ? `Cobrar $${o.total} en efectivo` : "Pagado"}`}
+                      detalle={`#${o.id} · ${o.pago === "Efectivo" ? `Cobrar ${dinero(o.total)} en efectivo` : "Pagado"}`}
                     />
                   ))}
                 </div>

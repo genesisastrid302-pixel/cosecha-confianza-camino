@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useId } from "react";
-import { productosRelacionados, unitLabel } from "@/lib/data";
+import { dinero, productosRelacionados, unidadPrecio } from "@/lib/data";
 import { cookie12, pathCaja } from "@/lib/formas";
 
 const COOKIE12 = pathCaja(cookie12);
@@ -36,7 +36,7 @@ export function ProductosRelacionados({ id }: { id: string }) {
               </span>
               <span className="serif mt-2 block text-sm leading-tight">{p.name}</span>
               <span className="mt-0.5 block text-[11px] text-muted-foreground">
-                ${p.price} / {unitLabel(p.unit)}
+                {dinero(p.price)} / {unidadPrecio(p.unit)}
               </span>
             </Link>
           </li>

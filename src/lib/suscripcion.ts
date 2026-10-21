@@ -5,7 +5,7 @@ import type { Entrega, MetodoPago, Order } from "@/lib/orders";
 
 /**
  * Planes del consumidor: suscripción a una canasta semanal o quincenal y, después
- * de su 3ª canasta recibida, Cosecha compartida con un productor.
+ * de su 3er pedido recibido, Cosecha compartida con un productor.
  * Prototipo sin backend: la suscripción se guarda en el navegador, una por cuenta.
  */
 
@@ -139,21 +139,21 @@ export function useMiSuscripcion() {
   return estado;
 }
 
-// --- Cosecha compartida: se desbloquea con canastas recibidas de verdad ---
+// --- Cosecha compartida: se desbloquea con pedidos recibidos de verdad ---
 
-export const CANASTAS_PARA_COSECHA = 3;
+export const PEDIDOS_PARA_COSECHA = 3;
 
-/** Fechas en que el consumidor confirmó cada canasta, de la más vieja a la más nueva */
-export function canastasRecibidas(pedidos: Order[]): string[] {
+/** Fechas en que el consumidor confirmó cada pedido como recibido, del más viejo al más nuevo */
+export function pedidosRecibidos(pedidos: Order[]): string[] {
   return pedidos
     .map((o) => o.history.find((h) => h.status === "recibido")?.at)
     .filter((at): at is string => !!at)
     .sort();
 }
 
-/** Cuándo se desbloqueó (la fecha de su 3ª canasta) o null si aún no */
+/** Cuándo se desbloqueó (la fecha de su 3er pedido recibido) o null si aún no */
 export function cosechaDesbloqueadaEn(pedidos: Order[]): string | null {
-  return canastasRecibidas(pedidos)[CANASTAS_PARA_COSECHA - 1] ?? null;
+  return pedidosRecibidos(pedidos)[PEDIDOS_PARA_COSECHA - 1] ?? null;
 }
 
 export type Compromiso = {

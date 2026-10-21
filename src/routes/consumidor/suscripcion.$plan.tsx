@@ -95,7 +95,7 @@ function ElegirPlan() {
             <div className="eyebrow">Lo que sigue</div>
             <ul className="mt-3 space-y-2 text-muted-foreground">
               <li>· Tu primera canasta se arma con lo que se cosecha esta semana.</li>
-              <li>· Confirma cada canasta al recibirla: con la 3ª se abre Cosecha compartida.</li>
+              <li>· Confirma cada pedido al recibirlo: con el 3º se abre Cosecha compartida.</li>
             </ul>
           </div>
           <Link to="/consumidor/planes" className="block w-full rounded-full bg-foreground py-4 text-center text-sm font-medium text-background">

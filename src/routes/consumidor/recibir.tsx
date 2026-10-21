@@ -1,7 +1,7 @@
 import { addResena } from "@/lib/producer-store";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { getProducer, products, unitLabel } from "@/lib/data";
+import { getProducer, products, cantidadTexto } from "@/lib/data";
 import { formatTime, repartidor, updateOrder, useMisPedidos } from "@/lib/orders";
 import { LinkTrazabilidad } from "@/components/LinkTrazabilidad";
 import { AppShell } from "@/components/AppShell";
@@ -81,7 +81,7 @@ function Recibir() {
   const primer = productores[0].name.split(" ")[0];
   const pedidoId = order.id;
   const lotes = Object.values(order.lots).join(", ");
-  const resumen = order.items.map((i) => `${i.quantity} ${unitLabel(i.unit, i.quantity)} ${i.name.toLowerCase()}`).join(" · ");
+  const resumen = order.items.map((i) => `${cantidadTexto(i.unit, i.quantity)} ${i.name.toLowerCase()}`).join(" · ");
 
   return (
     <AppShell

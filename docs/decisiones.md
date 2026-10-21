@@ -42,7 +42,7 @@ La pantalla agrupa **por pedido, no por acción**: una sección por pedido (la d
 | Rol | Le avisa |
 |---|---|
 | Productor | pedido nuevo, problema en la recolección, pedido recolectado, entregado, pago liberado (ya con la aportación de socio descontada), calificación recibida (alerta si es de 2★ o menos o trae merma), nueva reserva de cosecha compartida |
-| Consumidor | pedido aceptado o rechazado, empacado, en revisión por un problema, en camino (con su código de entrega), entregado, desbloqueó Cosecha compartida (con su 3ª canasta recibida), nueva cosecha compartida si ya compró antes |
+| Consumidor | pedido aceptado o rechazado, empacado, en revisión por un problema, en camino (con su código de entrega), entregado, desbloqueó Cosecha compartida (con su 3er pedido recibido), nueva cosecha compartida si ya compró antes |
 | Distribuidor | pedido confirmado, recolección lista (campo o local), consumidor confirmó la entrega |
 
 Cada aviso lleva a la pantalla donde se atiende. Son avisos dentro de la app; push, WhatsApp o correo necesitan backend.
@@ -133,7 +133,7 @@ El encabezado de cada pantalla es sólido y el contenido empieza debajo de la ba
 
 Las filas que se deslizan hacia los lados (filtros, fotos, productos relacionados) usan la clase `deslizar-x`: su barra mide lo mismo que la línea vertical (3 px, mismo riel y color, sin flechas).
 
-Toda pantalla con más contenido del que cabe muestra una línea de scroll vertical a la derecha (`IndicadorScroll` en el marco de la app); termina arriba de la barra de pestañas.
+Toda pantalla con más contenido del que cabe muestra una línea de scroll vertical a la derecha (`IndicadorScroll` en el marco de la app); termina arriba de la barra de pestañas y se desvanece cuando no se desliza (ver **Línea de scroll**).
 
 ## Carga
 
@@ -149,7 +149,7 @@ La pestaña **Planes** (antes "Cosecha") tiene dos pestañas: **Suscripción** (
 
 **Suscripción**: canasta Individual ($175, 1 persona, 4-5 productos), Pareja ($320, 2 personas, 6-8) o Familiar ($480, 3-4 personas, 10-12). El precio es por canasta y ya incluye entrega y plataforma. Cada semana o cada 15 días, a domicilio o para recoger, con el método de pago que elija. Se puede pausar, reanudar o cancelar desde Planes. Se guarda una suscripción por cuenta de consumidor. "Elegir plan" abre la pantalla Elegir plan.
 
-**Cosecha compartida** se desbloquea con la **3ª canasta recibida**: cuenta los pedidos de esa cuenta que el consumidor confirmó como recibidos (fecha del historial), nunca un número inventado. Mientras está bloqueada: candado en la pestaña, barra "N de 3 canastas" y una vista previa al 40 % que no se puede tocar; en Suscripción aparece el aviso "¿Conoces a tu productor?". Al desbloquearse llega el aviso "Desbloqueaste Cosecha compartida".
+**Cosecha compartida** se desbloquea con el **3er pedido recibido**: cuenta los pedidos de esa cuenta que el consumidor confirmó como recibidos (fecha del historial), nunca un número inventado. Mientras está bloqueada: candado en la pestaña, barra "N de 3 pedidos" y una vista previa al 40 % que no se puede tocar; en Suscripción aparece el aviso "¿Conoces a tu productor?". Al desbloquearse llega el aviso "Desbloqueaste Cosecha compartida".
 
 Desbloqueada: se elige a uno o más productores (la canasta se reparte entre ellos) y el compromiso:
 - **Prueba**: 4 semanas al mismo precio que su canasta.
@@ -167,3 +167,11 @@ Orden de la pantalla: encabezado "Mercado", el aviso del código de entrega (sol
 - **Tarjeta de cultivo**, en este orden: nombre del cultivo, quién lo cultivó (verde, con su foto mini, abre su perfil), precio con unidad ("$22 · manojo") y botón **Agregar**, que suma 1 al carrito sin salir del Mercado. Nombre, productor y botón son controles separados, nunca uno dentro de otro.
 
 El carrito usa el ícono de carrito de compras de la misma familia (lucide, trazo 2) que el resto de la barra; los botones que agregan al carrito usan ese mismo ícono.
+
+## Cantidades por gramo
+
+Jitomate, limón y ejote se piden de **250 en 250 g**; chiles de **100 en 100 g** (`unit: "gramo"` y `paso` en `src/lib/data.ts`). El precio se sigue mostrando por kg y la existencia en kg. En carrito y pedidos la cantidad va en gramos y se muestra como "250 g" o "1.25 kg" (`cantidadTexto`); el importe sale de `importe()` y los montos con centavos se muestran como "$5.40" (`dinero()`). Los pedidos anteriores conservan su unidad ("kilo"). Un carrito guardado en kg se pasa a gramos al leerlo.
+
+## Línea de scroll
+
+La línea vertical aparece al entrar a una pantalla y mientras se desliza, y se desvanece tras 1.2 s quieta, para no quedarse encima de las fotos.

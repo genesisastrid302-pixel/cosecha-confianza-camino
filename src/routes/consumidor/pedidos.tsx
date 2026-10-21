@@ -4,7 +4,7 @@ import { AppShell } from "@/components/AppShell";
 import { consumidorTabs } from "@/components/tabs";
 import { CheckCircle2, PackageCheck, Clock3, ShoppingBasket } from "lucide-react";
 import { useMisPedidos, repartidor, FLOW, STATUS_LABEL, codigoDe, formatTime, muestraCodigo, pedidosEnCurso, type Order } from "@/lib/orders";
-import { getProducer, unitLabel } from "@/lib/data";
+import { getProducer, cantidadTexto, dinero } from "@/lib/data";
 import { LinkTrazabilidad } from "@/components/LinkTrazabilidad";
 import { EstadoPedido } from "@/components/EstadoPedido";
 
@@ -92,9 +92,9 @@ function LiveOrder({ order }: { order: Order }) {
           <div className="mt-2 text-[11px] text-muted-foreground">Cultivado por</div>
           <div className="serif text-lg leading-tight">{producerNames.join(" y ")}</div>
           <div className="text-[11px] text-muted-foreground">
-            {order.items.map((i) => `${i.quantity} ${unitLabel(i.unit, i.quantity)} ${i.name.toLowerCase()}`).join(" · ")}
+            {order.items.map((i) => `${cantidadTexto(i.unit, i.quantity)} ${i.name.toLowerCase()}`).join(" · ")}
           </div>
-          <div className="mt-1 text-[11px] text-muted-foreground">{order.direccion} · ${order.total} · {order.pago}</div>
+          <div className="mt-1 text-[11px] text-muted-foreground">{order.direccion} · {dinero(order.total)} · {order.pago}</div>
         </div>
       </div>
 

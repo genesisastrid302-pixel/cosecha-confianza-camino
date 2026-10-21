@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { Banknote, Camera, Check, ChevronLeft, Eraser, MapPin, Store } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
-import { unitLabel } from "@/lib/data";
+import { cantidadTexto, dinero } from "@/lib/data";
 import { codigoDe, pesoPedido, useOrders, updateOrder, type Merma, type Order } from "@/lib/orders";
 import { fueEntregado } from "@/lib/distribucion";
 import { fileToDataUrl } from "@/lib/producer-store";
@@ -45,7 +45,7 @@ function Entrega() {
             {order.items.map((i) => (
               <li key={i.productId} className="flex justify-between">
                 <span>{i.name}</span>
-                <span className="text-muted-foreground">{i.quantity} {unitLabel(i.unit, i.quantity)}</span>
+                <span className="text-muted-foreground">{cantidadTexto(i.unit, i.quantity)}</span>
               </li>
             ))}
           </ul>
@@ -97,8 +97,8 @@ function ConfirmarEntrega({ order, onDone }: { order: Order; onDone: () => void 
 
       {efectivo && (
         <div className="rounded-2xl border-2 border-miel/50 bg-miel/10 p-4">
-          <div className="flex items-center gap-2 text-sm font-medium"><Banknote className="h-4 w-4" /> Cobrar ${order.total} en efectivo</div>
-          <div className="mt-3"><Casilla checked={cobrado} onChange={setCobrado} label={`Recibí $${order.total}`} /></div>
+          <div className="flex items-center gap-2 text-sm font-medium"><Banknote className="h-4 w-4" /> Cobrar {dinero(order.total)} en efectivo</div>
+          <div className="mt-3"><Casilla checked={cobrado} onChange={setCobrado} label={`Recibí ${dinero(order.total)}`} /></div>
         </div>
       )}
 

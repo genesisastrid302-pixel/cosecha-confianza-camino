@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { dinero } from "@/lib/data";
 import { AlertTriangle, Banknote, CheckCircle2, Landmark } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { distribuidorTabs } from "@/components/tabs";
@@ -59,7 +60,7 @@ function Finanzas() {
                 <div className="flex-1 text-sm">
                   #{o.id} · {o.cliente}
                   <div className="text-[11px] text-muted-foreground">
-                    {o.entregaRegistro ? formatTime(o.entregaRegistro.at) : ""} · {o.pago === "Efectivo" ? `Cobraste $${o.total} en efectivo` : `Pagado con ${o.pago}`}
+                    {o.entregaRegistro ? formatTime(o.entregaRegistro.at) : ""} · {o.pago === "Efectivo" ? `Cobraste ${dinero(o.total)} en efectivo` : `Pagado con ${o.pago}`}
                   </div>
                 </div>
                 <div className="serif text-base">+${LOGISTICA}</div>

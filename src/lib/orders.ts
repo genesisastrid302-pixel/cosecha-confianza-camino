@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { products } from "@/lib/data";
+import { importe, products, sumar } from "@/lib/data";
 import type { CartLine } from "@/lib/cart";
 import { nombreCorto, readConsumer, readDistributor } from "@/lib/accounts";
 import { sesionDe, suscribirSesion } from "@/lib/acceso";
@@ -183,7 +183,7 @@ export function createOrder(input: {
   producers.forEach((slug, idx) => {
     lots[slug] = `LT-${n}${producers.length > 1 ? `-${String.fromCharCode(65 + idx)}` : ""}`;
   });
-  const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
+  const subtotal = sumar(items.map((i) => importe(i.price, i.unit, i.quantity)));
   const now = new Date().toISOString();
   const order: Order = {
     id: `MLP-${n}`,
@@ -198,7 +198,7 @@ export function createOrder(input: {
     subtotal,
     logistica: LOGISTICA,
     plataforma: PLATAFORMA,
-    total: subtotal + LOGISTICA + PLATAFORMA,
+    total: sumar([subtotal, LOGISTICA, PLATAFORMA]),
     status: "nuevo",
     history: [{ status: "nuevo", at: now }],
     codigoEntrega: codigoNuevo(),
@@ -265,7 +265,9 @@ export function codigoDe(o: Order) {
 
 /** Peso aproximado de un renglón en kg (manojos y piezas cuentan 0.25 kg) */
 export function pesoKg(i: OrderItem) {
-  return i.unit === "kilo" ? i.quantity : i.quantity * 0.25;
+  if (i.unit === "kilo") return i.quantity;
+  if (i.unit === "gramo") return i.quantity / 1000;
+  return i.quantity * 0.25;
 }
 
 export function pesoPedido(o: Order) {

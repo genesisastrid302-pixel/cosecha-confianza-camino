@@ -4,7 +4,7 @@ import { ChevronLeft, Minus, Plus, Leaf, CalendarDays, Sprout, ShoppingCart } fr
 import { AppShell } from "@/components/AppShell";
 import { consumidorTabs } from "@/components/tabs";
 import { Button } from "@/components/ui/button";
-import { products, getProducer } from "@/lib/data";
+import { products, getProducer, cantidadTexto, dinero, existenciaTexto, importe, maximoDe, pasoDe, unidadPrecio } from "@/lib/data";
 import { addToCart } from "@/lib/cart";
 import { ProductosRelacionados } from "@/components/ProductosRelacionados";
 
@@ -35,9 +35,9 @@ function ProductDetail() {
 }
 
 function ProductDetailContent({ product }: { product: (typeof products)[number] }) {
-  const [quantity, setQuantity] = useState(1);
+  const paso = pasoDe(product);
+  const [quantity, setQuantity] = useState(paso);
   const producer = getProducer(product.producerSlug);
-  const unit = product.unit === "kilo" ? "kg" : "pieza";
   const harvestDate = new Date();
   harvestDate.setDate(harvestDate.getDate() + product.harvestIn);
 
@@ -54,8 +54,8 @@ function ProductDetailContent({ product }: { product: (typeof products)[number] 
           <div className="eyebrow">Del campo a tu mesa</div>
           <h1 className="display mt-2 text-4xl leading-tight">{product.name}</h1>
           <div className="mt-3 flex items-end justify-between gap-2">
-            <p className="serif text-2xl">${product.price} <span className="font-sans text-sm text-muted-foreground">/ {unit}</span></p>
-            <p className="text-xs text-muted-foreground">{product.unitsLeft} {unit} disponibles</p>
+            <p className="serif text-2xl">{dinero(product.price)} <span className="font-sans text-sm text-muted-foreground">/ {unidadPrecio(product.unit)}</span></p>
+            <p className="text-xs text-muted-foreground">{existenciaTexto(product)} disponibles</p>
           </div>
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{product.story}</p>
         </div>
@@ -79,15 +79,18 @@ function ProductDetailContent({ product }: { product: (typeof products)[number] 
         </section>
 
         <div className="flex items-center justify-between gap-3">
-          <span className="text-sm font-medium">Cantidad ({unit})</span>
+          <span className="text-sm font-medium">
+            Cantidad
+            {product.unit === "gramo" && <span className="block text-[11px] font-normal text-muted-foreground">De {paso} en {paso} g</span>}
+          </span>
           <div className="flex h-11 items-center gap-3 border border-border bg-card px-1">
-            <Button variant="ghost" size="icon" aria-label="Reducir cantidad" disabled={quantity <= 1} onClick={() => setQuantity((n) => n - 1)}><Minus /></Button>
-            <span className="w-7 text-center text-sm tabular-nums">{quantity}</span>
-            <Button variant="ghost" size="icon" aria-label="Aumentar cantidad" disabled={quantity >= product.unitsLeft} onClick={() => setQuantity((n) => n + 1)}><Plus /></Button>
+            <Button variant="ghost" size="icon" aria-label="Reducir cantidad" disabled={quantity <= paso} onClick={() => setQuantity((n) => n - paso)}><Minus /></Button>
+            <span className="min-w-14 text-center text-sm tabular-nums">{cantidadTexto(product.unit, quantity)}</span>
+            <Button variant="ghost" size="icon" aria-label="Aumentar cantidad" disabled={quantity + paso > maximoDe(product)} onClick={() => setQuantity((n) => n + paso)}><Plus /></Button>
           </div>
         </div>
         <Button asChild className="h-13 w-full rounded-full text-sm">
-          <Link to="/consumidor/carrito" onClick={() => addToCart(product.id, quantity, product.unitsLeft)}><ShoppingCart /> Agregar al carrito · ${product.price * quantity}</Link>
+          <Link to="/consumidor/carrito" onClick={() => addToCart(product.id, quantity, maximoDe(product))}><ShoppingCart /> Agregar al carrito · {dinero(importe(product.price, product.unit, quantity))}</Link>
         </Button>
 
         {producer && <Link to="/consumidor/productor/$slug" params={{ slug: producer.slug }} className="flex items-center gap-2 border-t border-border pt-5 text-sm text-primary underline-offset-4 hover:underline">

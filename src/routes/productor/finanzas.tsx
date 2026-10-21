@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { dinero } from "@/lib/data";
 import { Landmark, Clock3, CheckCircle2, AlertTriangle } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { productorTabs } from "@/components/tabs";
@@ -78,7 +79,7 @@ function Finanzas() {
                   </div>
                   <div className="text-right">
                     <div className="serif text-base">{money(neto(o))}</div>
-                    <div className="text-[10px] text-muted-foreground">de ${o.subtotal}</div>
+                    <div className="text-[10px] text-muted-foreground">de {dinero(o.subtotal)}</div>
                   </div>
                 </div>
               );

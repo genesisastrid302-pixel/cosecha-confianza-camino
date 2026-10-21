@@ -5,7 +5,7 @@ import { AppShell } from "@/components/AppShell";
 import { QrCode } from "@/components/QrCode";
 import { LinkTrazabilidad } from "@/components/LinkTrazabilidad";
 import { EstadoPedido } from "@/components/EstadoPedido";
-import { getProducer, unitLabel } from "@/lib/data";
+import { getProducer, cantidadTexto, dinero } from "@/lib/data";
 import {
   useOrders,
   updateOrder,
@@ -90,7 +90,7 @@ function Resumen({ order }: { order: Order }) {
           {order.entrega === "domicilio" ? "A domicilio" : "Para recoger"} · {order.direccion}
           <div className="mt-0.5">Pedido {formatTime(order.createdAt)} · {order.pago}</div>
         </div>
-        <div className="serif text-xl">${order.subtotal}</div>
+        <div className="serif text-xl">{dinero(order.subtotal)}</div>
       </div>
       <div className="mt-3 space-y-3">
         {Object.entries(bySlug).map(([slug, items]) => (
@@ -103,7 +103,7 @@ function Resumen({ order }: { order: Order }) {
                 <li key={i.productId} className="flex justify-between">
                   <span>{i.name}</span>
                   <span className="text-muted-foreground">
-                    {i.quantity} {unitLabel(i.unit, i.quantity)}
+                    {cantidadTexto(i.unit, i.quantity)}
                   </span>
                 </li>
               ))}
@@ -178,7 +178,7 @@ function PasoEmpacar({ order, onNext }: { order: Order; onNext: () => void }) {
             </span>
             <span className="flex-1 text-sm">{i.name}</span>
             <span className="text-xs text-muted-foreground">
-              {i.quantity} {unitLabel(i.unit, i.quantity)}
+              {cantidadTexto(i.unit, i.quantity)}
             </span>
           </button>
         );

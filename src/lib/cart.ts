@@ -1,4 +1,15 @@
+import { products } from "@/lib/data";
+
 export type CartLine = { id: string; quantity: number };
+
+/**
+ * Los productos por gramo antes se pedían en kg: una línea guardada con menos
+ * que el mínimo en gramos viene de entonces y se pasa a gramos (2 → 2000 g).
+ */
+function aGramos(line: CartLine): CartLine {
+  const p = products.find((x) => x.id === line.id);
+  return p?.unit === "gramo" && line.quantity < (p.paso ?? 250) ? { ...line, quantity: line.quantity * 1000 } : line;
+}
 
 const KEY = "milpa-cart";
 const EVENT = "milpa-cart-change";
@@ -8,9 +19,9 @@ export function readCart(): CartLine[] {
   try {
     const data: unknown = JSON.parse(window.localStorage.getItem(KEY) || "[]");
     if (!Array.isArray(data)) return [];
-    return data.filter((line): line is CartLine =>
-      typeof line?.id === "string" && Number.isInteger(line?.quantity) && line.quantity > 0,
-    );
+    return data
+      .filter((line): line is CartLine => typeof line?.id === "string" && Number.isInteger(line?.quantity) && line.quantity > 0)
+      .map(aGramos);
   } catch {
     return [];
   }

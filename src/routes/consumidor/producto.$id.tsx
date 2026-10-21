@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
-import { ChevronLeft, Minus, Plus, Leaf, CalendarDays, Sprout, ShoppingBasket } from "lucide-react";
+import { ChevronLeft, Minus, Plus, Leaf, CalendarDays, Sprout, ShoppingCart } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { consumidorTabs } from "@/components/tabs";
 import { Button } from "@/components/ui/button";
@@ -87,7 +87,7 @@ function ProductDetailContent({ product }: { product: (typeof products)[number] 
           </div>
         </div>
         <Button asChild className="h-13 w-full rounded-full text-sm">
-          <Link to="/consumidor/carrito" onClick={() => addToCart(product.id, quantity, product.unitsLeft)}><ShoppingBasket /> Agregar al carrito · ${product.price * quantity}</Link>
+          <Link to="/consumidor/carrito" onClick={() => addToCart(product.id, quantity, product.unitsLeft)}><ShoppingCart /> Agregar al carrito · ${product.price * quantity}</Link>
         </Button>
 
         {producer && <Link to="/consumidor/productor/$slug" params={{ slug: producer.slug }} className="flex items-center gap-2 border-t border-border pt-5 text-sm text-primary underline-offset-4 hover:underline">

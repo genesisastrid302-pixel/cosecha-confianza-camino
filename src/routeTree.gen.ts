@@ -18,6 +18,7 @@ import { Route as ConsumidorCosechaRouteImport } from './routes/consumidor/cosec
 import { Route as ConsumidorNotificacionesRouteImport } from './routes/consumidor/notificaciones'
 import { Route as ConsumidorPedidosRouteImport } from './routes/consumidor/pedidos'
 import { Route as ConsumidorPerfilRouteImport } from './routes/consumidor/perfil'
+import { Route as ConsumidorPlanesRouteImport } from './routes/consumidor/planes'
 import { Route as ConsumidorProductoresRouteImport } from './routes/consumidor/productores'
 import { Route as ConsumidorRecibirRouteImport } from './routes/consumidor/recibir'
 import { Route as DistribuidorIndexRouteImport } from './routes/distribuidor/index'
@@ -40,6 +41,7 @@ import { Route as ProductorPerfilRouteImport } from './routes/productor/perfil'
 import { Route as ProductorTransparenciaRouteImport } from './routes/productor/transparencia'
 import { Route as ConsumidorProductoIdRouteImport } from './routes/consumidor/producto.$id'
 import { Route as ConsumidorProductorSlugRouteImport } from './routes/consumidor/productor.$slug'
+import { Route as ConsumidorSuscripcionPlanRouteImport } from './routes/consumidor/suscripcion.$plan'
 import { Route as DistribuidorEntregaIdRouteImport } from './routes/distribuidor/entrega.$id'
 import { Route as DistribuidorRecoleccionKeyRouteImport } from './routes/distribuidor/recoleccion.$key'
 import { Route as ProductorPedidoIdRouteImport } from './routes/productor/pedido.$id'
@@ -88,6 +90,11 @@ const ConsumidorPedidosRoute = ConsumidorPedidosRouteImport.update({
 const ConsumidorPerfilRoute = ConsumidorPerfilRouteImport.update({
   id: '/consumidor/perfil',
   path: '/consumidor/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConsumidorPlanesRoute = ConsumidorPlanesRouteImport.update({
+  id: '/consumidor/planes',
+  path: '/consumidor/planes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConsumidorProductoresRoute = ConsumidorProductoresRouteImport.update({
@@ -202,6 +209,12 @@ const ConsumidorProductorSlugRoute = ConsumidorProductorSlugRouteImport.update({
   path: '/consumidor/productor/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConsumidorSuscripcionPlanRoute =
+  ConsumidorSuscripcionPlanRouteImport.update({
+    id: '/consumidor/suscripcion/$plan',
+    path: '/consumidor/suscripcion/$plan',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const DistribuidorEntregaIdRoute = DistribuidorEntregaIdRouteImport.update({
   id: '/distribuidor/entrega/$id',
   path: '/distribuidor/entrega/$id',
@@ -228,6 +241,7 @@ export interface FileRoutesByFullPath {
   '/consumidor/notificaciones': typeof ConsumidorNotificacionesRoute
   '/consumidor/pedidos': typeof ConsumidorPedidosRoute
   '/consumidor/perfil': typeof ConsumidorPerfilRoute
+  '/consumidor/planes': typeof ConsumidorPlanesRoute
   '/consumidor/productores': typeof ConsumidorProductoresRoute
   '/consumidor/recibir': typeof ConsumidorRecibirRoute
   '/distribuidor/analytics': typeof DistribuidorAnalyticsRoute
@@ -251,6 +265,7 @@ export interface FileRoutesByFullPath {
   '/productor/': typeof ProductorIndexRoute
   '/consumidor/producto/$id': typeof ConsumidorProductoIdRoute
   '/consumidor/productor/$slug': typeof ConsumidorProductorSlugRoute
+  '/consumidor/suscripcion/$plan': typeof ConsumidorSuscripcionPlanRoute
   '/distribuidor/entrega/$id': typeof DistribuidorEntregaIdRoute
   '/distribuidor/recoleccion/$key': typeof DistribuidorRecoleccionKeyRoute
   '/productor/pedido/$id': typeof ProductorPedidoIdRoute
@@ -264,6 +279,7 @@ export interface FileRoutesByTo {
   '/consumidor/notificaciones': typeof ConsumidorNotificacionesRoute
   '/consumidor/pedidos': typeof ConsumidorPedidosRoute
   '/consumidor/perfil': typeof ConsumidorPerfilRoute
+  '/consumidor/planes': typeof ConsumidorPlanesRoute
   '/consumidor/productores': typeof ConsumidorProductoresRoute
   '/consumidor/recibir': typeof ConsumidorRecibirRoute
   '/distribuidor/analytics': typeof DistribuidorAnalyticsRoute
@@ -287,6 +303,7 @@ export interface FileRoutesByTo {
   '/productor': typeof ProductorIndexRoute
   '/consumidor/producto/$id': typeof ConsumidorProductoIdRoute
   '/consumidor/productor/$slug': typeof ConsumidorProductorSlugRoute
+  '/consumidor/suscripcion/$plan': typeof ConsumidorSuscripcionPlanRoute
   '/distribuidor/entrega/$id': typeof DistribuidorEntregaIdRoute
   '/distribuidor/recoleccion/$key': typeof DistribuidorRecoleccionKeyRoute
   '/productor/pedido/$id': typeof ProductorPedidoIdRoute
@@ -301,6 +318,7 @@ export interface FileRoutesById {
   '/consumidor/notificaciones': typeof ConsumidorNotificacionesRoute
   '/consumidor/pedidos': typeof ConsumidorPedidosRoute
   '/consumidor/perfil': typeof ConsumidorPerfilRoute
+  '/consumidor/planes': typeof ConsumidorPlanesRoute
   '/consumidor/productores': typeof ConsumidorProductoresRoute
   '/consumidor/recibir': typeof ConsumidorRecibirRoute
   '/distribuidor/analytics': typeof DistribuidorAnalyticsRoute
@@ -324,6 +342,7 @@ export interface FileRoutesById {
   '/productor/': typeof ProductorIndexRoute
   '/consumidor/producto/$id': typeof ConsumidorProductoIdRoute
   '/consumidor/productor/$slug': typeof ConsumidorProductorSlugRoute
+  '/consumidor/suscripcion/$plan': typeof ConsumidorSuscripcionPlanRoute
   '/distribuidor/entrega/$id': typeof DistribuidorEntregaIdRoute
   '/distribuidor/recoleccion/$key': typeof DistribuidorRecoleccionKeyRoute
   '/productor/pedido/$id': typeof ProductorPedidoIdRoute
@@ -339,6 +358,7 @@ export interface FileRouteTypes {
     | '/consumidor/notificaciones'
     | '/consumidor/pedidos'
     | '/consumidor/perfil'
+    | '/consumidor/planes'
     | '/consumidor/productores'
     | '/consumidor/recibir'
     | '/distribuidor/analytics'
@@ -362,6 +382,7 @@ export interface FileRouteTypes {
     | '/productor/'
     | '/consumidor/producto/$id'
     | '/consumidor/productor/$slug'
+    | '/consumidor/suscripcion/$plan'
     | '/distribuidor/entrega/$id'
     | '/distribuidor/recoleccion/$key'
     | '/productor/pedido/$id'
@@ -375,6 +396,7 @@ export interface FileRouteTypes {
     | '/consumidor/notificaciones'
     | '/consumidor/pedidos'
     | '/consumidor/perfil'
+    | '/consumidor/planes'
     | '/consumidor/productores'
     | '/consumidor/recibir'
     | '/distribuidor/analytics'
@@ -398,6 +420,7 @@ export interface FileRouteTypes {
     | '/productor'
     | '/consumidor/producto/$id'
     | '/consumidor/productor/$slug'
+    | '/consumidor/suscripcion/$plan'
     | '/distribuidor/entrega/$id'
     | '/distribuidor/recoleccion/$key'
     | '/productor/pedido/$id'
@@ -411,6 +434,7 @@ export interface FileRouteTypes {
     | '/consumidor/notificaciones'
     | '/consumidor/pedidos'
     | '/consumidor/perfil'
+    | '/consumidor/planes'
     | '/consumidor/productores'
     | '/consumidor/recibir'
     | '/distribuidor/analytics'
@@ -434,6 +458,7 @@ export interface FileRouteTypes {
     | '/productor/'
     | '/consumidor/producto/$id'
     | '/consumidor/productor/$slug'
+    | '/consumidor/suscripcion/$plan'
     | '/distribuidor/entrega/$id'
     | '/distribuidor/recoleccion/$key'
     | '/productor/pedido/$id'
@@ -448,6 +473,7 @@ export interface RootRouteChildren {
   ConsumidorNotificacionesRoute: typeof ConsumidorNotificacionesRoute
   ConsumidorPedidosRoute: typeof ConsumidorPedidosRoute
   ConsumidorPerfilRoute: typeof ConsumidorPerfilRoute
+  ConsumidorPlanesRoute: typeof ConsumidorPlanesRoute
   ConsumidorProductoresRoute: typeof ConsumidorProductoresRoute
   ConsumidorRecibirRoute: typeof ConsumidorRecibirRoute
   DistribuidorAnalyticsRoute: typeof DistribuidorAnalyticsRoute
@@ -471,6 +497,7 @@ export interface RootRouteChildren {
   ProductorIndexRoute: typeof ProductorIndexRoute
   ConsumidorProductoIdRoute: typeof ConsumidorProductoIdRoute
   ConsumidorProductorSlugRoute: typeof ConsumidorProductorSlugRoute
+  ConsumidorSuscripcionPlanRoute: typeof ConsumidorSuscripcionPlanRoute
   DistribuidorEntregaIdRoute: typeof DistribuidorEntregaIdRoute
   DistribuidorRecoleccionKeyRoute: typeof DistribuidorRecoleccionKeyRoute
   ProductorPedidoIdRoute: typeof ProductorPedidoIdRoute
@@ -539,6 +566,13 @@ declare module '@tanstack/react-router' {
       path: '/consumidor/perfil'
       fullPath: '/consumidor/perfil'
       preLoaderRoute: typeof ConsumidorPerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/consumidor/planes': {
+      id: '/consumidor/planes'
+      path: '/consumidor/planes'
+      fullPath: '/consumidor/planes'
+      preLoaderRoute: typeof ConsumidorPlanesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/consumidor/productores': {
@@ -695,6 +729,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConsumidorProductorSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/consumidor/suscripcion/$plan': {
+      id: '/consumidor/suscripcion/$plan'
+      path: '/consumidor/suscripcion/$plan'
+      fullPath: '/consumidor/suscripcion/$plan'
+      preLoaderRoute: typeof ConsumidorSuscripcionPlanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/distribuidor/entrega/$id': {
       id: '/distribuidor/entrega/$id'
       path: '/distribuidor/entrega/$id'
@@ -728,6 +769,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConsumidorNotificacionesRoute: ConsumidorNotificacionesRoute,
   ConsumidorPedidosRoute: ConsumidorPedidosRoute,
   ConsumidorPerfilRoute: ConsumidorPerfilRoute,
+  ConsumidorPlanesRoute: ConsumidorPlanesRoute,
   ConsumidorProductoresRoute: ConsumidorProductoresRoute,
   ConsumidorRecibirRoute: ConsumidorRecibirRoute,
   DistribuidorAnalyticsRoute: DistribuidorAnalyticsRoute,
@@ -751,6 +793,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProductorIndexRoute: ProductorIndexRoute,
   ConsumidorProductoIdRoute: ConsumidorProductoIdRoute,
   ConsumidorProductorSlugRoute: ConsumidorProductorSlugRoute,
+  ConsumidorSuscripcionPlanRoute: ConsumidorSuscripcionPlanRoute,
   DistribuidorEntregaIdRoute: DistribuidorEntregaIdRoute,
   DistribuidorRecoleccionKeyRoute: DistribuidorRecoleccionKeyRoute,
   ProductorPedidoIdRoute: ProductorPedidoIdRoute,

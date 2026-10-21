@@ -357,6 +357,9 @@ export function useMisPedidos() {
   return misPedidos(orders);
 }
 
+/** Puntos donde el consumidor puede recoger su canasta */
+export const PUNTOS = ["Local Milpa · Col. Obispado, Monterrey", "Punto Milpa · Mercado Juárez, Centro"];
+
 /** Porcentaje del subtotal que llega a productores (el resto es logística y plataforma) */
 export function shareToProducers(subtotal: number) {
   const total = subtotal + LOGISTICA + PLATAFORMA;

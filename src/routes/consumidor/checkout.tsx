@@ -6,7 +6,7 @@ import { IndicadorCarga } from "@/components/IndicadorCarga";
 import { products, getProducer, unitLabel } from "@/lib/data";
 import { readCart, subscribeCart, writeCart, type CartLine } from "@/lib/cart";
 import { MUNICIPIOS, direccionCompleta, direccionValida, readConsumer, saveConsumer } from "@/lib/accounts";
-import { createOrder, LOGISTICA, PLATAFORMA, shareToProducers, type Entrega, type MetodoPago } from "@/lib/orders";
+import { createOrder, LOGISTICA, PLATAFORMA, PUNTOS, shareToProducers, type Entrega, type MetodoPago } from "@/lib/orders";
 
 export const Route = createFileRoute("/consumidor/checkout")({
   head: () => ({
@@ -17,8 +17,6 @@ export const Route = createFileRoute("/consumidor/checkout")({
   }),
   component: Checkout,
 });
-
-const PUNTOS = ["Local Milpa · Col. Obispado, Monterrey", "Punto Milpa · Mercado Juárez, Centro"];
 
 const PAGOS: { id: MetodoPago; label: string; detail: string; icon: typeof CreditCard }[] = [
   { id: "Tarjeta", label: "Tarjeta", detail: "Débito o crédito", icon: CreditCard },

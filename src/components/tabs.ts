@@ -1,4 +1,4 @@
-import { Sprout, Package, Bell, User, Wallet, Home, ShoppingBasket, HandHeart, ListOrdered, Map, Truck } from "lucide-react";
+import { Sprout, Package, Bell, User, Wallet, Home, ShoppingBasket, CalendarDays, ListOrdered, Map, Truck } from "lucide-react";
 import type { Tab } from "./AppShell";
 
 export const productorTabs: Tab[] = [
@@ -11,7 +11,7 @@ export const productorTabs: Tab[] = [
 
 export const consumidorTabs: Tab[] = [
   { to: "/consumidor", label: "Mercado", icon: Home },
-  { to: "/consumidor/cosecha", label: "Cosecha", icon: HandHeart },
+  { to: "/consumidor/planes", label: "Planes", icon: CalendarDays },
   { to: "/consumidor/carrito", label: "Carrito", icon: ShoppingBasket },
   { to: "/consumidor/pedidos", label: "Pedidos", icon: ListOrdered },
   { to: "/consumidor/perfil", label: "Perfil", icon: User },

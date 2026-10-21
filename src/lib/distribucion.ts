@@ -212,7 +212,15 @@ export function useRutaIniciada() {
 
 // --- Reservas de cosecha compartida (para la proyección de volumen) ---
 
-export type Reserva = { producerSlug: string; plan: string; semanas: number; kgSemana: number; at: string };
+export type Reserva = {
+  producerSlug: string;
+  plan: string;
+  semanas: number;
+  kgSemana: number;
+  at: string;
+  /** Cuenta de consumidor que reservó (las reservas viejas no lo traen) */
+  consumidorId?: string;
+};
 const RESERVAS_KEY = "milpa-reservas";
 
 export function readReservas(): Reserva[] {

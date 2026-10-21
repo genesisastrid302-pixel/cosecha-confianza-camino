@@ -247,10 +247,20 @@
   border-radius: 9999px;
   background: color-mix(in oklch, var(--ink) 35%, transparent);
 }
+/* Sobre fondos oscuros (p. ej. el verde de "Conoce a los productores") la línea va en papel */
+.deslizar-x-claro::-webkit-scrollbar-track {
+  background: color-mix(in oklch, var(--paper) 15%, transparent);
+}
+.deslizar-x-claro::-webkit-scrollbar-thumb {
+  background: color-mix(in oklch, var(--paper) 55%, transparent);
+}
 /* Navegadores sin barra personalizable (Firefox) */
 @supports not selector(::-webkit-scrollbar) {
   .deslizar-x {
     scrollbar-width: thin;
     scrollbar-color: color-mix(in oklch, var(--ink) 35%, transparent) color-mix(in oklch, var(--ink) 5%, transparent);
+  }
+  .deslizar-x-claro {
+    scrollbar-color: color-mix(in oklch, var(--paper) 55%, transparent) color-mix(in oklch, var(--paper) 15%, transparent);
   }
 }

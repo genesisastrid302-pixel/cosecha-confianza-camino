@@ -110,26 +110,37 @@ function AvisoCodigo() {
 /** Carrusel de productores del catálogo; cada tarjeta abre su perfil */
 function ConoceProductores() {
   return (
-    <section aria-labelledby="conoce-productores">
-      <h2 id="conoce-productores" className="serif text-xl">
+    <section aria-labelledby="conoce-productores" className="grain overflow-hidden rounded-3xl bg-primary pt-4 text-primary-foreground">
+      <h2 id="conoce-productores" className="serif px-4 text-xl">
         Conoce a los productores
       </h2>
-      <ul className="deslizar-x -mx-5 mt-3 flex gap-3 px-5 [--riel-margen:1.25rem]">
+      {/* Sin cajas: cada productor va directo sobre el verde, separado solo por el espacio */}
+      <ul className="deslizar-x deslizar-x-claro mt-3 flex gap-4 px-4 pb-4 [--riel-margen:1rem]">
         {Object.values(producers).map((p) => {
           const s = trustScore10(p.slug);
           return (
-            <li key={p.slug} className="w-44 shrink-0">
+            <li key={p.slug} className="w-40 shrink-0">
               <Link
                 to="/consumidor/productor/$slug"
                 params={{ slug: p.slug }}
-                className="flex h-full flex-col rounded-2xl border border-border bg-card p-3 transition active:scale-[0.98]"
+                className="group flex h-full flex-col rounded-2xl transition active:scale-[0.98]"
               >
-                <img src={p.photo} alt="" loading="lazy" className="aspect-[4/3] w-full rounded-xl object-cover" />
-                <span className="serif mt-2.5 block text-base leading-tight">{p.name}</span>
-                <span className="mt-1 line-clamp-2 text-[11px] leading-snug text-muted-foreground">{p.practice}</span>
-                {/* El score queda abajo en todas las tarjetas, con aire aunque la especialidad ocupe dos líneas */}
+                <img
+                  src={p.photo}
+                  alt=""
+                  loading="lazy"
+                  className="aspect-[4/3] w-full rounded-2xl object-cover ring-1 ring-primary-foreground/15"
+                />
+                <span className="serif mt-2.5 block text-base leading-tight group-hover:underline">{p.name}</span>
+                <span className="mt-1 line-clamp-2 text-[11px] leading-snug text-primary-foreground/75">{p.practice}</span>
+                {/* El score queda abajo en todas, con aire aunque la especialidad ocupe dos líneas */}
                 <span className="mt-auto pt-2.5">
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${scoreTone(s)}`}>{formatScore(s)}</span>
+                  {/* Sobre el verde, el score bueno va en papel con letra verde; miel y rojo se quedan como en toda la app */}
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${s >= 8 ? "bg-primary-foreground text-primary" : scoreTone(s)}`}
+                  >
+                    {formatScore(s)}
+                  </span>
                 </span>
               </Link>
             </li>

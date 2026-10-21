@@ -163,7 +163,7 @@ Las tarjetas de suscripción son limpias; las de Cosecha compartida llevan textu
 
 Orden de la pantalla: encabezado "Mercado", el aviso del código de entrega (solo si hay un pedido en camino), **Conoce a los productores**, buscador, filtros y la cuadrícula de cultivos.
 
-- **Conoce a los productores**: carrusel horizontal con los productores del catálogo (`producers` en `src/lib/data.ts`): foto, nombre, especialidad y score. Cada tarjeta abre su perfil.
+- **Conoce a los productores**: panel verde (`--milpa`) con un carrusel horizontal de los productores del catálogo (`producers` en `src/lib/data.ts`): foto, nombre, especialidad y score, directo sobre el verde y sin caja por productor. Cada uno abre su perfil. El score bueno va en papel con letra verde; miel y rojo conservan su color.
 - **Tarjeta de cultivo**, en este orden: nombre del cultivo, quién lo cultivó (verde, con su foto mini, abre su perfil), precio con unidad ("$22 · manojo") y botón **Agregar**, que suma 1 al carrito sin salir del Mercado. Nombre, productor y botón son controles separados, nunca uno dentro de otro.
 
 El carrito usa el ícono de carrito de compras de la misma familia (lucide, trazo 2) que el resto de la barra; los botones que agregan al carrito usan ese mismo ícono.

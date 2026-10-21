@@ -3,7 +3,7 @@ import { useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { productorTabs } from "@/components/tabs";
-import { unitLabel } from "@/lib/data";
+import { cantidadTexto, dinero } from "@/lib/data";
 import { useOrders, STATUS_LABEL, formatTime, type Order, type OrderStatus } from "@/lib/orders";
 
 export const Route = createFileRoute("/productor/pedidos")({
@@ -82,10 +82,10 @@ function OrderCard({ order }: { order: Order }) {
           <div className="text-[10px] uppercase tracking-widest text-muted-foreground">#{order.id} · {formatTime(order.createdAt)}</div>
           <div className="serif mt-1 text-base">{order.cliente} · {order.entrega === "domicilio" ? "Domicilio" : "Recoge"}</div>
           <div className="mt-1 text-xs text-muted-foreground">
-            {order.items.map((i) => `${i.quantity} ${unitLabel(i.unit, i.quantity)} ${i.name.toLowerCase()}`).join(" · ")}
+            {order.items.map((i) => `${cantidadTexto(i.unit, i.quantity)} ${i.name.toLowerCase()}`).join(" · ")}
           </div>
         </div>
-        <div className="serif text-xl">${order.subtotal}</div>
+        <div className="serif text-xl">{dinero(order.subtotal)}</div>
       </div>
       <div className={`mt-3 flex items-center justify-between text-sm ${nuevo ? "text-terracota" : "text-primary"}`}>
         <span>{accion}</span>

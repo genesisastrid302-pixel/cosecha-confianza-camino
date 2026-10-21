@@ -66,9 +66,14 @@ export type Product = {
   name: string;
   producerSlug: string;
   photo: string;
+  /** Precio por kg en productos que se venden por kilo o por gramo; por pieza o manojo en los demás */
   price: number;
+  /** "gramo" = se pide por gramos (en pasos de `paso`); la cantidad del carrito y del pedido va en gramos */
   unit: string;
+  /** Gramos de cada paso y mínimo a pedir, en productos por gramo */
+  paso?: number;
   harvestIn: number; // days
+  /** Existencia: kg en productos por kilo o por gramo; piezas o manojos en los demás */
   unitsLeft: number;
   story: string;
   season: string;
@@ -83,7 +88,7 @@ export const products: Product[] = [
     producerSlug: "santiago",
     photo: tomato,
     price: 68,
-    unit: "kilo",
+    unit: "gramo", paso: 250,
     harvestIn: 3,
     unitsLeft: 14,
     story: "Sembrado el 12 de marzo. Riego por goteo con agua de lluvia captada.",
@@ -97,7 +102,7 @@ export const products: Product[] = [
     producerSlug: "rosa",
     photo: limones,
     price: 38,
-    unit: "kilo",
+    unit: "gramo", paso: 250,
     harvestIn: 0,
     unitsLeft: 9,
     story: "Cortado al amanecer. Cáscara delgada, jugo perfumado.",
@@ -124,7 +129,7 @@ export const products: Product[] = [
     producerSlug: "santiago",
     photo: chiles,
     price: 54,
-    unit: "kilo",
+    unit: "gramo", paso: 100,
     harvestIn: 5,
     unitsLeft: 22,
     story: "Variedades criollas. Picor medio a alto, dependiendo del sol.",
@@ -146,7 +151,7 @@ export const products: Product[] = [
   },
   {
     id: "ejote", name: "Ejote criollo", producerSlug: "rosa", photo: ejote,
-    price: 28, unit: "kilo", harvestIn: 1, unitsLeft: 21,
+    price: 28, unit: "gramo", paso: 250, harvestIn: 1, unitsLeft: 21,
     story: "Vainas frescas seleccionadas a mano.", season: "Primavera–otoño",
     cropPractice: "Coberturas vegetales y cosecha manual en su punto de madurez.",
   },
@@ -218,5 +223,39 @@ export { scoreTone } from "@/lib/score";
 /** Unidad corta para mostrar precios: "kilo" → "kg" */
 export function unitLabel(unit: string, cantidad = 1) {
   if (unit === "kilo") return "kg";
+  if (unit === "gramo") return "g";
   return cantidad === 1 ? unit : `${unit}s`;
 }
+
+/** Unidad en la que se muestra el precio: por gramo también se compara por kg */
+export const unidadPrecio = (unit: string) => (unit === "kilo" || unit === "gramo" ? "kg" : unit);
+
+/** "250 g", "1.25 kg", "2 kg", "3 manojos" */
+export function cantidadTexto(unit: string, cantidad: number) {
+  if (unit === "gramo") return cantidad < 1000 ? `${cantidad} g` : `${+(cantidad / 1000).toFixed(2)} kg`;
+  return `${cantidad} ${unitLabel(unit, cantidad)}`;
+}
+
+/** Lo que cuesta esa cantidad (por gramo el precio es por kg) */
+export const importe = (price: number, unit: string, cantidad: number) =>
+  unit === "gramo" ? Math.round((price * cantidad) / 10) / 100 : price * cantidad;
+
+/** "$186" o "$9.50": centavos solo cuando los hay (al pedir por gramos) */
+export const dinero = (n: number) =>
+  `$${n.toLocaleString("es-MX", { minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 })}`;
+
+/** Suma importes sin arrastrar errores de punto flotante */
+export const sumar = (montos: number[]) => Math.round(montos.reduce((a, b) => a + b, 0) * 100) / 100;
+
+/** Cuánto suma cada toque de + y cuánto es lo mínimo */
+export const pasoDe = (p: Pick<Product, "unit" | "paso">) => (p.unit === "gramo" ? (p.paso ?? 250) : 1);
+
+/** Existencia del cultivo: "14 kg" (también en productos por gramo), "28 manojos" */
+export const existenciaTexto = (p: Pick<Product, "unit" | "unitsLeft">) =>
+  p.unit === "gramo" ? `${p.unitsLeft} kg` : `${p.unitsLeft} ${unitLabel(p.unit, p.unitsLeft)}`;
+
+/** Cantidad de un pedido en la unidad de la existencia (gramos → kg) */
+export const enUnidadDeExistencia = (unit: string, cantidad: number) => (unit === "gramo" ? cantidad / 1000 : cantidad);
+
+/** Máximo que se puede pedir, en la misma unidad que la cantidad del carrito */
+export const maximoDe = (p: Pick<Product, "unit" | "unitsLeft">) => (p.unit === "gramo" ? p.unitsLeft * 1000 : p.unitsLeft);

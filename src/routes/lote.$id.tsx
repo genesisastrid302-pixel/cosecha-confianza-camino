@@ -2,7 +2,7 @@ import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { ChevronLeft, Leaf, MapPin, ShieldCheck, Snowflake, Sprout, Truck } from "lucide-react";
 import { QrCode } from "@/components/QrCode";
 import { EstadoPedido } from "@/components/EstadoPedido";
-import { getProducer, producerDetails, products, trustScore10, unitLabel } from "@/lib/data";
+import { getProducer, producerDetails, products, trustScore10, cantidadTexto } from "@/lib/data";
 import { formatScore, scoreTone } from "@/lib/score";
 import { FLOW, STATUS_LABEL, formatTime, repartidor, useOrders, type Order, type OrderStatus } from "@/lib/orders";
 
@@ -102,7 +102,7 @@ function Detalle({ order }: { order: Order }) {
                     <li key={i.productId} className="py-2.5">
                       <div className="flex items-baseline justify-between gap-3 text-sm">
                         <span className="flex items-center gap-1.5"><Sprout className="h-3.5 w-3.5 text-primary" /> {i.name}</span>
-                        <span className="text-xs text-muted-foreground">{i.quantity} {unitLabel(i.unit, i.quantity)}</span>
+                        <span className="text-xs text-muted-foreground">{cantidadTexto(i.unit, i.quantity)}</span>
                       </div>
                       <p className="mt-0.5 pl-5 text-[11px] leading-relaxed text-muted-foreground">
                         {products.find((x) => x.id === i.productId)?.cropPractice ?? p.practice}

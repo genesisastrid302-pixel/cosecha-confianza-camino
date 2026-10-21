@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Camera, Check, ChevronLeft, QrCode, Snowflake, ThumbsDown, ThumbsUp } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
-import { unitLabel } from "@/lib/data";
+import { cantidadTexto } from "@/lib/data";
 import { useOrders, updateOrder } from "@/lib/orders";
 import { confirmarRecoleccion, paradasRecoleccion } from "@/lib/distribucion";
 import { fileToDataUrl } from "@/lib/producer-store";
@@ -107,7 +107,7 @@ function Recoleccion() {
                           <ul className="mt-1 text-sm">
                             {p.items.map((i) => (
                               <li key={i.productId}>
-                                {i.quantity} {unitLabel(i.unit, i.quantity)} · {i.name}
+                                {cantidadTexto(i.unit, i.quantity)} · {i.name}
                               </li>
                             ))}
                           </ul>

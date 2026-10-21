@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { distribuidorTabs } from "@/components/tabs";
-import { getProducer, products, scoreTone, trustScore10, unitLabel } from "@/lib/data";
+import { dinero, enUnidadDeExistencia, existenciaTexto, getProducer, products, scoreTone, trustScore10, unidadPrecio } from "@/lib/data";
 import { formatScore } from "@/lib/score";
 import { useOrders } from "@/lib/orders";
 import { readReservas, type Reserva } from "@/lib/distribucion";
@@ -49,7 +49,7 @@ function Catalogo() {
   // Cantidad que piden los pedidos en curso, por producto (en la unidad de cada cultivo)
   const pedidos = orders.filter((o) => ["nuevo", "aceptado", "empacado", "en_recoleccion", "en_ruta", "con_problema"].includes(o.status));
   const necesario = new Map<string, number>();
-  pedidos.forEach((o) => o.items.forEach((i) => necesario.set(i.productId, (necesario.get(i.productId) ?? 0) + i.quantity)));
+  pedidos.forEach((o) => o.items.forEach((i) => necesario.set(i.productId, (necesario.get(i.productId) ?? 0) + enUnidadDeExistencia(i.unit, i.quantity))));
   const planeacion = [...necesario.entries()].flatMap(([id, kg]) => {
     const p = products.find((x) => x.id === id);
     return p ? [{ p, kg }] : [];
@@ -80,10 +80,10 @@ function Catalogo() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-2">
                     <div className="serif text-base leading-tight">{p.name}</div>
-                    <div className="shrink-0 text-sm">${p.price}<span className="text-[10px] text-muted-foreground"> / {unitLabel(p.unit)}</span></div>
+                    <div className="shrink-0 text-sm">{dinero(p.price)}<span className="text-[10px] text-muted-foreground"> / {unidadPrecio(p.unit)}</span></div>
                   </div>
                   <div className="mt-0.5 text-[11px] text-muted-foreground">
-                    {p.unitsLeft} {unitLabel(p.unit, p.unitsLeft)} disponibles · {fechaCosecha(p.harvestIn)}
+                    {existenciaTexto(p)} disponibles · {fechaCosecha(p.harvestIn)}
                   </div>
                   <div className="mt-1.5 flex items-center gap-2 text-[11px]">
                     <span>{producer.name}</span>
@@ -107,7 +107,7 @@ function Catalogo() {
                 <div key={p.id} className="rounded-2xl border border-border bg-card p-3">
                   <div className="flex justify-between text-sm">
                     <span>{p.name}</span>
-                    <span className={falta ? "text-destructive" : ""}>{kg} de {p.unitsLeft} {unitLabel(p.unit, p.unitsLeft)}</span>
+                    <span className={falta ? "text-destructive" : ""}>{+kg.toFixed(2)} de {existenciaTexto(p)}</span>
                   </div>
                   <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-secondary">
                     <div className={`h-full rounded-full ${falta ? "bg-destructive" : "bg-primary"}`} style={{ width: `${Math.min(100, (kg / p.unitsLeft) * 100)}%` }} />

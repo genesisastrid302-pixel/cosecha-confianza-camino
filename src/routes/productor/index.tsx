@@ -5,7 +5,7 @@ import { Bell, TrendingDown, CheckCircle2, Clock } from "lucide-react";
 import { useProducer } from "@/lib/producer-store";
 import { ScoreCard } from "@/components/ScoreCard";
 import { pesoPedido, useOrders, updateOrder } from "@/lib/orders";
-import { unitLabel } from "@/lib/data";
+import { cantidadTexto, dinero } from "@/lib/data";
 
 export const Route = createFileRoute("/productor/")({
   head: () => ({ meta: [{ title: "Inicio · Productor — Milpa" }] }),
@@ -64,10 +64,10 @@ function ProductorHome() {
                 <div>
                   <div className="serif text-lg">Pedido #{pendiente.id}</div>
                   <div className="text-xs text-muted-foreground">
-                    {pendiente.cliente} · {pendiente.items.map((i) => `${i.quantity} ${unitLabel(i.unit, i.quantity)} ${i.name.toLowerCase()}`).join(", ")}
+                    {pendiente.cliente} · {pendiente.items.map((i) => `${cantidadTexto(i.unit, i.quantity)} ${i.name.toLowerCase()}`).join(", ")}
                   </div>
                 </div>
-                <div className="serif text-xl text-terracota">${pendiente.subtotal}</div>
+                <div className="serif text-xl text-terracota">{dinero(pendiente.subtotal)}</div>
               </div>
               <div className="mt-3 flex gap-2">
                 <Link

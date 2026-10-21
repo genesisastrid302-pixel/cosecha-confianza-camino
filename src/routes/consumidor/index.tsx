@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { consumidorTabs } from "@/components/tabs";
-import { products, producers, getProducer, trustScore10, scoreTone, unitLabel } from "@/lib/data";
+import { products, producers, getProducer, trustScore10, scoreTone, cantidadTexto, dinero, maximoDe, pasoDe, unidadPrecio } from "@/lib/data";
 import { formatScore } from "@/lib/score";
 import { addToCart } from "@/lib/cart";
 import { Check, Search, ShoppingCart } from "lucide-react";
@@ -184,13 +184,13 @@ function TarjetaProducto({ producto: p }: { producto: (typeof products)[number] 
           <span className="truncate">{prod.name}</span>
         </Link>
         <p className="mt-1 text-sm">
-          ${p.price}
-          <span className="text-[11px] text-muted-foreground"> · {unitLabel(p.unit)}</span>
+          {dinero(p.price)}
+          <span className="text-[11px] text-muted-foreground"> · {unidadPrecio(p.unit)}</span>
         </p>
         <button
           type="button"
           onClick={() => {
-            addToCart(p.id, 1, p.unitsLeft);
+            addToCart(p.id, pasoDe(p), maximoDe(p));
             setAgregado(true);
           }}
           aria-label={agregado ? `${p.name} en tu carrito` : `Agregar ${p.name} al carrito`}
@@ -199,7 +199,8 @@ function TarjetaProducto({ producto: p }: { producto: (typeof products)[number] 
           }`}
         >
           {agregado ? <Check className="h-4 w-4" /> : <ShoppingCart className="h-4 w-4" />}
-          {agregado ? "Agregado" : "Agregar"}
+          {/* Por gramos se dice cuánto suma cada toque */}
+          {agregado ? "Agregado" : p.unit === "gramo" ? `Agregar ${cantidadTexto(p.unit, pasoDe(p))}` : "Agregar"}
         </button>
         <span className="sr-only" aria-live="polite">
           {agregado ? `${p.name} se agregó a tu carrito` : ""}

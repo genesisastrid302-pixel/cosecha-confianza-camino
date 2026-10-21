@@ -133,7 +133,7 @@ El encabezado de cada pantalla es sólido y el contenido empieza debajo de la ba
 
 Las filas que se deslizan hacia los lados (filtros, fotos, productos relacionados) usan la clase `deslizar-x`: su barra mide lo mismo que la línea vertical (3 px, mismo riel y color, sin flechas).
 
-Toda pantalla con más contenido del que cabe muestra una línea de scroll vertical a la derecha (`IndicadorScroll` en el marco de la app); termina arriba de la barra de pestañas.
+Toda pantalla con más contenido del que cabe muestra una línea de scroll vertical a la derecha (`IndicadorScroll` en el marco de la app); termina arriba de la barra de pestañas y se desvanece cuando no se desliza (ver **Línea de scroll**).
 
 ## Carga
 
@@ -167,3 +167,11 @@ Orden de la pantalla: encabezado "Mercado", el aviso del código de entrega (sol
 - **Tarjeta de cultivo**, en este orden: nombre del cultivo, quién lo cultivó (verde, con su foto mini, abre su perfil), precio con unidad ("$22 · manojo") y botón **Agregar**, que suma 1 al carrito sin salir del Mercado. Nombre, productor y botón son controles separados, nunca uno dentro de otro.
 
 El carrito usa el ícono de carrito de compras de la misma familia (lucide, trazo 2) que el resto de la barra; los botones que agregan al carrito usan ese mismo ícono.
+
+## Cantidades por gramo
+
+Jitomate, limón y ejote se piden de **250 en 250 g**; chiles de **100 en 100 g** (`unit: "gramo"` y `paso` en `src/lib/data.ts`). El precio se sigue mostrando por kg y la existencia en kg. En carrito y pedidos la cantidad va en gramos y se muestra como "250 g" o "1.25 kg" (`cantidadTexto`); el importe sale de `importe()` y los montos con centavos se muestran como "$5.40" (`dinero()`). Los pedidos anteriores conservan su unidad ("kilo"). Un carrito guardado en kg se pasa a gramos al leerlo.
+
+## Línea de scroll
+
+La línea vertical aparece al entrar a una pantalla y mientras se desliza, y se desvanece tras 1.2 s quieta, para no quedarse encima de las fotos.

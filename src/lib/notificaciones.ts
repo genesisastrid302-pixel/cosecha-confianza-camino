@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { getProducer, unitLabel } from "@/lib/data";
+import { getProducer, cantidadTexto } from "@/lib/data";
 import { codigoDe, misPedidos, repartidor, tituloPedidoProductor, useOrders, type Order, type OrderStatus } from "@/lib/orders";
 import { LOCAL_DISTRIBUIDOR, fueEntregado, readReservas } from "@/lib/distribucion";
 import { APORTACION_SOCIO, listarCuentas } from "@/lib/producer-store";
@@ -27,7 +27,7 @@ export type Aviso = {
   alerta?: boolean;
 };
 
-const resumen = (o: Order) => o.items.map((i) => `${i.quantity} ${unitLabel(i.unit, i.quantity)} ${i.name.toLowerCase()}`).join(", ");
+const resumen = (o: Order) => o.items.map((i) => `${cantidadTexto(i.unit, i.quantity)} ${i.name.toLowerCase()}`).join(", ");
 const nombres = (o: Order) => [...new Set(o.items.map((i) => getProducer(i.producerSlug).name.split(" ")[0]))].join(" y ");
 
 function deUnPedido(rol: Rol, o: Order): Aviso[] {

@@ -34,6 +34,8 @@ import { Route as LoginRolRouteImport } from './routes/login.rol'
 import { Route as LoteIdRouteImport } from './routes/lote.$id'
 import { Route as ProductorIndexRouteImport } from './routes/productor/index'
 import { Route as ProductorCatalogoRouteImport } from './routes/productor/catalogo'
+import { Route as ProductorCosechaCompartidaRouteImport } from './routes/productor/cosecha-compartida'
+import { Route as ProductorCultivosRouteImport } from './routes/productor/cultivos'
 import { Route as ProductorFinanzasRouteImport } from './routes/productor/finanzas'
 import { Route as ProductorNotificacionesRouteImport } from './routes/productor/notificaciones'
 import { Route as ProductorPedidosRouteImport } from './routes/productor/pedidos'
@@ -174,6 +176,17 @@ const ProductorCatalogoRoute = ProductorCatalogoRouteImport.update({
   path: '/productor/catalogo',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProductorCosechaCompartidaRoute =
+  ProductorCosechaCompartidaRouteImport.update({
+    id: '/productor/cosecha-compartida',
+    path: '/productor/cosecha-compartida',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ProductorCultivosRoute = ProductorCultivosRouteImport.update({
+  id: '/productor/cultivos',
+  path: '/productor/cultivos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProductorFinanzasRoute = ProductorFinanzasRouteImport.update({
   id: '/productor/finanzas',
   path: '/productor/finanzas',
@@ -254,6 +267,8 @@ export interface FileRoutesByFullPath {
   '/login/rol': typeof LoginRolRoute
   '/lote/$id': typeof LoteIdRoute
   '/productor/catalogo': typeof ProductorCatalogoRoute
+  '/productor/cosecha-compartida': typeof ProductorCosechaCompartidaRoute
+  '/productor/cultivos': typeof ProductorCultivosRoute
   '/productor/finanzas': typeof ProductorFinanzasRoute
   '/productor/notificaciones': typeof ProductorNotificacionesRoute
   '/productor/pedidos': typeof ProductorPedidosRoute
@@ -292,6 +307,8 @@ export interface FileRoutesByTo {
   '/login/rol': typeof LoginRolRoute
   '/lote/$id': typeof LoteIdRoute
   '/productor/catalogo': typeof ProductorCatalogoRoute
+  '/productor/cosecha-compartida': typeof ProductorCosechaCompartidaRoute
+  '/productor/cultivos': typeof ProductorCultivosRoute
   '/productor/finanzas': typeof ProductorFinanzasRoute
   '/productor/notificaciones': typeof ProductorNotificacionesRoute
   '/productor/pedidos': typeof ProductorPedidosRoute
@@ -331,6 +348,8 @@ export interface FileRoutesById {
   '/login/rol': typeof LoginRolRoute
   '/lote/$id': typeof LoteIdRoute
   '/productor/catalogo': typeof ProductorCatalogoRoute
+  '/productor/cosecha-compartida': typeof ProductorCosechaCompartidaRoute
+  '/productor/cultivos': typeof ProductorCultivosRoute
   '/productor/finanzas': typeof ProductorFinanzasRoute
   '/productor/notificaciones': typeof ProductorNotificacionesRoute
   '/productor/pedidos': typeof ProductorPedidosRoute
@@ -371,6 +390,8 @@ export interface FileRouteTypes {
     | '/login/rol'
     | '/lote/$id'
     | '/productor/catalogo'
+    | '/productor/cosecha-compartida'
+    | '/productor/cultivos'
     | '/productor/finanzas'
     | '/productor/notificaciones'
     | '/productor/pedidos'
@@ -409,6 +430,8 @@ export interface FileRouteTypes {
     | '/login/rol'
     | '/lote/$id'
     | '/productor/catalogo'
+    | '/productor/cosecha-compartida'
+    | '/productor/cultivos'
     | '/productor/finanzas'
     | '/productor/notificaciones'
     | '/productor/pedidos'
@@ -447,6 +470,8 @@ export interface FileRouteTypes {
     | '/login/rol'
     | '/lote/$id'
     | '/productor/catalogo'
+    | '/productor/cosecha-compartida'
+    | '/productor/cultivos'
     | '/productor/finanzas'
     | '/productor/notificaciones'
     | '/productor/pedidos'
@@ -486,6 +511,8 @@ export interface RootRouteChildren {
   LoginRolRoute: typeof LoginRolRoute
   LoteIdRoute: typeof LoteIdRoute
   ProductorCatalogoRoute: typeof ProductorCatalogoRoute
+  ProductorCosechaCompartidaRoute: typeof ProductorCosechaCompartidaRoute
+  ProductorCultivosRoute: typeof ProductorCultivosRoute
   ProductorFinanzasRoute: typeof ProductorFinanzasRoute
   ProductorNotificacionesRoute: typeof ProductorNotificacionesRoute
   ProductorPedidosRoute: typeof ProductorPedidosRoute
@@ -680,6 +707,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductorCatalogoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/productor/cosecha-compartida': {
+      id: '/productor/cosecha-compartida'
+      path: '/productor/cosecha-compartida'
+      fullPath: '/productor/cosecha-compartida'
+      preLoaderRoute: typeof ProductorCosechaCompartidaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/productor/cultivos': {
+      id: '/productor/cultivos'
+      path: '/productor/cultivos'
+      fullPath: '/productor/cultivos'
+      preLoaderRoute: typeof ProductorCultivosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/productor/finanzas': {
       id: '/productor/finanzas'
       path: '/productor/finanzas'
@@ -782,6 +823,8 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRolRoute: LoginRolRoute,
   LoteIdRoute: LoteIdRoute,
   ProductorCatalogoRoute: ProductorCatalogoRoute,
+  ProductorCosechaCompartidaRoute: ProductorCosechaCompartidaRoute,
+  ProductorCultivosRoute: ProductorCultivosRoute,
   ProductorFinanzasRoute: ProductorFinanzasRoute,
   ProductorNotificacionesRoute: ProductorNotificacionesRoute,
   ProductorPedidosRoute: ProductorPedidosRoute,

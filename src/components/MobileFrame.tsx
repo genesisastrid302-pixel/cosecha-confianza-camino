@@ -37,7 +37,8 @@ export function MobileFrame({ children }: { children: ReactNode }) {
         <div className="hidden md:block absolute -inset-2 rounded-[3rem] bg-ink/95 shadow-[0_30px_80px_-30px_rgba(60,40,20,0.5)]" />
         <div className="hidden md:block absolute -inset-[1px] rounded-[2.6rem] bg-gradient-to-b from-ink/70 to-ink/40" />
 
-        <div className="relative h-[100dvh] w-full overflow-hidden bg-background md:h-[860px] md:w-[420px] md:rounded-[2.4rem]">
+        {/* id="marco-app": las hojas y diálogos se montan aquí para cubrir la pantalla del teléfono, no el contenido que se desliza */}
+        <div id="marco-app" className="relative h-[100dvh] w-full overflow-hidden bg-background md:h-[860px] md:w-[420px] md:rounded-[2.4rem]">
           {/* iOS-style notch (desktop only) */}
           <div className="hidden md:block pointer-events-none absolute left-1/2 top-2 z-50 h-7 w-32 -translate-x-1/2 rounded-full bg-ink" />
 

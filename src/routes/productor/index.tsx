@@ -49,7 +49,7 @@ function ProductorHome() {
           <div className="eyebrow">Acciones rápidas</div>
           <div className="mt-3 grid grid-cols-2 gap-3">
             <ActionCard to="/productor/transparencia" title="Transparencia" subtitle="Subir evidencia del cultivo" />
-            <ActionCard to="/productor/catalogo" title="Catálogo" subtitle="Agregar cultivo o temporada" />
+            <ActionCard to="/productor/cultivos" title="Cultivos" subtitle="Cultivos actuales y cosecha compartida" />
             <ActionCard to="/productor/pedidos" title="Pedidos" subtitle={nuevos.length ? `${nuevos.length} por confirmar` : "Sin pendientes"} highlight={nuevos.length > 0} />
             <ActionCard to="/productor/finanzas" title="Finanzas" subtitle="Ventas y aportación" />
           </div>

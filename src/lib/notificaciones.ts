@@ -133,7 +133,7 @@ export function avisosDe(rol: Rol, orders: Order[]): Aviso[] {
         at: r.at,
         titulo: "Nueva reserva de cosecha compartida",
         detalle: `Plan ${r.plan} · ${r.semanas} semanas · ${r.kgSemana} kg por semana.`,
-        href: "/productor/catalogo",
+        href: "/productor/cosecha-compartida",
       }),
     );
   }

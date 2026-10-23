@@ -74,7 +74,7 @@ Validación por sistema en 3 capas, como en el modelo de negocio (`src/lib/score
 - **Productor nuevo**: mientras tenga menos de 10 reseñas no muestra score; lleva una estampa roja "Nuevo" sobre su foto y ve su avance (x/10 reseñas). Al registrarse como nuevo debe subir entre 5 y 15 fotos de su campo.
 - **Consistencia de datos · 30 %**: información básica completa (datos de contacto, identificación, historia, ubicación, cuenta de cobro, acuerdo de socio y fotos del campo). Completarla da el 30 % del score.
 - El score del productor se muestra con una sola tarjeta (`src/components/ScoreCard.tsx`) en Inicio y en Transparencia; debe coincidir con el que ve el consumidor.
-- Los nombres de los enlaces y accesos coinciden con el título de la pantalla a la que llevan (Transparencia, Catálogo, Pedidos, Finanzas).
+- Los nombres de los enlaces y accesos coinciden con el título de la pantalla a la que llevan (Transparencia, Cultivos, Pedidos, Finanzas).
 - **Registro del distribuidor · 30 %**: entregas a tiempo y estado del producto al recolectar.
 - Colores: verde ≥ 8, amarillo ≥ 5, rojo < 5. Siempre se muestra como `9.4/10`. El mercado muestra primero a los productores con mejor score.
 - Solo califica quien compró, y solo dentro de la app.
@@ -175,3 +175,15 @@ Jitomate, limón y ejote se piden de **250 en 250 g**; chiles de **100 en 100 g*
 ## Línea de scroll
 
 La línea vertical aparece al entrar a una pantalla y mientras se desliza, y se desvanece tras 1.2 s quieta, para no quedarse encima de las fotos.
+
+## Cultivos del productor
+
+La pestaña del productor se llama **Cultivos** (antes "Catálogo"; `/productor/catalogo` redirige). Tiene dos pestañas:
+- **Cultivos actuales**: lo que publica para el Mercado, con filtros por estado (disponible, próximamente, agotado), demanda y acciones rápidas.
+- **Cosecha compartida**: sus cosechas publicadas (cultivo, fecha estimada, kg esperados, niveles, precio "desde" y postales de campo) y el botón para publicar una nueva. `/productor/cosecha-compartida` abre esta pestaña (lo usan los avisos de reservas).
+
+El botón de arriba cambia según la pestaña: "Agregar" cultivo o "Publicar" cosecha.
+
+## Hojas (bottom sheets)
+
+Los formularios que suben desde abajo usan `HojaInferior` (`src/components/HojaInferior.tsx`). Se montan en el marco de la app (`#marco-app`), así cubren la pantalla del teléfono aunque el contenido de atrás esté deslizado. Se cierran con la X, tocando fuera o con Escape, y usan la línea de scroll delgada de la app (`.deslizar-y`), sin la barra nativa.

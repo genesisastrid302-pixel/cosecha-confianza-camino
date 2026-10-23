@@ -247,6 +247,27 @@
   border-radius: 9999px;
   background: color-mix(in oklch, var(--ink) 35%, transparent);
 }
+/* Contenido que se desliza hacia abajo dentro de una hoja: misma línea delgada, sin flechas */
+.deslizar-y {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklch, var(--ink) 35%, transparent) transparent;
+}
+.deslizar-y::-webkit-scrollbar {
+  width: 3px;
+}
+.deslizar-y::-webkit-scrollbar-button {
+  display: none;
+  height: 0;
+}
+.deslizar-y::-webkit-scrollbar-track {
+  margin-block: 1.5rem;
+  background: transparent;
+}
+.deslizar-y::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background: color-mix(in oklch, var(--ink) 35%, transparent);
+}
 /* Sobre fondos oscuros (p. ej. el verde de "Conoce a los productores") la línea va en papel */
 .deslizar-x-claro::-webkit-scrollbar-track {
   background: color-mix(in oklch, var(--paper) 15%, transparent);

@@ -162,7 +162,7 @@ function Perfil() {
           <div className="mt-3 divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
             <LinkFila to="/productor/finanzas" label="Finanzas" detail="Ventas, aportación y pagos" />
             <LinkFila to="/productor/transparencia" label="Transparencia" detail="Evidencia de tu cultivo" />
-            <LinkFila to="/productor/catalogo" label="Catálogo" detail={`${state.crops.length} cultivos · ${state.cosechas.length} cosechas compartidas`} />
+            <LinkFila to="/productor/cultivos" label="Cultivos" detail={`${state.crops.length} cultivos · ${state.cosechas.length} cosechas compartidas`} />
           </div>
         </section>
 
@@ -332,7 +332,7 @@ function EditarFotos({ p }: { p: ProducerProfile }) {
   );
 }
 
-function LinkFila({ to, label, detail }: { to: "/productor/finanzas" | "/productor/transparencia" | "/productor/catalogo"; label: string; detail: string }) {
+function LinkFila({ to, label, detail }: { to: "/productor/finanzas" | "/productor/transparencia" | "/productor/cultivos"; label: string; detail: string }) {
   return (
     <Link to={to} className="flex w-full items-center justify-between px-4 py-3.5 text-sm">
       <span>{label}</span>

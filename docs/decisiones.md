@@ -184,6 +184,8 @@ La pestaña del productor se llama **Cultivos** (antes "Catálogo"; `/productor/
 
 El botón de arriba cambia según la pestaña: "Agregar" cultivo o "Publicar" cosecha.
 
+Fotos guardadas: al publicar, cada imagen de la app lleva un código que cambia si se cambia el archivo. Al leer un productor guardado, la foto de cada cultivo del catálogo se toma del catálogo vigente (por su id) y las del perfil se actualizan por nombre de archivo; las fotos que sube el productor no se tocan. Si una foto no carga se muestra un brote, nunca el ícono de imagen rota.
+
 ## Hojas (bottom sheets)
 
 Los formularios que suben desde abajo usan `HojaInferior` (`src/components/HojaInferior.tsx`). Se montan en el marco de la app (`#marco-app`), así cubren la pantalla del teléfono aunque el contenido de atrás esté deslizado. Se cierran con la X, tocando fuera o con Escape, y usan la línea de scroll delgada de la app (`.deslizar-y`), sin la barra nativa.

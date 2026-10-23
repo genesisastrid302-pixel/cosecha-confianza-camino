@@ -103,6 +103,18 @@ function Cultivos() {
   );
 }
 
+/** Foto del cultivo; si no carga, un brote en su lugar (nunca el ícono de imagen rota) */
+function FotoCultivo({ src, alt }: { src: string; alt: string }) {
+  const [fallo, setFallo] = useState(false);
+  if (!src || fallo)
+    return (
+      <span role="img" aria-label={alt} className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+        <Sprout className="h-7 w-7" aria-hidden />
+      </span>
+    );
+  return <img src={src} alt={alt} onError={() => setFallo(true)} className="h-20 w-20 shrink-0 rounded-xl object-cover" />;
+}
+
 /** Lo que hoy se puede pedir en el Mercado, se agotó o viene pronto */
 function CultivosActuales({ crops, onEditar }: { crops: Crop[]; onEditar: (c: Crop | "new") => void }) {
   const [filter, setFilter] = useState<CropStatus | "todos">("todos");
@@ -128,7 +140,7 @@ function CultivosActuales({ crops, onEditar }: { crops: Crop[]; onEditar: (c: Cr
         const demand = p.kgEstimated > 0 ? Math.round(((p.kgEstimated - p.kgAvailable) / p.kgEstimated) * 100) : 0;
         return (
           <div key={p.id} className="flex gap-3 rounded-2xl border border-border bg-card p-3">
-            <img src={p.photo} alt={p.name} className="h-20 w-20 shrink-0 rounded-xl object-cover" />
+            <FotoCultivo src={p.photo} alt={p.name} />
             <div className="min-w-0 flex-1">
               <div className="flex items-baseline justify-between gap-2">
                 <h3 className="serif truncate text-lg leading-tight">{p.name}</h3>

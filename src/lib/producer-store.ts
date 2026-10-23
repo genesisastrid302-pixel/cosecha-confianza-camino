@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getProductsByProducer, producerDetails, producers } from "@/lib/data";
+import { getProductsByProducer, producerDetails, producers, products } from "@/lib/data";
 import { SCORE_LAYERS, score10 } from "@/lib/score";
 import { coincide, iniciarSesion, sesionDe, suscribirSesion } from "@/lib/acceso";
 
@@ -201,13 +201,47 @@ function vacio(): ProducerState {
 const CUENTAS_KEY = "milpa-productores";
 export const DEMO_ID = "demo";
 
+/**
+ * Las fotos de la app se publican con un código que cambia cada vez que se cambia
+ * el archivo (p. ej. /assets/product-calabaza-B0c3gDx6.jpg). Lo guardado en el
+ * navegador puede traer la dirección vieja; aquí se cambia por la actual usando
+ * el nombre del archivo. Las fotos que sube el productor (data:) no se tocan.
+ */
+function nombreDeFoto(url: string) {
+  const m = url.match(/\/assets\/([^/?#]+?)\.(?:jpe?g|png|webp|avif)(?:[?#].*)?$/i);
+  if (!m) return undefined;
+  // Quita el código solo si de verdad lo es: 8 caracteres con al menos una mayúscula, número o "_"
+  // (así "product-calabaza" no se confunde con "product" + código)
+  const conCodigo = m[1].match(/^(.+)-([\w-]{8})$/);
+  return conCodigo && /[A-Z0-9_]/.test(conCodigo[2]) ? conCodigo[1] : m[1];
+}
+let fotosActuales: Map<string, string> | null = null;
+function fotoActual(url: string) {
+  if (!url || url.startsWith("data:")) return url;
+  fotosActuales ??= new Map(
+    [...Object.values(producers).map((p) => p.photo), ...Object.values(producerDetails).flatMap((d) => d.gallery)]
+      .map((u) => [nombreDeFoto(u) ?? "", u] as const)
+      .filter(([nombre]) => nombre),
+  );
+  const nombre = nombreDeFoto(url);
+  return (nombre && fotosActuales.get(nombre)) || url;
+}
+
+/** Foto de un cultivo: si es uno del catálogo y no subió una propia, la del catálogo vigente */
+function fotoDeCultivo(c: Crop) {
+  if (c.photo?.startsWith("data:")) return c.photo;
+  return products.find((p) => p.id === c.id)?.photo ?? c.photo;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function normalizar(parsed: any): ProducerState {
   // Perfiles guardados antes de agregar correo, teléfono y cuenta de cobro
   const profile = { ...EMPTY_PROFILE, ...parsed.profile };
   // Antes se guardaba un solo método en "pago"
   if (parsed.profile?.pago && !parsed.profile?.pagos) profile.pagos = [parsed.profile.pago];
-  return { ...seed(), ...parsed, profile };
+  profile.photos = (profile.photos ?? []).map(fotoActual);
+  const st: ProducerState = { ...seed(), ...parsed, profile };
+  return { ...st, crops: st.crops.map((c) => ({ ...c, photo: fotoDeCultivo(c) })) };
 }
 
 function readCuentas(): Record<string, ProducerState> {

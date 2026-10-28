@@ -5,7 +5,7 @@ import { consumidorTabs } from "@/components/tabs";
 import { products, producers, getProducer, trustScore10, scoreTone, cantidadTexto, dinero, maximoDe, pasoDe, unidadPrecio } from "@/lib/data";
 import { formatScore } from "@/lib/score";
 import { addToCart } from "@/lib/cart";
-import { Check, Search, ShoppingCart } from "lucide-react";
+import { Check, ChevronRight, Search, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { codigoDe, muestraCodigo, pedidosEnCurso, STATUS_LABEL, useMisPedidos, repartidor } from "@/lib/orders";
 
@@ -111,8 +111,11 @@ function AvisoCodigo() {
 function ConoceProductores() {
   return (
     <section aria-labelledby="conoce-productores" className="grain overflow-hidden rounded-3xl bg-primary pt-4 text-primary-foreground">
+      {/* El título abre la lista completa; el carrusel solo se desliza */}
       <h2 id="conoce-productores" className="serif px-4 text-xl">
-        Conoce a los productores
+        <Link to="/consumidor/productores" className="inline-flex items-center gap-1">
+          Conoce a los productores <ChevronRight className="h-4 w-4 opacity-80" aria-hidden />
+        </Link>
       </h2>
       {/* Sin cajas: cada productor va directo sobre el verde, separado solo por el espacio */}
       <ul className="deslizar-x deslizar-x-claro mt-3 flex gap-4 px-4 pb-4 [--riel-margen:1rem]">

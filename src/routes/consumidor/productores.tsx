@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { ChevronLeft } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { consumidorTabs } from "@/components/tabs";
 import { producers } from "@/lib/data";
@@ -6,11 +7,23 @@ import { formatScore } from "@/lib/score";
 import { trustScore10 } from "@/lib/data";
 
 export const Route = createFileRoute("/consumidor/productores")({
-  head: () => ({ meta: [{ title: "Productores · Milpa" }] }),
+  head: () => ({ meta: [{ title: "Conoce a los productores · Milpa" }] }),
   component: () => (
-    <AppShell tabs={consumidorTabs} tone="terracota" eyebrow="Cerca de ti" title="Productores">
+    <AppShell
+      tabs={consumidorTabs}
+      tone="terracota"
+      eyebrow="Cerca de ti"
+      title="Conoce a los productores"
+      back={
+        <Link to="/consumidor" aria-label="Volver al Mercado" className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary">
+          <ChevronLeft className="h-5 w-5" />
+        </Link>
+      }
+    >
       <div className="space-y-3 px-5">
-        {Object.values(producers).map((p) => (
+        {Object.values(producers)
+          .sort((a, b) => trustScore10(b.slug) - trustScore10(a.slug))
+          .map((p) => (
           <Link to="/consumidor/productor/$slug" params={{ slug: p.slug }} key={p.slug} className="flex gap-3 rounded-2xl border border-border bg-card p-3">
             <img src={p.photo} alt={p.name} className="h-20 w-20 rounded-xl object-cover" />
             <div className="flex-1">

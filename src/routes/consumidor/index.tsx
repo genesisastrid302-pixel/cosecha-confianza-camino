@@ -5,7 +5,9 @@ import { consumidorTabs } from "@/components/tabs";
 import { products, producers, getProducer, trustScore10, scoreTone, cantidadTexto, dinero, maximoDe, pasoDe, unidadPrecio } from "@/lib/data";
 import { formatScore } from "@/lib/score";
 import { addToCart } from "@/lib/cart";
-import { Check, ChevronRight, Search, ShoppingCart } from "lucide-react";
+import { Check, ChevronRight, Search, ShoppingCart, Sprout } from "lucide-react";
+import { NuevoStamp } from "@/components/NuevoStamp";
+import { useProductoresRegistrados } from "@/lib/producer-store";
 import { Button } from "@/components/ui/button";
 import { codigoDe, muestraCodigo, pedidosEnCurso, STATUS_LABEL, useMisPedidos, repartidor } from "@/lib/orders";
 
@@ -109,6 +111,7 @@ function AvisoCodigo() {
 
 /** Carrusel de productores del catálogo; cada tarjeta abre su perfil */
 function ConoceProductores() {
+  const [registrados] = useProductoresRegistrados();
   return (
     <section aria-labelledby="conoce-productores" className="grain overflow-hidden rounded-3xl bg-primary pt-4 text-primary-foreground">
       {/* El título abre la lista completa; el carrusel solo se desliza */}
@@ -119,8 +122,14 @@ function ConoceProductores() {
       </h2>
       {/* Sin cajas: cada productor va directo sobre el verde, separado solo por el espacio */}
       <ul className="deslizar-x deslizar-x-claro mt-3 flex gap-4 px-4 pb-4 [--riel-margen:1rem]">
-        {Object.values(producers).map((p) => {
-          const s = trustScore10(p.slug);
+        {/* Catálogo primero, por score; los registrados en la app después, con sus reglas de "Nuevo" */}
+        {[
+          ...Object.values(producers).map((p) => ({ slug: p.slug, name: p.name, texto: p.practice, photo: p.photo as string | undefined, score: trustScore10(p.slug) as number | null, nuevo: false })),
+          ...registrados.map((r) => ({ slug: r.id, name: r.name, texto: r.story, photo: r.photos[0], score: r.score, nuevo: r.nuevo })),
+        ]
+          .sort((a, b) => (b.score ?? -1) - (a.score ?? -1))
+          .map((p) => {
+          const s = p.score ?? 0;
           return (
             <li key={p.slug} className="w-40 shrink-0">
               <Link
@@ -128,22 +137,36 @@ function ConoceProductores() {
                 params={{ slug: p.slug }}
                 className="group flex h-full flex-col rounded-2xl transition active:scale-[0.98]"
               >
-                <img
-                  src={p.photo}
-                  alt=""
-                  loading="lazy"
-                  className="aspect-[4/3] w-full rounded-2xl object-cover ring-1 ring-primary-foreground/15"
-                />
+                <span className="relative block">
+                  {p.photo ? (
+                    <img
+                      src={p.photo}
+                      alt=""
+                      loading="lazy"
+                      className="aspect-[4/3] w-full rounded-2xl object-cover ring-1 ring-primary-foreground/15"
+                    />
+                  ) : (
+                    <span className="flex aspect-[4/3] w-full items-center justify-center rounded-2xl bg-primary-foreground/10 ring-1 ring-primary-foreground/15">
+                      <Sprout className="h-8 w-8 opacity-80" />
+                    </span>
+                  )}
+                  {p.nuevo && <NuevoStamp size={40} className="absolute -left-1.5 -top-1.5" />}
+                </span>
                 <span className="serif mt-2.5 block text-base leading-tight group-hover:underline">{p.name}</span>
-                <span className="mt-1 line-clamp-2 text-[11px] leading-snug text-primary-foreground/75">{p.practice}</span>
+                <span className="mt-1 line-clamp-2 text-[11px] leading-snug text-primary-foreground/75">{p.texto}</span>
                 {/* El score queda abajo en todas, con aire aunque la especialidad ocupe dos líneas */}
                 <span className="mt-auto pt-2.5">
-                  {/* Sobre el verde, el score bueno va en papel con letra verde; miel y rojo se quedan como en toda la app */}
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${s >= 8 ? "bg-primary-foreground text-primary" : scoreTone(s)}`}
-                  >
-                    {formatScore(s)}
-                  </span>
+                  {p.nuevo ? (
+                    // Sin score hasta juntar sus reseñas: solo la marca de nuevo
+                    <span className="rounded-full bg-primary-foreground/15 px-2 py-0.5 text-[10px] font-medium">Nuevo</span>
+                  ) : (
+                    // Sobre el verde, el score bueno va en papel con letra verde; miel y rojo se quedan como en toda la app
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${s >= 8 ? "bg-primary-foreground text-primary" : scoreTone(s)}`}
+                    >
+                      {formatScore(s)}
+                    </span>
+                  )}
                 </span>
               </Link>
             </li>

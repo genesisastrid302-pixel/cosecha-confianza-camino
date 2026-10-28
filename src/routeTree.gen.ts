@@ -19,6 +19,7 @@ import { Route as ConsumidorNotificacionesRouteImport } from './routes/consumido
 import { Route as ConsumidorPedidosRouteImport } from './routes/consumidor/pedidos'
 import { Route as ConsumidorPerfilRouteImport } from './routes/consumidor/perfil'
 import { Route as ConsumidorPlanesRouteImport } from './routes/consumidor/planes'
+import { Route as ConsumidorProductoresRouteImport } from './routes/consumidor/productores'
 import { Route as ConsumidorRecibirRouteImport } from './routes/consumidor/recibir'
 import { Route as DistribuidorIndexRouteImport } from './routes/distribuidor/index'
 import { Route as DistribuidorAnalyticsRouteImport } from './routes/distribuidor/analytics'
@@ -96,6 +97,11 @@ const ConsumidorPerfilRoute = ConsumidorPerfilRouteImport.update({
 const ConsumidorPlanesRoute = ConsumidorPlanesRouteImport.update({
   id: '/consumidor/planes',
   path: '/consumidor/planes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConsumidorProductoresRoute = ConsumidorProductoresRouteImport.update({
+  id: '/consumidor/productores',
+  path: '/consumidor/productores',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConsumidorRecibirRoute = ConsumidorRecibirRouteImport.update({
@@ -249,6 +255,7 @@ export interface FileRoutesByFullPath {
   '/consumidor/pedidos': typeof ConsumidorPedidosRoute
   '/consumidor/perfil': typeof ConsumidorPerfilRoute
   '/consumidor/planes': typeof ConsumidorPlanesRoute
+  '/consumidor/productores': typeof ConsumidorProductoresRoute
   '/consumidor/recibir': typeof ConsumidorRecibirRoute
   '/distribuidor/analytics': typeof DistribuidorAnalyticsRoute
   '/distribuidor/catalogo': typeof DistribuidorCatalogoRoute
@@ -288,6 +295,7 @@ export interface FileRoutesByTo {
   '/consumidor/pedidos': typeof ConsumidorPedidosRoute
   '/consumidor/perfil': typeof ConsumidorPerfilRoute
   '/consumidor/planes': typeof ConsumidorPlanesRoute
+  '/consumidor/productores': typeof ConsumidorProductoresRoute
   '/consumidor/recibir': typeof ConsumidorRecibirRoute
   '/distribuidor/analytics': typeof DistribuidorAnalyticsRoute
   '/distribuidor/catalogo': typeof DistribuidorCatalogoRoute
@@ -328,6 +336,7 @@ export interface FileRoutesById {
   '/consumidor/pedidos': typeof ConsumidorPedidosRoute
   '/consumidor/perfil': typeof ConsumidorPerfilRoute
   '/consumidor/planes': typeof ConsumidorPlanesRoute
+  '/consumidor/productores': typeof ConsumidorProductoresRoute
   '/consumidor/recibir': typeof ConsumidorRecibirRoute
   '/distribuidor/analytics': typeof DistribuidorAnalyticsRoute
   '/distribuidor/catalogo': typeof DistribuidorCatalogoRoute
@@ -369,6 +378,7 @@ export interface FileRouteTypes {
     | '/consumidor/pedidos'
     | '/consumidor/perfil'
     | '/consumidor/planes'
+    | '/consumidor/productores'
     | '/consumidor/recibir'
     | '/distribuidor/analytics'
     | '/distribuidor/catalogo'
@@ -408,6 +418,7 @@ export interface FileRouteTypes {
     | '/consumidor/pedidos'
     | '/consumidor/perfil'
     | '/consumidor/planes'
+    | '/consumidor/productores'
     | '/consumidor/recibir'
     | '/distribuidor/analytics'
     | '/distribuidor/catalogo'
@@ -447,6 +458,7 @@ export interface FileRouteTypes {
     | '/consumidor/pedidos'
     | '/consumidor/perfil'
     | '/consumidor/planes'
+    | '/consumidor/productores'
     | '/consumidor/recibir'
     | '/distribuidor/analytics'
     | '/distribuidor/catalogo'
@@ -487,6 +499,7 @@ export interface RootRouteChildren {
   ConsumidorPedidosRoute: typeof ConsumidorPedidosRoute
   ConsumidorPerfilRoute: typeof ConsumidorPerfilRoute
   ConsumidorPlanesRoute: typeof ConsumidorPlanesRoute
+  ConsumidorProductoresRoute: typeof ConsumidorProductoresRoute
   ConsumidorRecibirRoute: typeof ConsumidorRecibirRoute
   DistribuidorAnalyticsRoute: typeof DistribuidorAnalyticsRoute
   DistribuidorCatalogoRoute: typeof DistribuidorCatalogoRoute
@@ -587,6 +600,13 @@ declare module '@tanstack/react-router' {
       path: '/consumidor/planes'
       fullPath: '/consumidor/planes'
       preLoaderRoute: typeof ConsumidorPlanesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/consumidor/productores': {
+      id: '/consumidor/productores'
+      path: '/consumidor/productores'
+      fullPath: '/consumidor/productores'
+      preLoaderRoute: typeof ConsumidorProductoresRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/consumidor/recibir': {
@@ -791,6 +811,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConsumidorPedidosRoute: ConsumidorPedidosRoute,
   ConsumidorPerfilRoute: ConsumidorPerfilRoute,
   ConsumidorPlanesRoute: ConsumidorPlanesRoute,
+  ConsumidorProductoresRoute: ConsumidorProductoresRoute,
   ConsumidorRecibirRoute: ConsumidorRecibirRoute,
   DistribuidorAnalyticsRoute: DistribuidorAnalyticsRoute,
   DistribuidorCatalogoRoute: DistribuidorCatalogoRoute,

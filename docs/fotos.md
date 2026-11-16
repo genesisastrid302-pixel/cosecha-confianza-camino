@@ -10,6 +10,14 @@ Fotografías reales de [Unsplash](https://unsplash.com) (licencia de Unsplash: u
 | `src/assets/product-espinaca.jpg` | Espinaca baby | https://images.unsplash.com/photo-1576045057995-568f588f82fb |
 | `src/assets/product-ejote.jpg` | Ejote criollo | https://images.unsplash.com/photo-1567375698348-5d9d5ae99de0 |
 
+## Fotos de los productores
+
+Fotos genéricas de Unsplash (misma licencia), recorte 3:2 a 1200 × 800 px. No son los productores reales: son de referencia hasta tener fotos propias.
+
+| Archivo | Productor | Foto en Unsplash |
+|---|---|---|
+| `src/assets/producer-santiago.jpg` | Ezequiel Martínez | https://unsplash.com/photos/jp3cYrsfeZ4 (Marco Antonio Casique Reyes, San José Chiapa, Puebla) |
+
 Pendientes (siguen siendo ilustraciones generadas): `product-chiles.jpg` (deben ser serranos verdes y manzanos), `product-lechuga.jpg` (orejona = romana) y `product-limones.jpg` (limón mexicano verde, no amarillo).
 
 Criterio: fotografía documental con luz natural, sin retoque ni fondos de estudio. Para la versión final, lo ideal son fotos de los propios productores.

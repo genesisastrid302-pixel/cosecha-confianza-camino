@@ -293,7 +293,8 @@ export function writeProducer(next: ProducerState) {
  *  La sesión la inicia quien registra, ya con la contraseña guardada. */
 export function registrarProductor(profile: ProducerProfile) {
   const id = newId();
-  const nueva: ProducerState = { ...seed(), resenas: 0, lastScore: null, cosechas: [], profile };
+  // Empieza sin cultivos ni historial: publica lo suyo desde Cultivos
+  const nueva: ProducerState = { ...seed(), resenas: 0, lastScore: null, crops: [], cosechas: [], profile };
   if (!writeCuentas({ ...readCuentas(), [id]: nueva })) return null;
   window.dispatchEvent(new Event(EVENT));
   return id;
@@ -372,6 +373,56 @@ export function trustScore(s: ProducerState) {
   };
   const components = SCORE_LAYERS.map((l) => ({ label: l.label, weight: l.weight, value: layers[l.key], help: l.help }));
   return { total: score10(layers), components };
+}
+
+/** Cómo ve el consumidor a un productor que se registró en la app (Conoce a los productores y su perfil) */
+export type ProductorPublico = {
+  id: string;
+  name: string;
+  zona: string;
+  story: string;
+  photos: string[];
+  /** Menos de RESENAS_PARA_SCORE reseñas: va con la estampa "Nuevo" y sin score */
+  nuevo: boolean;
+  resenas: number;
+  /** Información básica completa (vale el 30 % del score) */
+  completo: number;
+  /** El mismo score que ve el productor en su ScoreCard; null mientras es nuevo */
+  score: number | null;
+};
+
+function publico(id: string, s: ProducerState): ProductorPublico {
+  const nuevo = esNuevo(s);
+  return {
+    id,
+    name: s.profile.name.trim(),
+    zona: s.profile.zona,
+    story: s.profile.story.trim(),
+    photos: s.profile.photos,
+    nuevo,
+    resenas: s.resenas,
+    completo: profileCompleteness(s.profile).pct,
+    score: nuevo ? null : trustScore(s).total,
+  };
+}
+
+/** Productores registrados en este navegador, sin la cuenta de ejemplo (Ezequiel ya está en el catálogo) */
+export function useProductoresRegistrados(): [ProductorPublico[], boolean] {
+  const [lista, setLista] = useState<ProductorPublico[]>([]);
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const sync = () =>
+      setLista(
+        listarCuentas()
+          .filter((c) => !c.ejemplo && c.state.profile.name.trim().length > 1)
+          .map((c) => publico(c.id, c.state)),
+      );
+    sync();
+    setReady(true);
+    window.addEventListener(EVENT, sync);
+    return () => window.removeEventListener(EVENT, sync);
+  }, []);
+  return [lista, ready];
 }
 
 export function newId() {
